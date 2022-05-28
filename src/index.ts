@@ -2,14 +2,16 @@ const dotenv = require('dotenv');
 dotenv.config(); 
 const { PORT } = process.env; 
 
+import express, {Request, Response} from 'express'; 
+const bodyParser = require('body-parser');
 
-import express, {Express, Request, Response} from 'express'; 
+const runsRouter = require('./services/controllers/runsControllers')
 
-const app = express(); 
+const app = express();
 
-app.get('/', (req: Request, res: Response) => {
-    res.send('hello world!'); 
-})
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use('/runs', runsRouter); 
+
 
 app.listen(PORT, () => {
     console.log('server up')
