@@ -13,7 +13,7 @@ router.get('/getRunsFromTournament', (req: Request, res: Response) => {
 })
 
 router.get('/getFilteredRuns', (req: Request, res: Response) => {
-    let yearsStr:string , years: number[], contestStr:string , contests:string[], teamsStr:string, teams:string[]; 
+    let years: number[], contests:string[], teams:string[], circuits:string[]; 
     if(req.query.years){
         const yearsStr: string = (req.query.years as unknown as string)
         years = yearsStr.split(",").map(Number)    
@@ -32,7 +32,13 @@ router.get('/getFilteredRuns', (req: Request, res: Response) => {
     } else {
         teams = []; 
     }
-    let runs = Runs.getFilteredRuns(years, contests, teams); 
+    if(req.query.circuits){
+        const circuitsStr: string = (req.query.circuits as unknown as string)
+        circuits = circuitsStr.split(",")    
+    } else {
+        circuits = []; 
+    }
+    let runs = Runs.getFilteredRuns(years, contests, teams, circuits); 
     res.send(runs); 
 })
 

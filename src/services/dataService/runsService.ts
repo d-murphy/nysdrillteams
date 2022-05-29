@@ -6,8 +6,8 @@ class RunsService {
     public getRunsFromTournament(tournamentId:number): Run[] {
         return this.dataSource.getRunsFromTournament(tournamentId); 
     }
-    public getFilteredRuns(years: number[], contests: string[], teams: string[]): Run[] {
-        return this.dataSource.getFilteredRuns(years, contests, teams); 
+    public getFilteredRuns(years: number[], contests: string[], teams: string[], circuits: string[]): Run[] {
+        return this.dataSource.getFilteredRuns(years, contests, teams, circuits); 
     }
 }
     
