@@ -6,6 +6,26 @@ import RunsService from '../dataService/runsService';
 
 const Runs = new RunsService(runsData); 
 
+router.get('/getRun', (req: Request, res: Response) => {
+    const runId: number = (req.query.runId as unknown as number);
+    let run = Runs.getRun(runId);
+    res.send(run);
+})
+
+router.post('/insertRun', (req: Request, res: Response) => {
+    let newRun = req.body
+    if(!newRun.team || !newRun.contest || !newRun.tournamentId || !newRun.time){
+        res.status(404).send('malformed reqeust')
+    }
+    let result = Runs.insertRun(newRun)
+    if(!result){
+        res.status(500).send('Internal server error')
+    }
+    console.log('yeah?',req.body.name)
+    res.status(200).send(result);
+})
+
+
 router.get('/getRunsFromTournament', (req: Request, res: Response) => {
     const tournamentId: number = (req.query.tournamentId as unknown as number);  
     let runs = Runs.getRunsFromTournament(tournamentId); 

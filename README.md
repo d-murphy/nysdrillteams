@@ -8,6 +8,9 @@
 
 ### To Do
 
+* think about insert?  How is circuit populated
+* need to do async in controller
+
 * finish runs controller
 * use an importer, esp on router
 * write db module

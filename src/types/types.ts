@@ -5,7 +5,7 @@ export type Run = {
     year: number, 
     tournament: string
     tournamentId: number,
-    time: number, 
+    time: string, 
     runningPosition: number, 
     circuit: string, 
     date: Date, 
