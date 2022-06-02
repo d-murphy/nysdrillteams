@@ -1,15 +1,17 @@
 export type Run = {
-    id: number, 
+    id?: number, 
     team: string, 
     contest: string,
-    year: number, 
-    tournament: string
+    year?: number, 
+    tournament?: string
     tournamentId: number,
+    track: string, 
     time: string, 
-    runningPosition: number, 
-    circuit: string, 
+    runningPosition?: number, 
+    circuit?: string, 
     date: Date, 
-    urls: string[]
+    urls: string[], 
+    sanctioned: boolean
 }
 
 export interface RunsData {
@@ -21,6 +23,16 @@ export interface RunsData {
     getFilteredRuns(years: number[], contests: string[], teams: string[], circuit: string[]): Run[]
 }
 
+// export interface RunsService {
+//     insertRun(newRun: Run, tournament: Tournament, team: Team): boolean;
+//     deleteRun(runId: number): boolean;
+//     updateRun(updatedRun:Run): Run; 
+//     getRun(runId: number): Run | undefined; 
+//     getRunsFromTournament(tournamentId:number): Run[]
+//     getFilteredRuns(years: number[], contests: string[], teams: string[], circuit: string[]): Run[]
+// }
+
+
 
 export type Tournament = {
     id: number, 
@@ -29,7 +41,8 @@ export type Tournament = {
     date: Date, 
     circuits: string[], 
     track: string,
-    runningOrder: {string: number}
+    runningOrder: { [teamName: string]: number },
+    sanctioned: boolean
 }
 
 export interface TournamentsData {
@@ -53,9 +66,26 @@ export type Track = {
 }
 
 export interface TracksData {
-    insertTrack(newTournament: Track): boolean;
-    deleteTrack(tournamentId: number): boolean;
-    updateTrack(updatedTournament:Track): Track; 
+    insertTrack(newTrack: Track): boolean;
+    deleteTrack(trackId: number): boolean;
+    updateTrack(updatedTrack:Track): Track; 
     getTrack(trackId:number): Track | undefined;
     getTracks(): Track[];
+}
+
+export type Team = {
+    id: number,
+    fullName: string,  
+    name: string,
+    town: string,
+    circuit: string,
+    imageUrl: string, 
+}
+
+export interface TeamData {
+    insertTeam(newTeam: Team): boolean;
+    deleteTeam(teamId: number): boolean;
+    updateTeam(updatedTeam:Team): Team; 
+    getTeam(teamId:number): Team | undefined;
+    getTeams(): Team[];
 }

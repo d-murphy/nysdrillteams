@@ -1,4 +1,4 @@
-import { Run, RunsData } from '../../types/types'
+import { Run, RunsData, Tournament, Team } from '../../types/types'
 
 class RunsService {
 
@@ -12,8 +12,13 @@ class RunsService {
     public getRun(runId: number): Run | undefined {
         return this.dataSource.getRun(runId); 
     } 
-    public insertRun(newRun: Run): boolean {
-        return this.dataSource.insertRun(newRun);
+    public insertRun(newRun: Run, tournament: Tournament, team: Team): boolean {
+        let run: Run = newRun;
+        run.year = newRun.date.getFullYear();
+        run.tournament = tournament.name;
+        run.runningPosition = tournament.runningOrder[newRun.team];
+        run.circuit = tournament.circuits.includes(team.circuit) ? team.circuit : ''; 
+        return this.dataSource.insertRun(run);
     }
     public deleteRun(runId: number): boolean {
         return this.dataSource.deleteRun(runId);

@@ -8,16 +8,15 @@
 
 ### To Do
 
-* think about insert?  How is circuit populated
-* need to do async in controller
+* need to finish run controller (check tournament info in insert run)
+* need to finish controllers
+* need to do async in controllers after db
 
-* finish runs controller
 * use an importer, esp on router
 * write db module
-* tournament controller
-* tournament dataService
-* tournament data layer (mock and db)
-* seasons?  
-    * include flag for total points complete?
+
+* Do not need season service? Just agg query on tournaments for each year
+
+
 
 

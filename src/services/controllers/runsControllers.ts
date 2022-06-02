@@ -4,6 +4,8 @@ const router = express.Router()
 import runsData from '../database/runsMock';
 import RunsService from '../dataService/runsService';
 
+import { Run } from '../../types/types'
+
 const Runs = new RunsService(runsData); 
 
 router.get('/getRun', (req: Request, res: Response) => {
@@ -13,16 +15,32 @@ router.get('/getRun', (req: Request, res: Response) => {
 })
 
 router.post('/insertRun', (req: Request, res: Response) => {
-    let newRun = req.body
-    if(!newRun.team || !newRun.contest || !newRun.tournamentId || !newRun.time){
+    let newRun = req.body.runsData;
+    if(!newRun?.team || !newRun?.contest || !newRun?.tournamentId || !newRun?.time){
         res.status(404).send('malformed reqeust')
+        return
     }
-    let result = Runs.insertRun(newRun)
+    let team = req.body.teamData; 
+    let tournament = req.body.tournament; 
+    let result = Runs.insertRun(newRun, tournament, team)
     if(!result){
         res.status(500).send('Internal server error')
     }
     console.log('yeah?',req.body.name)
     res.status(200).send(result);
+})
+
+router.post('/deleteRun', (req: Request, res: Response) => {
+    const runId: number = (req.body.runId as unknown as number);
+    let run = Runs.deleteRun(runId);
+    res.send(run);
+})
+
+router.get('/updateRun', (req: Request, res: Response) => {
+    const updatedRun: Run = req.body.runId;
+    let run = Runs.updateRun(updatedRun);
+
+    res.send(run);
 })
 
 
