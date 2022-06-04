@@ -1,11 +1,11 @@
-import { Run, RunsData } from '../../types/types'; 
+import { Run, RunsData, insertRunResp } from '../../types/types'; 
 
 const runs: Run[] = loadMockRuns(); 
 
 const runsData: RunsData = {
-    insertRun(newRun:Run): boolean {
+    insertRun(newRun:Run): insertRunResp {
         runs.push(newRun); 
-        return true; 
+        return { result: true, run: newRun }
     },
     deleteRun(runId:number): boolean {
         const index = runs.findIndex(el => {
@@ -18,12 +18,13 @@ const runsData: RunsData = {
             return false; 
         }
     }, 
-    updateRun(updatedRun:Run):Run {
+    updateRun(runId: number, pointsUpdate:number | undefined = undefined, timeUpdate:string | undefined = undefined):Run {
         const index = runs.findIndex(el => {
-            return el.id == updatedRun.id
+            return el.id == runId
         })
-        runs[index] = updatedRun; 
-        return updatedRun; 
+        if(pointsUpdate) runs[index].points = pointsUpdate; 
+        if(timeUpdate) runs[index].time = timeUpdate; 
+        return runs[index]; 
     }, 
     getRun(runId: number): Run | undefined{
         return runs.find(el => el.id == runId)
@@ -62,7 +63,8 @@ function loadMockRuns(): Run[]{
             circuit: "Suffolk", 
             date: new Date('7/28/2019'), 
             urls: [], 
-            sanctioned:true
+            sanctioned:true,
+            points: 0
         }, 
         {
             id: 124,
@@ -77,7 +79,8 @@ function loadMockRuns(): Run[]{
             circuit: "Suffolk", 
             date: new Date('7/28/2020'), 
             urls: [], 
-            sanctioned:true
+            sanctioned:true,
+            points: 0
         }, 
         {
             id: 125,
@@ -92,7 +95,8 @@ function loadMockRuns(): Run[]{
             circuit: "Suffolk", 
             date: new Date('7/28/2020'), 
             urls: [], 
-            sanctioned:true
+            sanctioned:true,
+            points: 0
         }, 
         {
             id: 126,
@@ -107,7 +111,8 @@ function loadMockRuns(): Run[]{
             circuit: "Suffolk", 
             date: new Date('7/28/2020'), 
             urls: [], 
-            sanctioned:true
+            sanctioned:true,
+            points: 4
         }, 
         {
             id: 127,
@@ -122,7 +127,8 @@ function loadMockRuns(): Run[]{
             circuit: "", 
             date: new Date('7/28/2020'), 
             urls: [], 
-            sanctioned:true
+            sanctioned:true,
+            points: 3
         }, 
         {
             id: 127,
@@ -137,7 +143,8 @@ function loadMockRuns(): Run[]{
             circuit: "Suffolk", 
             date: new Date('7/28/2020'), 
             urls: [], 
-            sanctioned:true
+            sanctioned: true,
+            points: 2.5
         }, 
         {
             id: 126,

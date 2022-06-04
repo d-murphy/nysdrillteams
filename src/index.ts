@@ -5,7 +5,6 @@ const { PORT } = process.env;
 import express, {Request, Response} from 'express'; 
 
 const runsRouter = require('./services/controllers/runsControllers')
-
 const app = express();
 
 app.use(express.urlencoded({

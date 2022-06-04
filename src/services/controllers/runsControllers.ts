@@ -4,48 +4,70 @@ const router = express.Router()
 import runsData from '../database/runsMock';
 import RunsService from '../dataService/runsService';
 
-import { Run } from '../../types/types'
-
 const Runs = new RunsService(runsData); 
 
+
 router.get('/getRun', (req: Request, res: Response) => {
+    console.log('anything?')
     const runId: number = (req.query.runId as unknown as number);
+    if(!runId){
+        res.status(400).send('run id not valid')
+        return
+    }
     let run = Runs.getRun(runId);
     res.send(run);
 })
 
+
 router.post('/insertRun', (req: Request, res: Response) => {
+
     let newRun = req.body.runsData;
-    if(!newRun?.team || !newRun?.contest || !newRun?.tournamentId || !newRun?.time){
-        res.status(404).send('malformed reqeust')
+    let team = req.body.teamData; 
+    let tournament = req.body.tournamentData; 
+
+    if(     !newRun?.contest || !newRun?.time || 
+            !team?.name || !team?.circuit || 
+            !tournament?.runningOrder || !tournament?.runningOrder[team?.name] || !tournament?.name || !tournament?.id || !tournament?.name || !tournament?.id
+        ){
+        res.status(401).send('malformed reqeust')
         return
     }
-    let team = req.body.teamData; 
-    let tournament = req.body.tournament; 
     let result = Runs.insertRun(newRun, tournament, team)
     if(!result){
         res.status(500).send('Internal server error')
     }
-    console.log('yeah?',req.body.name)
     res.status(200).send(result);
 })
 
 router.post('/deleteRun', (req: Request, res: Response) => {
     const runId: number = (req.body.runId as unknown as number);
+    if(!runId){
+        res.status(400).send('run id not valid')
+        return
+    }
     let run = Runs.deleteRun(runId);
-    res.send(run);
+    res.send(`Delete successful: ${run}`);
 })
 
-router.get('/updateRun', (req: Request, res: Response) => {
-    const updatedRun: Run = req.body.runId;
-    let run = Runs.updateRun(updatedRun);
-
+router.post('/updateRun', (req: Request, res: Response) => {
+    let runId = req.body.runId; 
+    let pointsUpdate = req.body.pointsUpdate;
+    let timeUpdate = req.body.timeUpdate;   
+    if((!pointsUpdate && !timeUpdate) || !runId){
+        res.status(400).send('update body not valid')
+        return 
+    }
+    let run = Runs.updateRun(runId, pointsUpdate, timeUpdate);
     res.send(run);
 })
 
 
 router.get('/getRunsFromTournament', (req: Request, res: Response) => {
     const tournamentId: number = (req.query.tournamentId as unknown as number);  
+    if(!tournamentId){
+        res.status(400).send('tournament id not valid')
+        return
+    }
     let runs = Runs.getRunsFromTournament(tournamentId); 
     res.send(runs); 
 })

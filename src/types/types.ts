@@ -12,26 +12,22 @@ export type Run = {
     date: Date, 
     urls: string[], 
     sanctioned: boolean
+    points?: number
 }
 
 export interface RunsData {
-    insertRun(newRun: Run): boolean;
+    insertRun(newRun: Run): insertRunResp;
     deleteRun(runId: number): boolean;
-    updateRun(updatedRun:Run): Run; 
+    updateRun(runId: number, pointsUpdate: number, timeUpdate: string): Run; 
     getRun(runId: number): Run | undefined; 
     getRunsFromTournament(tournamentId:number): Run[]
     getFilteredRuns(years: number[], contests: string[], teams: string[], circuit: string[]): Run[]
 }
 
-// export interface RunsService {
-//     insertRun(newRun: Run, tournament: Tournament, team: Team): boolean;
-//     deleteRun(runId: number): boolean;
-//     updateRun(updatedRun:Run): Run; 
-//     getRun(runId: number): Run | undefined; 
-//     getRunsFromTournament(tournamentId:number): Run[]
-//     getFilteredRuns(years: number[], contests: string[], teams: string[], circuit: string[]): Run[]
-// }
-
+export type insertRunResp = {
+    result: boolean, 
+    run: Run
+}
 
 
 export type Tournament = {
