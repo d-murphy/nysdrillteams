@@ -1,11 +1,12 @@
-import { Team, TeamData } from '../../types/types'; 
+import { Team, TeamData, insertTeamResp } from '../../types/types'; 
 
 const teams: Team[] = loadMockTeams(); 
 
 const teamsData: TeamData = {
-    insertTeam(newTeam:Team): boolean {
+    insertTeam(newTeam:Team): insertTeamResp {
+        if(!newTeam.id) newTeam.id = Math.floor(Math.random()*10000)
         teams.push(newTeam); 
-        return true; 
+        return {result: true, team: newTeam}; 
     },
     deleteTeam(teamId:number): boolean {
         const index = teams.findIndex(el => {
@@ -47,7 +48,8 @@ function loadMockTeams(): Team[]{
             name: 'Hoboes',
             town: 'Central Islip',
             circuit: 'Suffolk',
-            imageUrl: ''        
+            imageUrl: '', 
+            active: true        
         },
         {
             id: 2,
@@ -55,7 +57,8 @@ function loadMockTeams(): Team[]{
             name: 'Gamblers',
             town: 'Hagerman',
             circuit: 'Suffolk',
-            imageUrl: ''        
+            imageUrl: '', 
+            active: true        
         },
         {
             id: 3,
@@ -63,7 +66,8 @@ function loadMockTeams(): Team[]{
             name: 'Redskins',
             town: 'Bay Shore',
             circuit: 'Suffolk',
-            imageUrl: ''        
+            imageUrl: '', 
+            active: true        
         }
     
     ]; 

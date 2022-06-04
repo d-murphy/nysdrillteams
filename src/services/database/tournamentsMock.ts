@@ -1,11 +1,12 @@
-import { Tournament, TournamentsData } from '../../types/types'; 
+import { Tournament, TournamentsData, insertTournamentResp } from '../../types/types'; 
 
 const tournaments: Tournament[] = loadMockTournaments(); 
 
 const tracksData: TournamentsData = {
-    insertTournament(newTournament:Tournament): boolean {
+    insertTournament(newTournament:Tournament): insertTournamentResp {
+        if(!newTournament.id) newTournament.id = Math.floor(Math.random()*10000)
         tournaments.push(newTournament); 
-        return true; 
+        return {result: true, tournament: newTournament}; 
     },
     deleteTournament(tournamentId:number): boolean {
         const index = tournaments.findIndex(el => {

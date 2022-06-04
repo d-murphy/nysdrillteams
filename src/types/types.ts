@@ -37,17 +37,23 @@ export type Tournament = {
     date: Date, 
     circuits: string[], 
     track: string,
-    runningOrder: { [teamName: string]: number },
+    runningOrder?: { [teamName: string]: number },
     sanctioned: boolean
 }
 
 export interface TournamentsData {
-    insertTournament(newTournament: Tournament): boolean;
+    insertTournament(newTournament: Tournament): insertTournamentResp;
     deleteTournament(tournamentId: number): boolean;
     updateTournament(updatedTournament:Tournament): Tournament; 
     getTournament(tournamentId:number): Tournament | undefined; 
     getTournaments(): Tournament[]
 }
+
+export type insertTournamentResp = {
+    result: boolean, 
+    tournament: Tournament
+}
+
 
 
 export type Track = {
@@ -57,17 +63,23 @@ export type Track = {
     city: string, 
     notes: string,
     imageUrls: [], 
-    archHeight: number | null,
+    archHeight: string | null,
     distanceToHydrant: number | null
 }
 
 export interface TracksData {
-    insertTrack(newTrack: Track): boolean;
+    insertTrack(newTrack: Track): insertTrackResp;
     deleteTrack(trackId: number): boolean;
     updateTrack(updatedTrack:Track): Track; 
     getTrack(trackId:number): Track | undefined;
     getTracks(): Track[];
 }
+
+export type insertTrackResp = {
+    result: boolean, 
+    track: Track
+}
+
 
 export type Team = {
     id: number,
@@ -75,13 +87,19 @@ export type Team = {
     name: string,
     town: string,
     circuit: string,
-    imageUrl: string, 
+    imageUrl?: string, 
+    active?: boolean
 }
 
 export interface TeamData {
-    insertTeam(newTeam: Team): boolean;
+    insertTeam(newTeam: Team): insertTeamResp;
     deleteTeam(teamId: number): boolean;
     updateTeam(updatedTeam:Team): Team; 
     getTeam(teamId:number): Team | undefined;
     getTeams(): Team[];
+}
+
+export type insertTeamResp = {
+    result: boolean, 
+    team: Team
 }

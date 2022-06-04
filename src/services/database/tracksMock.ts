@@ -1,11 +1,12 @@
-import { Track, TracksData } from '../../types/types'; 
+import { Track, TracksData, insertTrackResp } from '../../types/types'; 
 
 const tracks: Track[] = loadMockTracks(); 
 
 const tracksData: TracksData = {
-    insertTrack(newTrack:Track): boolean {
+    insertTrack(newTrack:Track): insertTrackResp {
+        if(!newTrack.id) newTrack.id = Math.floor(Math.random()*10000);
         tracks.push(newTrack); 
-        return true; 
+        return {result: true, track: newTrack}; 
     },
     deleteTrack(runId:number): boolean {
         const index = tracks.findIndex(el => {
@@ -48,7 +49,7 @@ function loadMockTracks(): Track[]{
             city: "Central Islip", 
             notes: "",
             imageUrls: [], 
-            archHeight: 19.7,
+            archHeight: "19'7''",
             distanceToHydrant: 225
         },
         {
@@ -58,7 +59,7 @@ function loadMockTracks(): Track[]{
             city: "Hagerman", 
             notes: "",
             imageUrls: [], 
-            archHeight: 0,
+            archHeight: null,
             distanceToHydrant: 200
         }
 

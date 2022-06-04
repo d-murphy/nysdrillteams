@@ -1,10 +1,10 @@
-import { TracksData, Track } from '../../types/types'
+import { TracksData, Track, insertTrackResp } from '../../types/types'
 
 class TracksService {
 
     constructor ( private dataSource : TracksData ){}
 
-    public insertTrack(newTrack: Track): boolean {
+    public insertTrack(newTrack: Track): insertTrackResp {
         return this.dataSource.insertTrack(newTrack); 
     }
     public deleteTrack(trackId: number): boolean {

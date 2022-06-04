@@ -5,6 +5,11 @@ const { PORT } = process.env;
 import express, {Request, Response} from 'express'; 
 
 const runsRouter = require('./services/controllers/runsControllers')
+const teamsRouter = require('./services/controllers/teamsController')
+const tracksRouter = require('./services/controllers/tracksController')
+const tournamentsRouter = require('./services/controllers/tournamentsController')
+
+
 const app = express();
 
 app.use(express.urlencoded({
@@ -13,8 +18,9 @@ app.use(express.urlencoded({
 app.use(express.json());
 
 app.use('/runs', runsRouter); 
-
-
+app.use('/teams', teamsRouter);
+app.use('/tracks', tracksRouter);
+app.use('/tournaments', tournamentsRouter); 
 
 
 app.listen(PORT, () => {

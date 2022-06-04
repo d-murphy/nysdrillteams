@@ -33,7 +33,7 @@ router.post('/insertRun', (req: Request, res: Response) => {
         return
     }
     let result = Runs.insertRun(newRun, tournament, team)
-    if(!result){
+    if(!result.result){
         res.status(500).send('Internal server error')
     }
     res.status(200).send(result);

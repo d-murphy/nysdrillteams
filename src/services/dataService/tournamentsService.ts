@@ -1,11 +1,13 @@
-import { TournamentsData, Tournament } from '../../types/types'
+import { TournamentsData, Tournament, insertTournamentResp } from '../../types/types'
 
 
 class TournamentsService {
 
     constructor ( private dataSource : TournamentsData ){}
 
-    public insertTournament(newTournament: Tournament): boolean {
+    public insertTournament(newTournament: Tournament): insertTournamentResp {
+        newTournament.date = new Date(newTournament.date); 
+        newTournament.year = newTournament.date.getFullYear();
         return this.dataSource.insertTournament(newTournament); 
     }
     public deleteTournament(tournamentId: number): boolean {

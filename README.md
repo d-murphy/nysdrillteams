@@ -18,5 +18,6 @@
 * Do not need season service? Just agg query on tournaments for each year
 
 
-
+* way to save images on teams
+* control imports on controller
 

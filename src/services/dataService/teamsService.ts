@@ -1,10 +1,10 @@
-import { TeamData, Team } from '../../types/types'
+import { TeamData, Team, insertTeamResp } from '../../types/types'
 
 class TeamsService {
 
     constructor ( private dataSource : TeamData ){}
 
-    public insertTeam(newTeam: Team): boolean {
+    public insertTeam(newTeam: Team): insertTeamResp {
         return this.dataSource.insertTeam(newTeam); 
     }
     public deleteTeam(teamId: number): boolean {
