@@ -17,6 +17,9 @@
 * way to save images on teams
 
 
+### Ideas: 
+* Most points scored in year, circuit, sanctioned
+
 Conclusions:
 * Do not need season service? Just agg query on tournaments for each year
 
