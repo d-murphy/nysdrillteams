@@ -8,6 +8,8 @@
 
 ### To Do
 
+* add service for sponsers
+
 * add cors
 * need to do async in controllers after db
 * use an importer, esp on router
