@@ -13,7 +13,10 @@
 * use an importer, esp on router
 * write db module
 * way to save images on teams
-
+* edit note endpoint
+* edit link endpoint
+* edit tournament live stream planned? 
+* edit tournament urls?
 
 Conclusions:
 * Do not need season service? Just agg query on tournaments for each year

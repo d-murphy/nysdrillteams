@@ -12,7 +12,9 @@ export type Run = {
     date: Date, 
     urls: string[], 
     sanctioned: boolean
-    points?: number
+    points?: number, 
+    notes?: string,
+    stateRecord?: boolean
 }
 
 export interface RunsData {
@@ -38,7 +40,11 @@ export type Tournament = {
     circuits: string[], 
     track: string,
     runningOrder?: { [teamName: string]: number },
-    sanctioned: boolean
+    sanctioned: boolean, 
+    top5?: [ {teamName: string, finishingPosition: string} ] 
+    contests: string[],
+    liveStreamPlanned?: boolean
+    urls?: []
 }
 
 export interface TournamentsData {
