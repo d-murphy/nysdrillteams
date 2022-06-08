@@ -1,6 +1,7 @@
 const dotenv = require('dotenv'); 
 dotenv.config(); 
 const { PORT } = process.env; 
+const cors = require("cors")
 
 import express, {Request, Response} from 'express'; 
 
@@ -16,6 +17,7 @@ app.use(express.urlencoded({
     extended: true
 }));
 app.use(express.json());
+app.use(cors()); 
 
 app.use('/runs', runsRouter); 
 app.use('/teams', teamsRouter);

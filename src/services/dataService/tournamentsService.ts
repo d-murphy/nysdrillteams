@@ -19,8 +19,8 @@ class TournamentsService {
     public getTournament(tournamentId:number): Tournament | undefined {
         return this.dataSource.getTournament(tournamentId); 
     }
-    public getTournaments(): Tournament[] {
-        return this.dataSource.getTournaments(); 
+    public getTournaments(years: number[]=[]): Tournament[] {
+        return this.dataSource.getTournaments(years); 
 
     }
 }

@@ -7,7 +7,7 @@ import TournamentsService from '../dataService/tournamentsService';
 const Tournaments = new TournamentsService(tournamentsData); 
 
 router.get('/getTournament', (req: Request, res: Response) => {
-    const tournamentId: number = (req.query.tournamentId as unknown as number);
+    const tournamentId: number = (req.query?.tournamentId as unknown as number);
     if(!tournamentId){
         res.status(400).send('run id not valid')
         return
@@ -19,7 +19,7 @@ router.get('/getTournament', (req: Request, res: Response) => {
 
 router.post('/insertTournament', (req: Request, res: Response) => {
 
-    let newTournament = req.body.tournamentData;
+    let newTournament = req.body?.tournamentData;
     if( !newTournament?.name || !newTournament?.date || !newTournament?.circuits || 
         !newTournament?.track || !newTournament?.sanctioned  
         ){
@@ -34,7 +34,7 @@ router.post('/insertTournament', (req: Request, res: Response) => {
 })
 
 router.post('/deleteTournament', (req: Request, res: Response) => {
-    const tournamentId: number = (req.body.tournamentId as unknown as number);
+    const tournamentId: number = (req.body?.tournamentId as unknown as number);
     if(!tournamentId){
         res.status(400).send('team id not valid')
         return
@@ -44,7 +44,7 @@ router.post('/deleteTournament', (req: Request, res: Response) => {
 })
 
 router.post('/updateTournament', (req: Request, res: Response) => {
-    let updatedTournament = req.body.updatedTournament; 
+    let updatedTournament = req.body?.updatedTournament; 
     if(!updatedTournament){
         res.status(400).send('update body not valid')
         return 
@@ -55,7 +55,13 @@ router.post('/updateTournament', (req: Request, res: Response) => {
 
 
 router.get('/getTournaments', (req: Request, res: Response) => {
-    let tournaments = Tournaments.getTournaments(); 
+    let yearsStr = (req.query?.years as unknown as string); 
+    if(!yearsStr){
+        res.status(400).send('malformed request');
+        return;
+    }
+    let years = yearsStr.split(",").map(el => parseInt(el))
+    let tournaments = Tournaments.getTournaments(years); 
     res.send(tournaments); 
 })
 

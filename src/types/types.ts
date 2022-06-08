@@ -52,7 +52,7 @@ export interface TournamentsData {
     deleteTournament(tournamentId: number): boolean;
     updateTournament(updatedTournament:Tournament): Tournament; 
     getTournament(tournamentId:number): Tournament | undefined; 
-    getTournaments(): Tournament[]
+    getTournaments(years:number[]): Tournament[]
 }
 
 export type insertTournamentResp = {

@@ -31,8 +31,11 @@ const tracksData: TournamentsData = {
             return el.id == tournamentId; 
         })
     }, 
-    getTournaments():Tournament[] {
-        return tournaments; 
+    getTournaments(years:number[] = []):Tournament[] {
+        if(years.length==0) return tournaments; 
+        return tournaments.filter(torn => {
+            return years.includes(torn.year)
+        }); 
     }
 }
 
@@ -49,7 +52,8 @@ function loadMockTournaments(): Tournament[]{
             circuits: ['Suffolk', 'Nassau'], 
             track: 'Central Islip',
             runningOrder: { 'Central Islip Hoboes': 1, 'Hagerman Gamblers': 2, 'Bay Shore Redskins': 3 }, 
-            sanctioned: true      
+            sanctioned: true, 
+            contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]     
         },
         {
             id: 1, 
@@ -59,7 +63,8 @@ function loadMockTournaments(): Tournament[]{
             circuits: ['Suffolk'], 
             track: 'Hagerman',
             runningOrder: { 'Central Islip Hoboes': 8, 'Hagerman Gamblers': 1, 'Bay Shore Redskins': 7 }, 
-            sanctioned: true              
+            sanctioned: true, 
+            contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]              
         }
     ]; 
 }
