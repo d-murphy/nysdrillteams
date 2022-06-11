@@ -44,7 +44,7 @@ export type Tournament = {
     top5?: [ {teamName: string, finishingPosition: string} ] 
     contests: string[],
     liveStreamPlanned?: boolean
-    urls?: []
+    urls?: string[]
 }
 
 export interface TournamentsData {

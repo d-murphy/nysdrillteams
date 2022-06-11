@@ -53,7 +53,12 @@ function loadMockTournaments(): Tournament[]{
             track: 'Lindenhurst',
             runningOrder: { 'Central Islip Hoboes': 1, 'Hagerman Gamblers': 2, 'Bay Shore Redskins': 3 }, 
             sanctioned: true, 
-            contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]     
+            contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"], 
+            liveStreamPlanned: true,
+            top5: [ {teamName: "Central Islip Hoboes", finishingPosition: "1"} ], 
+            urls: ["http://www.youtube.com"]  
+
+     
         },
         {
             id: 2, 
@@ -64,7 +69,8 @@ function loadMockTournaments(): Tournament[]{
             track: 'Merrick',
             runningOrder: { 'Port Washington Road Runners': 1, 'Carle Place Frogs': 2, 'Manhasset Lakeville Minute Men': 3 }, 
             sanctioned: true, 
-            contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]              
+            contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"], 
+            liveStreamPlanned: true              
         },
         {
             id: 3, 
@@ -108,7 +114,8 @@ function loadMockTournaments(): Tournament[]{
             track: 'Merrick',
             runningOrder: { }, 
             sanctioned: true, 
-            contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]              
+            contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"], 
+            liveStreamPlanned: true              
         },
         {
             id: 7, 
@@ -141,7 +148,8 @@ function loadMockTournaments(): Tournament[]{
             track: 'Ridge',
             runningOrder: { }, 
             sanctioned: true, 
-            contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]              
+            contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"], 
+            liveStreamPlanned: true              
         },
         {
             id: 10, 
