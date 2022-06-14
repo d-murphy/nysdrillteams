@@ -36,6 +36,11 @@ const tracksData: TournamentsData = {
         return tournaments.filter(torn => {
             return years.includes(torn.year)
         }); 
+    },
+    getTournamentsByName(name:string):Tournament[] {
+        return tournaments.filter(torn => {
+            return torn.name == name; 
+        }); 
     }
 }
 
@@ -51,11 +56,21 @@ function loadMockTournaments(): Tournament[]{
             date: new Date('6/4/2022 10:00 am'), 
             circuits: ['Suffolk', 'Nassau'], 
             track: 'Lindenhurst',
-            runningOrder: { 'Central Islip Hoboes': 1, 'Hagerman Gamblers': 2, 'Bay Shore Redskins': 3 }, 
+            runningOrder: { 
+                3:'Central Islip Hoboes', 
+                4: 'West Sayville Flying Dutchmen', 
+                5: 'East Islip Guzzlers', 
+                6: 'Islip Wolves', 
+                7:'Hagerman Gamblers', 
+                10:'Bay Shore Redskins',
+                11: 'Port Washington Road Runners', 
+                12: 'Hempstead Yellow Hornets', 
+                13: 'Roslyn Highlanders'
+            }, 
             sanctioned: true, 
             contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"], 
             liveStreamPlanned: true,
-            top5: [ {teamName: "Central Islip Hoboes", finishingPosition: "1"} ], 
+            top5: [ {teamName: "Central Islip Hoboes", finishingPosition: "1", points:20} ], 
             urls: ["http://www.youtube.com"]  
 
      
@@ -67,7 +82,7 @@ function loadMockTournaments(): Tournament[]{
             date: new Date('6/11/2022'), 
             circuits: ['Nassau'], 
             track: 'Merrick',
-            runningOrder: { 'Port Washington Road Runners': 1, 'Carle Place Frogs': 2, 'Manhasset Lakeville Minute Men': 3 }, 
+            runningOrder: { 10:'Port Washington Road Runners', 13:'Carle Place Frogs', 14:'Manhasset Lakeville Minute Men' }, 
             sanctioned: true, 
             contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"], 
             liveStreamPlanned: true              
@@ -94,6 +109,52 @@ function loadMockTournaments(): Tournament[]{
             sanctioned: true, 
             contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]              
         },
+        {
+            id: 401, 
+            name: 'Selden Invitational', 
+            year: 2021, 
+            date: new Date('6/25/2021'), 
+            circuits: ["Suffolk"], 
+            track: 'Ridge',
+            runningOrder: { }, 
+            sanctioned: true, 
+            top5: [ 
+                {teamName: "West Sayville Flying Dutchmen", finishingPosition: "1", points:15},
+                {teamName: "Carle Place Frogs", finishingPosition: "1", points:15} 
+             ], 
+            contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]              
+        },
+        {
+            id: 402, 
+            name: 'Selden Invitational', 
+            year: 2020, 
+            date: new Date('6/25/2020'), 
+            circuits: ["Suffolk"], 
+            track: 'Ridge',
+            runningOrder: { }, 
+            sanctioned: true, 
+            top5: [ 
+                {teamName: "West Sayville Flying Dutchmen", finishingPosition: "1", points:18},
+                {teamName: "Carle Place Frogs", finishingPosition: "2", points:15} 
+             ], 
+            contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]              
+        },
+        {
+            id: 403, 
+            name: 'Selden Invitational', 
+            year: 2019, 
+            date: new Date('6/25/2019'), 
+            circuits: ["Suffolk"], 
+            track: 'Ridge',
+            runningOrder: { }, 
+            sanctioned: true, 
+            top5: [ 
+                {teamName: "East Islip Guzzlers", finishingPosition: "1", points:25},
+                {teamName: "Bay Shore Redskins", finishingPosition: "2", points: 20}
+             ], 
+            contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]              
+        },
+
         {
             id: 5, 
             name: 'Joe Hunter Memorial', 
@@ -160,6 +221,53 @@ function loadMockTournaments(): Tournament[]{
             track: 'Central Islip',
             runningOrder: { }, 
             sanctioned: true, 
+            contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"], 
+            urls: []  
+              
+        },
+        {
+            id: 101, 
+            name: 'Central Islip Invitational', 
+            year: 2021, 
+            date: new Date('7/30/2021'), 
+            circuits: ["Suffolk"], 
+            track: 'Central Islip',
+            runningOrder: { }, 
+            sanctioned: true, 
+            top5: [ 
+                {teamName: "West Sayville Flying Dutchmen", finishingPosition: "1", points:15},
+                {teamName: "Carle Place Frogs", finishingPosition: "1", points:15} 
+             ], 
+            contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]              
+        },
+        {
+            id: 102, 
+            name: 'Central Islip Invitational', 
+            year: 2020, 
+            date: new Date('7/30/2020'), 
+            circuits: ["Suffolk"], 
+            track: 'Central Islip',
+            runningOrder: { }, 
+            sanctioned: true, 
+            top5: [ 
+                {teamName: "West Sayville Flying Dutchmen", finishingPosition: "1", points:18},
+                {teamName: "Carle Place Frogs", finishingPosition: "2", points:15} 
+             ], 
+            contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]              
+        },
+        {
+            id: 103, 
+            name: 'Central Islip Invitational', 
+            year: 2019, 
+            date: new Date('7/30/2019'), 
+            circuits: ["Suffolk"], 
+            track: 'Central Islip',
+            runningOrder: { }, 
+            sanctioned: true, 
+            top5: [ 
+                {teamName: "East Islip Guzzlers", finishingPosition: "1", points:25},
+                {teamName: "Bay Shore Redskins", finishingPosition: "2", points: 20}
+             ], 
             contests: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]              
         },
         {

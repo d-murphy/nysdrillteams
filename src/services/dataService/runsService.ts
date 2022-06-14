@@ -20,7 +20,7 @@ class RunsService {
         run.year = run.date.getFullYear(); 
         run.tournament = tournament.name;
         run.tournamentId = tournament.id; 
-        run.runningPosition = tournament.runningOrder ? tournament.runningOrder[newRun.team] : 0; 
+        run.runningPosition = run.runningPosition;  
         run.sanctioned = tournament.sanctioned; 
         run.circuit = tournament.circuits.includes(team.circuit) ? team.circuit : ''; 
         return this.dataSource.insertRun(run);

@@ -21,7 +21,9 @@ class TournamentsService {
     }
     public getTournaments(years: number[]=[]): Tournament[] {
         return this.dataSource.getTournaments(years); 
-
+    }
+    public getTournamentsByName(name: string): Tournament[] {
+        return this.dataSource.getTournamentsByName(name); 
     }
 }
     

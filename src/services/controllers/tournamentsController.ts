@@ -65,4 +65,14 @@ router.get('/getTournaments', (req: Request, res: Response) => {
     res.send(tournaments); 
 })
 
+router.get('/getTournamentsByName', (req: Request, res: Response) => {
+    let name = (req.query?.name as unknown as string); 
+    if(!name){
+        res.status(400).send('malformed request');
+        return;
+    }
+    let tournaments = Tournaments.getTournamentsByName(name); 
+    res.send(tournaments); 
+})
+
 module.exports = router

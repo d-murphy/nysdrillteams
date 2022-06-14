@@ -14,7 +14,8 @@ export type Run = {
     sanctioned: boolean
     points?: number, 
     notes?: string,
-    stateRecord?: boolean
+    stateRecord?: boolean,
+    currentStateRecord?: boolean
 }
 
 export interface RunsData {
@@ -39,12 +40,13 @@ export type Tournament = {
     date: Date, 
     circuits: string[], 
     track: string,
-    runningOrder?: { [teamName: string]: number },
+    runningOrder?: { [runningPosition:number]: string },
     sanctioned: boolean, 
-    top5?: [ {teamName: string, finishingPosition: string} ] 
+    top5?: {teamName: string, finishingPosition: string, points: number}[] 
     contests: string[],
     liveStreamPlanned?: boolean
-    urls?: string[]
+    urls?: string[], 
+    waterTime?: string
 }
 
 export interface TournamentsData {
@@ -52,7 +54,8 @@ export interface TournamentsData {
     deleteTournament(tournamentId: number): boolean;
     updateTournament(updatedTournament:Tournament): Tournament; 
     getTournament(tournamentId:number): Tournament | undefined; 
-    getTournaments(years:number[]): Tournament[]
+    getTournaments(years:number[]): Tournament[]; 
+    getTournamentsByName(name:string):Tournament[]; 
 }
 
 export type insertTournamentResp = {
