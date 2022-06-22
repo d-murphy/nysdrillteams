@@ -16,6 +16,9 @@ class TracksService {
     public getTrack(trackId:number): Track | undefined {
         return this.dataSource.getTrack(trackId); 
     }
+    public getTrackByName(trackName:string): Track | undefined {
+        return this.dataSource.getTrackByName(trackName); 
+    }
     public getTracks(): Track[] {
         return this.dataSource.getTracks(); 
 

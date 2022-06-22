@@ -39,6 +39,7 @@ export type Tournament = {
     year: number, 
     date: Date, 
     circuits: string[], 
+    circuitsForSchedule?: string[], 
     track: string,
     runningOrder?: { [runningPosition:number]: string },
     sanctioned: boolean, 
@@ -56,6 +57,7 @@ export interface TournamentsData {
     getTournament(tournamentId:number): Tournament | undefined; 
     getTournaments(years:number[]): Tournament[]; 
     getTournamentsByName(name:string):Tournament[]; 
+    getTournamentsByTrack(name:string):Tournament[]; 
 }
 
 export type insertTournamentResp = {
@@ -71,7 +73,7 @@ export type Track = {
     address: string, 
     city: string, 
     notes: string,
-    imageUrls: [], 
+    imageUrls: string[], 
     archHeight: string | null,
     distanceToHydrant: number | null
 }
@@ -81,6 +83,7 @@ export interface TracksData {
     deleteTrack(trackId: number): boolean;
     updateTrack(updatedTrack:Track): Track; 
     getTrack(trackId:number): Track | undefined;
+    getTrackByName(trackName:string): Track | undefined;
     getTracks(): Track[];
 }
 

@@ -75,4 +75,15 @@ router.get('/getTournamentsByName', (req: Request, res: Response) => {
     res.send(tournaments); 
 })
 
+router.get('/getTournamentsByTrack', (req: Request, res: Response) => {
+    let track = (req.query?.track as unknown as string); 
+    if(!track){
+        res.status(400).send('malformed request');
+        return;
+    }
+    let tournaments = Tournaments.getTournamentsByTrack(track); 
+    res.send(tournaments); 
+})
+
+
 module.exports = router

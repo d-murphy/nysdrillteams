@@ -27,9 +27,13 @@ const tracksData: TracksData = {
         return updatedTrack; 
     }, 
     getTrack(trackId:number):Track | undefined {
-        console.log('mock version')
         return tracks.find(el => {
             return el.id == trackId; 
+        })
+    }, 
+    getTrackByName(trackName:string):Track | undefined {
+        return tracks.find(el => {
+            return el.name == trackName; 
         })
     }, 
     getTracks():Track[] {
@@ -47,8 +51,8 @@ function loadMockTracks(): Track[]{
             name: "Central Islip", 
             address: "110 Wheeler Road", 
             city: "Central Islip", 
-            notes: "",
-            imageUrls: [], 
+            notes: "The Central Islip Track is the home of the Hoboes.  It was built in XXXX and has annually hosted an invitational, a junior invitational and the Islip Town Drill.\n\nState Tournaments were held here in 1999, 2011 and some other times.",
+            imageUrls: ["http://localhost:4400/ciTrack.jpg", "http://localhost:4400/streetSign.jpg"], 
             archHeight: "19'7''",
             distanceToHydrant: 225
         },

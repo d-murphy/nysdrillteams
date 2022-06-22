@@ -25,6 +25,9 @@ class TournamentsService {
     public getTournamentsByName(name: string): Tournament[] {
         return this.dataSource.getTournamentsByName(name); 
     }
+    public getTournamentsByTrack(track: string): Tournament[] {
+        return this.dataSource.getTournamentsByTrack(track); 
+    }
 }
     
 export default TournamentsService; 

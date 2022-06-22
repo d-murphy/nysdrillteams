@@ -17,6 +17,17 @@ router.get('/getTrack', (req: Request, res: Response) => {
 })
 
 
+router.get('/getTrackByName', (req: Request, res: Response) => {
+    const trackName: string = (req.query.trackName as unknown as string);
+    if(!trackName){
+        res.status(400).send('run id not valid')
+        return
+    }
+    let track = Tracks.getTrackByName(trackName);
+    res.send(track);
+})
+
+
 router.post('/insertTrack', (req: Request, res: Response) => {
 
     let newTrack = req.body.trackData;

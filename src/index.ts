@@ -19,6 +19,8 @@ app.use(express.urlencoded({
 app.use(express.json());
 app.use(cors()); 
 
+app.use(express.static("static/user"))
+
 app.use('/runs', runsRouter); 
 app.use('/teams', teamsRouter);
 app.use('/tracks', tracksRouter);
