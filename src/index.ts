@@ -5,42 +5,20 @@ if(!DB_NAME) DB_NAME = 'nysdrillteams';
 
 const cors = require("cors")
 
-import express, {Request, Response} from 'express'; 
-import { getDbPromise, getCollectionPromise } from './services/database/db';
+import express from 'express'; 
+import { getDbPromise } from './services/database/db';
 import { runsRouter } from './services/controllers/runsControllers';
-import runsData from './services/database/runsMock'; 
+import { runsDbFactory } from './services/database/runsDb';
+// import runsData from './services/database/runsMock'
 
 const dbConnectionStr:string =
   `mongodb+srv://${dbUn}:${dbPass}@nysdrillteams.4t9radi.mongodb.net/?retryWrites=true&w=majority`;
 const dbPromise = getDbPromise(dbConnectionStr, DB_NAME);
-// const collectionPromise = getCollectionPromise(dbPromise, 'test')
-
 
 // const teamsRouter = require('./services/controllers/teamsController')
 // const tracksRouter = require('./services/controllers/tracksController')
 // const tournamentsRouter = require('./services/controllers/tournamentsController')
-
-
-
-const app = express();
-
-app.use(express.urlencoded({
-    extended: true
-}));
-app.use(express.json());
-app.use(cors()); 
-
-app.use(express.static("static/user"))
-
-
-
-app.use('/runs', runsRouter(dbPromise, 'runs', runsData)); 
-
-
-// app.use('/teams', teamsRouter);
-// app.use('/tracks', tracksRouter);
-// app.use('/tournaments', tournamentsRouter); 
-
+    
 // app.get('/test', async (req,res) => {
 //     // let db = await dbFetch(DB_NAME)
 //     // let result = await db.collection('test').findOne(); 
@@ -49,9 +27,25 @@ app.use('/runs', runsRouter(dbPromise, 'runs', runsData));
 // })
 
 (async function(){
-    if(!DB_NAME) return 
-    // let collection = await collectionPromise; 
-    console.log(await collection?.findOne()) 
+    const app = express();
+
+    app.use(express.urlencoded({
+        extended: true
+    }));
+    app.use(express.json());
+    app.use(cors()); 
+    
+    app.use(express.static("static/user"))
+    
+    
+    let runsData = await runsDbFactory(dbPromise, 'test');  
+    if(runsData) app.use('/runs', runsRouter(runsData)); 
+    
+    // app.use('/teams', teamsRouter);
+    // app.use('/tracks', tracksRouter);
+    // app.use('/tournaments', tournamentsRouter); 
+    
+
     app.listen(PORT, () => {
         console.log('server up')
     })

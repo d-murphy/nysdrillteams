@@ -3,7 +3,7 @@ import { Run, RunsData, Tournament, Team, insertRunResp } from '../../types/type
 class RunsService {
 
     constructor ( private dataSource : RunsData ){}
-    public getRunsFromTournament(tournamentId:number): Run[] {
+    public getRunsFromTournament(tournamentId:number): Promise<Run[]> {
         return this.dataSource.getRunsFromTournament(tournamentId); 
     }
     public getFilteredRuns(years: number[], contests: string[], teams: string[], circuits: string[]): Run[] {

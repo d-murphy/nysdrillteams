@@ -1,3 +1,5 @@
+import { Collection } from "mongodb"
+
 export type Run = {
     id?: number, 
     team: string, 
@@ -19,11 +21,12 @@ export type Run = {
 }
 
 export interface RunsData {
+    _dbCollection: Collection | undefined;  
     insertRun(newRun: Run): insertRunResp;
     deleteRun(runId: number): boolean;
     updateRun(runId: number, pointsUpdate: number, timeUpdate: string): Run; 
     getRun(runId: number): Run | undefined; 
-    getRunsFromTournament(tournamentId:number): Run[]
+    getRunsFromTournament(tournamentId:number): Promise<Run[]>
     getFilteredRuns(years: number[], contests: string[], teams: string[], circuit: string[]): Run[]
 }
 

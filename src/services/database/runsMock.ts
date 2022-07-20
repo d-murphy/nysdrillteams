@@ -1,8 +1,10 @@
+import { Collection } from 'mongodb';
 import { Run, RunsData, insertRunResp } from '../../types/types'; 
 
 const runs: Run[] = loadMockRuns(); 
 
 const runsData: RunsData = {
+    _dbCollection: undefined, 
     insertRun(newRun:Run): insertRunResp {
         runs.push(newRun); 
         return { result: true, run: newRun }
@@ -29,7 +31,7 @@ const runsData: RunsData = {
     getRun(runId: number): Run | undefined{
         return runs.find(el => el.id == runId)
     },
-    getRunsFromTournament(tournamentId:number):Run[] {
+    async getRunsFromTournament(tournamentId:number):Promise<Run[]> {
         console.log('mock version')
         return runs.filter(el => {
             return el.tournamentId == tournamentId; 

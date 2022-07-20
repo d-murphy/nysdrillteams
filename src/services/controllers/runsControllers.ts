@@ -5,7 +5,7 @@ import { RunsData } from '../../types/types';
 import RunsService from '../dataService/runsService';
 
 
-export function runsRouter (dbPromise:Promise<Db | null>, collectionName:string, runsDataSource:RunsData){
+export function runsRouter (runsDataSource:RunsData){
     const Runs = new RunsService(runsDataSource); 
     const router = express.Router()
     router.get('/getRun', (req: Request, res: Response) => {

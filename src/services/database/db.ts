@@ -1,6 +1,6 @@
 import {MongoClient, Db, Collection} from 'mongodb'; 
 
-const getDbPromise = (uri:string, dbName:string):Promise<Db | null> => {
+const getDbPromise = (uri:string, dbName:string):Promise<Db> => {
 
     return new Promise(async (res,rej)=>{
         try {
