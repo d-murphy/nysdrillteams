@@ -1,0 +1,8 @@
+id;"name";"alias";"ordering";"checked_out";"checked_out_time";"published";"params"
+1;"Juniors";"juniors";"0";"0";"0000-00-00 00:00:00";"1";
+2;"Northern";"northern";"0";"0";"0000-00-00 00:00:01";"0";
+3;"Old Fashioned";"old-fashioned";"0";"0";"0000-00-00 00:00:02";"0";
+4;"Suffolk-Nassau";"suffolk-nassau";"0";"0";"0000-00-00 00:00:03";"0";
+5;"Uncategorized";"uncategorized";"0";"0";"0000-00-00 00:00:04";"0";
+6;"Western";"western";"0";"0";"0000-00-00 00:00:05";"0";
+7;"Parade";"parade";"0";"0";"0000-00-00 00:00:00";"1";
