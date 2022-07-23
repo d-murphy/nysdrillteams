@@ -1,5 +1,9 @@
 const fs = require('fs'); 
-// const {getDbPromise, getCollectionPromise} = require('../src/services/database/db')
+const dotenv = require('dotenv'); 
+const { getDbPromise, getCollectionPromise } = require('../dist/services/database/db')
+
+dotenv.config(); 
+let { PORT, DB_NAME, dbUn, dbPass } = process.env; 
 
 
 let teamsLUT = {}; 
@@ -117,18 +121,138 @@ try {
     console.log(e); 
 }
 
-// (function(){
-//     const dbConnectionStr:string =
-//         `mongodb+srv://${dbUn}:${dbPass}@nysdrillteams.4t9radi.mongodb.net/?retryWrites=true&w=majority`;
-//     const dbPromise = getDbPromise(dbConnectionStr, DB_NAME);
-//     const collection = getCollectionPromise(dbPromise, 'runs'); 
-    
-  
-// })()
+
+var numWOType = 0; 
+var numWoDate = 0; 
+var numWoTourName = 0; 
+var numWoTourId = 0; 
+var runIdsWithError = new Set(); 
+
+(async function(){
+    const dbConnectionStr =
+        `mongodb+srv://${dbUn}:${dbPass}@nysdrillteams.4t9radi.mongodb.net/?retryWrites=true&w=majority`;
+    const dbPromise = await getDbPromise(dbConnectionStr, DB_NAME);
+    const collection = await getCollectionPromise(dbPromise, 'runs'); 
+
+    let runsForDb = []; 
+    Object.values(eventResultsLUT).forEach(el => {
+        try{
+            runsForDb.push({
+                id: el.id, 
+                team: teamsLUT[el.individual_id].team_name, 
+                hometown: teamsLUT[el.individual_id].hometown,
+                nickname: teamsLUT[el.individual_id].nickname,
+                contest: getContest(el.event_id),
+                year: getDateYr(el.event_id), 
+                tournament: getTournamentName(el.event_id),
+                tournamentId: getTournamentId(el.event_id),
+                host: uniqueEventsLUT[el.event_id] ? uniqueEventsLUT[el.event_id].host : null, 
+                track: uniqueEventsLUT[el.event_id] ? uniqueEventsLUT[el.event_id].location : null,  
+                time: el.time, 
+                runningPosition: el.ro_number, 
+                nassauPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nass_cm_ : null : null, 
+                suffolkPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].suff_cm_ : null : null, 
+                westernPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].wny_cm_: null : null, 
+                northernPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nny_cm_: null : null, 
+                suffolkOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].suffof_cm_: null : null, 
+                nassauOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nassof_cm_: null : null, 
+                liOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].liof_cm_: null : null, 
+                juniorPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].jr_cm_: null : null,
+                date: getDate(el.event_id), 
+                urls: [], 
+                sanctioned: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].sanctioned : null : null,
+                points: el.points,
+                rank: el.rank,  
+                notes: '',
+                stateRecord: false,
+                currentStateRecord: false
+            })    
+        } catch (e){
+            console.log('new error: ', e)
+        }
+    })
+    console.log('number of runs: ', Object.values(eventResultsLUT).length)
+    console.log('num of failed types: ', numWOType)
+    console.log('num of failed dates: ', numWoDate)
+    console.log('num of failed tourn name: ', numWoTourName)
+    console.log('num of failed tournId: ', numWoTourId); 
+    console.log('run example', runsForDb[286619], runsForDb[281619], runsForDb[280619])
+    let errStr = 'The following runs Ids had errors when loading:\n\n'; 
+    runIdsWithError.forEach(el => {
+        errStr += el + ', '
+    })
+    fs.writeFileSync('runWithError.txt', errStr)
+
+    let result
+    try {
+        console.log('starting write to db: '); 
+        result = await collection.insertMany(runsForDb)
+    } catch(e) {
+        console.log('error during db write: ', e); 
+        result = false; 
+    }
+    console.log('db result: ', result); 
+    return
+})()
 
 
 
+function getContest(event_id){
 
+    let uniqueEvent = uniqueEventsLUT[event_id]; 
+    let type = uniqueEvent ? uniqueEvent.type : null; 
+    let eventName = type ? eventNamesLUT[type] : null; 
+    let result = eventName ? eventName.name : null; 
+    if(!result) {
+        runIdsWithError.add(event_id);
+        numWOType++;  
+    }
+    return result; 
+}
+
+function getDate(event_id, counting=true){
+    let uniqueEvent = uniqueEventsLUT[event_id]; 
+    let projectId = uniqueEvent ? uniqueEvent.projectround_id : null; 
+    let drill = projectId ? uniqueDrillsLUT[projectId] : null; 
+    let date = drill ? drill.start_date_field : null; 
+    if(!date && counting) {
+        runIdsWithError.add(event_id);
+        numWoDate++;  
+    }
+    return date; 
+}
+
+function getDateYr(event_id){
+    let dateVal = getDate(event_id, false); 
+    let yearVal = dateVal ? new Date(dateVal).getFullYear() : null; 
+    return yearVal; 
+}
+
+function getTournamentName(event_id){
+
+    let uniqueEvent = uniqueEventsLUT[event_id]; 
+    let projectId = uniqueEvent ? uniqueEvent.projectround_id : null;
+    let drill = projectId ? uniqueDrillsLUT[projectId] : null; 
+    let round_id = drill ? drill.round_id : null; 
+    let drillName = round_id ? drillNamesLUT[round_id] : null; 
+    let result = drillName ? drillName.name : null; 
+    if(!result) {
+        runIdsWithError.add(event_id);
+        numWoTourName++;  
+    }
+    return result; 
+}
+
+function getTournamentId(event_id){
+
+    let event = uniqueEventsLUT[event_id]; 
+    let projectId = event ? event.projectround_id : null ; 
+    if(!projectId) {
+        runIdsWithError.add(event_id);
+        numWoTourId++;  
+    }
+    return projectId; 
+}
 
 function addToTable(lut, text, indexOfKey){
     const lines = text.split('\n')

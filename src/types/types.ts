@@ -3,21 +3,30 @@ import { Collection } from "mongodb"
 export type Run = {
     id?: number, 
     team: string, 
+    hometown?: string, 
+    nickname?: string, 
     contest: string,
     year?: number, 
-    tournament?: string
+    tournament?: string,
     tournamentId: number,
     track: string, 
     time: string, 
     runningPosition?: number, 
-    circuit?: string, 
+    nassauPoints: string, 
+    suffolkPoints: string, 
+    westernPoints: string, 
+    northernPoints: string, 
+    suffolkOfPoints: string, 
+    nassauOfPoints: string, 
+    liOfPoints: string, 
+    juniorPoints: string,
     date: Date, 
     urls: string[], 
-    sanctioned: boolean
+    sanctioned: string, 
     points?: number, 
     notes?: string,
-    stateRecord?: boolean,
-    currentStateRecord?: boolean
+    stateRecord?: string,
+    currentStateRecord?: string
 }
 
 export interface RunsData {

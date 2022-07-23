@@ -23,5 +23,5 @@ const getCollectionPromise = async (dbPromise:Promise<Db | null>, collectionName
     return null; 
 }
 
-exports.getDbPromise = getDbPromise; 
-exports.getCollectionPromise = getCollectionPromise; 
+export { getDbPromise, getCollectionPromise }
+
