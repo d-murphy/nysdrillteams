@@ -6,30 +6,47 @@ class RunsService {
     public getRunsFromTournament(tournamentId:number): Promise<Run[]> {
         return this.dataSource.getRunsFromTournament(tournamentId); 
     }
-    public getFilteredRuns(years: number[], contests: string[], teams: string[], circuits: string[]): Run[] {
-        return this.dataSource.getFilteredRuns(years, contests, teams, circuits); 
+    public getFilteredRuns(
+        years?: number[], 
+        contests?: string[], 
+        teams?: string[], 
+        tracks?:string[], 
+        tournaments?:string[], 
+        ranks?:string[], 
+        stateRecord?: boolean, 
+        currentStateRecord?: boolean,
+        ): Promise<Run[]> {
+        return this.dataSource.getFilteredRuns(years, contests, teams, tracks, tournaments, ranks, stateRecord, currentStateRecord); 
     }
-    public getRun(runId: number): Run | undefined {
+    public getRun(runId: number): Promise<Run | undefined> {
         return this.dataSource.getRun(runId); 
     } 
-    public insertRun(newRun: Run, tournament: Tournament, team: Team): insertRunResp {
+    public insertRun(newRun: Run, tournament: Tournament, team: Team): Promise<insertRunResp> {
         let run: Run = newRun;
-        run.id = Math.floor(Math.random()*100000)
         run.team = team.name; 
+        run.hometown = team.hometown; 
+        run.nickname = team.nickname; 
         run.date = new Date(newRun.date); 
         run.year = run.date.getFullYear(); 
         run.tournament = tournament.name;
         run.tournamentId = tournament.id; 
-        run.runningPosition = run.runningPosition;  
+        run.track = tournament.track; 
         run.sanctioned = tournament.sanctioned; 
-        run.circuit = tournament.circuits.includes(team.circuit) ? team.circuit : ''; 
-        return this.dataSource.insertRun(run);
+        run.nassauPoints = tournament.circuits.includes("Nassau");
+        run.suffolkPoints = tournament.circuits.includes("Suffolk");
+        run.westernPoints = tournament.circuits.includes("Western");
+        run.northernPoints = tournament.circuits.includes("Northern");
+        run.suffolkOfPoints = tournament.circuits.includes("Suffolk-OF");
+        run.nassauOfPoints = tournament.circuits.includes("Nassau-OF");
+        run.liOfPoints = tournament.circuits.includes("LI-OF");
+        run.juniorPoints = tournament.circuits.includes("Junior");
+        return this.dataSource.insertRun(run);    
     }
-    public deleteRun(runId: number): boolean {
+    public deleteRun(runId: number): Promise<boolean> {
         return this.dataSource.deleteRun(runId);
     }
-    public updateRun(runId: number, pointsUpdate:number, timeUpdate: string): Run {
-        return this.dataSource.updateRun(runId, pointsUpdate, timeUpdate);
+    public updateRun(runId: number, pointsUpdate:number, timeUpdate: string, rankUpdate:string): Promise<Run> {
+        return this.dataSource.updateRun(runId, pointsUpdate, timeUpdate, rankUpdate);
     }
 }
     

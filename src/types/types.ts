@@ -12,18 +12,19 @@ export type Run = {
     track: string, 
     time: string, 
     runningPosition?: number, 
-    nassauPoints: string, 
-    suffolkPoints: string, 
-    westernPoints: string, 
-    northernPoints: string, 
-    suffolkOfPoints: string, 
-    nassauOfPoints: string, 
-    liOfPoints: string, 
-    juniorPoints: string,
+    nassauPoints: boolean, 
+    suffolkPoints: boolean, 
+    westernPoints: boolean, 
+    northernPoints: boolean, 
+    suffolkOfPoints: boolean, 
+    nassauOfPoints: boolean, 
+    liOfPoints: boolean, 
+    juniorPoints: boolean,
     date: Date, 
     urls: string[], 
-    sanctioned: string, 
+    sanctioned: boolean, 
     points?: number, 
+    rank: string, 
     notes?: string,
     stateRecord?: string,
     currentStateRecord?: string
@@ -31,12 +32,21 @@ export type Run = {
 
 export interface RunsData {
     _dbCollection: Collection | undefined;  
-    insertRun(newRun: Run): insertRunResp;
-    deleteRun(runId: number): boolean;
-    updateRun(runId: number, pointsUpdate: number, timeUpdate: string): Run; 
-    getRun(runId: number): Run | undefined; 
+    insertRun(newRun: Run): Promise<insertRunResp>;
+    deleteRun(runId: number): Promise<boolean>;
+    updateRun(runId: number, pointsUpdate: number, timeUpdate: string, rankUpdate: string): Promise<Run>; 
+    getRun(runId: number): Promise<Run | undefined>;
     getRunsFromTournament(tournamentId:number): Promise<Run[]>
-    getFilteredRuns(years: number[], contests: string[], teams: string[], circuit: string[]): Run[]
+    getFilteredRuns(        
+        years?: number[], 
+        contests?: string[], 
+        teams?: string[], 
+        tracks?:string[], 
+        tournaments?:string[], 
+        ranks?:string[], 
+        stateRecord?: boolean, 
+        currentStateRecord?: boolean,
+    ): Promise<Run[]>
 }
 
 export type insertRunResp = {
@@ -112,7 +122,9 @@ export type Team = {
     town: string,
     circuit: string,
     imageUrl?: string, 
-    active?: boolean
+    active?: boolean, 
+    hometown: string, 
+    nickname: string
 }
 
 export interface TeamData {

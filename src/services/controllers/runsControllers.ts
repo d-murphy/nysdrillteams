@@ -8,19 +8,18 @@ import RunsService from '../dataService/runsService';
 export function runsRouter (runsDataSource:RunsData){
     const Runs = new RunsService(runsDataSource); 
     const router = express.Router()
-    router.get('/getRun', (req: Request, res: Response) => {
-        console.log('anything?')
+    router.get('/getRun', async (req: Request, res: Response) => {
         const runId: number = (req.query.runId as unknown as number);
         if(!runId){
-            res.status(400).send('run id not valid')
+            res.status(400).send('runId not valid')
             return
         }
-        let run = Runs.getRun(runId);
+        let run = await Runs.getRun(runId);
         res.send(run);
     })
     
     
-    router.post('/insertRun', (req: Request, res: Response) => {
+    router.post('/insertRun', async (req: Request, res: Response) => {
     
         let newRun = req.body.runsData;
         let team = req.body.teamData; 
@@ -33,74 +32,69 @@ export function runsRouter (runsDataSource:RunsData){
             res.status(401).send('malformed reqeust')
             return
         }
-        let result = Runs.insertRun(newRun, tournament, team)
+        let result = await Runs.insertRun(newRun, tournament, team)
         if(!result.result){
             res.status(500).send('Internal server error')
         }
         res.status(200).send(result);
     })
     
-    router.post('/deleteRun', (req: Request, res: Response) => {
+    router.post('/deleteRun', async (req: Request, res: Response) => {
         const runId: number = (req.body.runId as unknown as number);
         if(!runId){
             res.status(400).send('run id not valid')
             return
         }
-        let run = Runs.deleteRun(runId);
+        let run = await Runs.deleteRun(runId);
         res.send(`Delete successful: ${run}`);
     })
     
-    router.post('/updateRun', (req: Request, res: Response) => {
+    router.post('/updateRun', async (req: Request, res: Response) => {
         let runId = req.body.runId; 
         let pointsUpdate = req.body.pointsUpdate;
-        let timeUpdate = req.body.timeUpdate;   
-        if((!pointsUpdate && !timeUpdate) || !runId){
+        let timeUpdate = req.body.timeUpdate;  
+        let rankUpdate = req.body.rankUpdate;  
+        if((!pointsUpdate && !timeUpdate && !rankUpdate) || !runId){
             res.status(400).send('update body not valid')
             return 
         }
-        let run = Runs.updateRun(runId, pointsUpdate, timeUpdate);
+        let run = await Runs.updateRun(runId, pointsUpdate, timeUpdate, rankUpdate);
         res.send(run);
     })
     
     
-    router.get('/getRunsFromTournament', (req: Request, res: Response) => {
+    router.get('/getRunsFromTournament', async (req: Request, res: Response) => {
         const tournamentId: number = (req.query.tournamentId as unknown as number);  
         if(!tournamentId){
             res.status(400).send('tournament id not valid')
             return
         }
-        let runs = Runs.getRunsFromTournament(tournamentId); 
+        let runs = await Runs.getRunsFromTournament(tournamentId); 
         res.send(runs); 
     })
     
-    router.get('/getFilteredRuns', (req: Request, res: Response) => {
-        let years: number[], contests:string[], teams:string[], circuits:string[]; 
-        if(req.query.years){
-            const yearsStr: string = (req.query.years as unknown as string)
-            years = yearsStr.split(",").map(Number)    
-        } else {
-            years = []; 
-        }
-        if(req.query.contests){
-            const contestsStr: string = (req.query.contests as unknown as string)
-            contests = contestsStr.split(",") 
-        } else {
-            contests = []; 
-        }
-        if(req.query.teams){
-            const teamsStr: string = (req.query.teams as unknown as string)
-            teams = teamsStr.split(",")    
-        } else {
-            teams = []; 
-        }
-        if(req.query.circuits){
-            const circuitsStr: string = (req.query.circuits as unknown as string)
-            circuits = circuitsStr.split(",")    
-        } else {
-            circuits = []; 
-        }
-        let runs = Runs.getFilteredRuns(years, contests, teams, circuits); 
+    router.get('/getFilteredRuns', async (req: Request, res: Response) => {
+        let years: number[], contests:string[], teams:string[], tracks:string[], tournaments: string[], ranks: string[] 
+        years = checkQuery(req, 'years').map(Number); 
+        contests = checkQuery(req, 'contests'); 
+        teams = checkQuery(req, 'teams'); 
+        tracks = checkQuery(req, 'tracks'); 
+        tournaments = checkQuery(req, 'tournaments'); 
+        ranks = checkQuery(req, 'ranks'); 
+        let stateRecord = req.query?.stateRecord ? true : false
+        let currentStateRecord = req.query?.currentStateRecord ? true : false; 
+
+        let runs = await Runs.getFilteredRuns(years, contests, teams, tracks, tournaments, ranks, stateRecord, currentStateRecord); 
         res.send(runs); 
     })
     return router; 
+}
+
+function checkQuery(req:Request, fieldName:string): string[]{
+    if(req.query[fieldName]){
+        let qryString: string = (req.query[fieldName] as unknown as string); 
+        return qryString.split(",");  
+    } else {
+        return []
+    }
 }

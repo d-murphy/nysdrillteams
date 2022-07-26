@@ -9,13 +9,16 @@
 
 ### To Do
 
-* add service for sponsers
+* handle cursor for getFilteredRuns
+* considering select columns for some requests
+* state record flags are run in runDb
+* index on tournamentId?
+* test insert / delete / update, once tournaments are available.  
+
 
 * add cors
-* need to do async in controllers after db
-* use an importer, esp on router
-* write db module
-* way to save images on teams
+* aws to save images
+
 * edit note endpoint
 * edit link endpoint
 * edit tournament live stream planned? 

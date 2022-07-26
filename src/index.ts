@@ -38,7 +38,7 @@ const dbPromise = getDbPromise(dbConnectionStr, DB_NAME);
     app.use(express.static("static/user"))
     
     
-    let runsData = await runsDbFactory(dbPromise, 'test');  
+    let runsData = await runsDbFactory(dbPromise, 'runs');  
     if(runsData) app.use('/runs', runsRouter(runsData)); 
     
     // app.use('/teams', teamsRouter);
