@@ -52,7 +52,7 @@ try {
 try {
     const data = fs.readFileSync("./dataForMigration/4_divisions.txt", 'utf8'); 
     addToTable(divisions, data,0); 
-    console.log('divisions: ', divisions['4'])
+    console.log('divisions: ', divisions)
     // console.log(drillNamesLUT['1'])
     // console.log(drillNamesLUT['2'])
     // console.log(drillNamesLUT['3'])
@@ -122,78 +122,187 @@ try {
 }
 
 
-var numWOType = 0; 
-var numWoDate = 0; 
-var numWoTourName = 0; 
-var numWoTourId = 0; 
-var runIdsWithError = new Set(); 
+let trackSet = new Set() 
+Object.values(uniqueDrillsLUT).forEach(el => {
+    trackSet.add(el.location); 
+})
+let trackLUT = {}; 
+trackSet.forEach(track => {
+    let newStr; 
+    let indOf_Track = track ? track.toLowerCase().search(' track') : -1
+    if(indOf_Track>=0){
+        let trackArr = track.split(''); 
+        trackArr.splice(indOf_Track, 6); 
+        newStr = trackArr.join(''); 
+    } else {
+        newStr = track; 
+    }
+    if(track && track!= 'NULL') {
+        trackLUT[track] = newStr
+    }; 
+})
 
-(async function(){
+// load runs
+
+// var numWOType = 0; 
+// var numWoDate = 0; 
+// var numWoTourName = 0; 
+// var numWoTourId = 0; 
+// var runIdsWithError = new Set(); 
+
+// (async function(){
+//     const dbConnectionStr =
+//         `mongodb+srv://${dbUn}:${dbPass}@nysdrillteams.4t9radi.mongodb.net/?retryWrites=true&w=majority`;
+//     const dbPromise = await getDbPromise(dbConnectionStr, DB_NAME);
+//     const collection = await getCollectionPromise(dbPromise, 'runs'); 
+
+//     let runsForDb = []; 
+//     Object.values(eventResultsLUT).forEach(el => {
+//         try{
+//             runsForDb.push({
+//                 id: el.id, 
+//                 team: teamsLUT[el.individual_id].team_name, 
+//                 hometown: teamsLUT[el.individual_id].hometown,
+//                 nickname: teamsLUT[el.individual_id].nickname,
+//                 contest: getContest(el.event_id),
+//                 year: getDateYr(el.event_id), 
+//                 tournament: getTournamentName(el.event_id),
+//                 tournamentId: getTournamentId(el.event_id),
+//                 host: uniqueEventsLUT[el.event_id] ? uniqueEventsLUT[el.event_id].host : null, 
+//                 track: uniqueEventsLUT[el.event_id] ? uniqueEventsLUT[el.event_id].location : null,  
+//                 time: el.time, 
+//                 runningPosition: el.ro_number, 
+//                 nassauPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nass_cm_ : null : null, 
+//                 suffolkPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].suff_cm_ : null : null, 
+//                 westernPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].wny_cm_: null : null, 
+//                 northernPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nny_cm_: null : null, 
+//                 suffolkOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].suffof_cm_: null : null, 
+//                 nassauOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nassof_cm_: null : null, 
+//                 liOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].liof_cm_: null : null, 
+//                 juniorPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].jr_cm_: null : null,
+//                 date: getDate(el.event_id), 
+//                 urls: [], 
+//                 sanctioned: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].sanctioned : null : null,
+//                 points: el.points,
+//                 rank: el.rank,  
+//                 notes: '',
+//                 stateRecord: false,
+//                 currentStateRecord: false
+//             })    
+//         } catch (e){
+//             console.log('new error: ', e)
+//         }
+//     })
+//     console.log('number of runs: ', Object.values(eventResultsLUT).length)
+//     console.log('num of failed types: ', numWOType)
+//     console.log('num of failed dates: ', numWoDate)
+//     console.log('num of failed tourn name: ', numWoTourName)
+//     console.log('num of failed tournId: ', numWoTourId); 
+//     console.log('run example', runsForDb[286619], runsForDb[281619], runsForDb[280619])
+//     let errStr = 'The following runs Ids had errors when loading:\n\n'; 
+//     runIdsWithError.forEach(el => {
+//         errStr += el + ', '
+//     })
+//     fs.writeFileSync('runWithError.txt', errStr)
+
+//     let result
+//     try {
+//         console.log('starting write to db: '); 
+//         result = await collection.insertMany(runsForDb)
+//     } catch(e) {
+//         console.log('error during db write: ', e); 
+//         result = false; 
+//     }
+//     console.log('db result: ', result); 
+//     return
+// })()
+
+// // teams
+
+let circuitLU = {
+    "1": "Nassau", 
+    "2": "Western", 
+    "3": "Northern", 
+    "4": "Suffolk"
+}; 
+
+let classLU = {
+    "1": "Motorized",
+    "6": "Juniors"
+}; 
+
+// (async function(){
+//     const dbConnectionStr =
+//         `mongodb+srv://${dbUn}:${dbPass}@nysdrillteams.4t9radi.mongodb.net/?retryWrites=true&w=majority`;
+//     const dbPromise = await getDbPromise(dbConnectionStr, DB_NAME);
+//     const collection = await getCollectionPromise(dbPromise, 'teams'); 
+
+//     let teamsArr = []; 
+
+//     Object.values(teamsLUT).forEach(el => {
+//         teamsArr.push({
+//             id: el.id, 
+//             fullName: el.team_name, 
+//             nickname: el.nickname, 
+//             hometown: el.hometown, 
+//             circuit: circuitLU[el.region_code] ? circuitLU[el.region_code] : el.region_code,  
+//             imageUrl: el.avatar, 
+//             active: true, 
+//             class: classLU[el.class] ? classLU[el.class] : el.class
+//         })
+//     })
+//     let result
+//     try {
+//         console.log('starting write to db: '); 
+//         result = await collection.insertMany(teamsArr); 
+//         console.log('completed db write'); 
+//     } catch(e) {
+//         console.log('error during db write: ', e); 
+//         result = false; 
+//     }
+//     return
+
+// })(); 
+
+// Track
+
+
+
+( async function(){
     const dbConnectionStr =
         `mongodb+srv://${dbUn}:${dbPass}@nysdrillteams.4t9radi.mongodb.net/?retryWrites=true&w=majority`;
     const dbPromise = await getDbPromise(dbConnectionStr, DB_NAME);
-    const collection = await getCollectionPromise(dbPromise, 'runs'); 
+    const collection = await getCollectionPromise(dbPromise, 'tracks'); 
 
-    let runsForDb = []; 
-    Object.values(eventResultsLUT).forEach(el => {
-        try{
-            runsForDb.push({
-                id: el.id, 
-                team: teamsLUT[el.individual_id].team_name, 
-                hometown: teamsLUT[el.individual_id].hometown,
-                nickname: teamsLUT[el.individual_id].nickname,
-                contest: getContest(el.event_id),
-                year: getDateYr(el.event_id), 
-                tournament: getTournamentName(el.event_id),
-                tournamentId: getTournamentId(el.event_id),
-                host: uniqueEventsLUT[el.event_id] ? uniqueEventsLUT[el.event_id].host : null, 
-                track: uniqueEventsLUT[el.event_id] ? uniqueEventsLUT[el.event_id].location : null,  
-                time: el.time, 
-                runningPosition: el.ro_number, 
-                nassauPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nass_cm_ : null : null, 
-                suffolkPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].suff_cm_ : null : null, 
-                westernPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].wny_cm_: null : null, 
-                northernPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nny_cm_: null : null, 
-                suffolkOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].suffof_cm_: null : null, 
-                nassauOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nassof_cm_: null : null, 
-                liOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].liof_cm_: null : null, 
-                juniorPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].jr_cm_: null : null,
-                date: getDate(el.event_id), 
-                urls: [], 
-                sanctioned: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].sanctioned : null : null,
-                points: el.points,
-                rank: el.rank,  
-                notes: '',
-                stateRecord: false,
-                currentStateRecord: false
-            })    
-        } catch (e){
-            console.log('new error: ', e)
-        }
+    let trackDocs = []; 
+    let trackSet2 = new Set(); 
+
+    Object.values(trackLUT).forEach(el => {
+        trackSet2.add(el); 
     })
-    console.log('number of runs: ', Object.values(eventResultsLUT).length)
-    console.log('num of failed types: ', numWOType)
-    console.log('num of failed dates: ', numWoDate)
-    console.log('num of failed tourn name: ', numWoTourName)
-    console.log('num of failed tournId: ', numWoTourId); 
-    console.log('run example', runsForDb[286619], runsForDb[281619], runsForDb[280619])
-    let errStr = 'The following runs Ids had errors when loading:\n\n'; 
-    runIdsWithError.forEach(el => {
-        errStr += el + ', '
+    trackSet2.forEach(track => {
+        trackDocs.push({
+            name: track, 
+            address: '', 
+            city: '', 
+            notes: '', 
+            imageUrls: [], 
+            archHeight: null, 
+            distanceToHydrant: null
+        })
     })
-    fs.writeFileSync('runWithError.txt', errStr)
 
     let result
     try {
         console.log('starting write to db: '); 
-        result = await collection.insertMany(runsForDb)
+        result = await collection.insertMany(trackDocs); 
+        console.log('completed db write'); 
     } catch(e) {
         console.log('error during db write: ', e); 
         result = false; 
     }
-    console.log('db result: ', result); 
     return
-})()
+})(); 
 
 
 

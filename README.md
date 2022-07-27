@@ -9,11 +9,18 @@
 
 ### To Do
 
+* Try to add some db-related functions to loadData
+* add rename function to do overwrites
+* overwrite runs db with new trackLUT
+* do tournaments
+
 * handle cursor for getFilteredRuns
 * considering select columns for some requests
 * state record flags are run in runDb
 * index on tournamentId?
 * test insert / delete / update, once tournaments are available.  
+
+* unsure about teams class and circuit
 
 
 * add cors

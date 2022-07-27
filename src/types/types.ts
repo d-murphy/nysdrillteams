@@ -118,13 +118,12 @@ export type insertTrackResp = {
 export type Team = {
     id: number,
     fullName: string,  
-    name: string,
-    town: string,
     circuit: string,
     imageUrl?: string, 
     active?: boolean, 
     hometown: string, 
-    nickname: string
+    nickname: string, 
+    class: string
 }
 
 export interface TeamData {
