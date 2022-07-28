@@ -9,15 +9,14 @@
 
 ### To Do
 
-* Try to add some db-related functions to loadData
-* add rename function to do overwrites
-* overwrite runs db with new trackLUT
-* do tournaments
+* need Top5 and running order in tournaments collection
+* confirm types from collections match types file
+* add other endpoints
 
 * handle cursor for getFilteredRuns
 * considering select columns for some requests
 * state record flags are run in runDb
-* index on tournamentId?
+* index on tournamentId (convert to numeric?)?
 * test insert / delete / update, once tournaments are available.  
 
 * unsure about teams class and circuit

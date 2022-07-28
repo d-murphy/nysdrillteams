@@ -6,362 +6,59 @@ dotenv.config();
 let { PORT, DB_NAME, dbUn, dbPass } = process.env; 
 
 
-let teamsLUT = {}; 
-let seasonLUT = {}; 
-let divisionSeriesLUT = {}; 
-let divisions = {}; 
-let drillNamesLUT = {}; 
-let eventNamesLUT = {}; 
-let uniqueDrillsLUT = {}; 
-let uniqueEventsLUT = {}; 
-let eventResultsLUT = {}; 
+// reading source files and reshaping. 
 
-try {
-    const data = fs.readFileSync("./dataForMigration/1_teams.txt", 'utf8');
-    addToTable(teamsLUT, data, 0); 
-    console.log('team example', teamsLUT[1])
-    // console.log(teamsLUT[2])
-    // console.log(teamsLUT[3])
-    // console.log(teamsLUT[4])
-    // console.log(teamsLUT[5])
-} catch (e) {
-    console.log('in teams read', e); 
-}
+let teamsLUT = readFileToObject("./dataForMigration/1_teams.txt", 0);  
+let seasonLUT = readFileToObject("./dataForMigration/2_season.txt", 1);  
+let divisionSeriesLUT = readFileToObject("./dataForMigration/3_division_series.txt", 0); 
+let divisions = readFileToObject("./dataForMigration/4_divisions.txt", 0); 
+let drillNamesLUT = readFileToObject("./dataForMigration/5_drill_names.txt", 0);  
+let eventNamesLUT = readFileToObject("./dataForMigration/6_event_names.txt", 0); 
+let uniqueDrillsLUT = readFileToObject("./dataForMigration/7_unique_drills.txt", 0);  
+let uniqueEventsLUT = readFileToObject("./dataForMigration/8_unique_events.txt", 0);  
+let eventResultsLUT = readFileToObject("./dataForMigration/9_event_results.txt", 0); 
 
-try {
-    const data = fs.readFileSync("./dataForMigration/2_season.txt", 'utf8'); 
-    addToTable(seasonLUT, data,1); 
-    console.log('season LUT: ', seasonLUT['2020']); 
-} catch (e) {
-    console.log(e); 
-}
+// print examples
 
-try {
-    const data = fs.readFileSync("./dataForMigration/3_division_series.txt", 'utf8'); 
-    addToTable(divisionSeriesLUT, data,0); 
-    console.log('divisionSeriesLUT: ', divisionSeriesLUT['52']); 
-    // console.log(divisionSeriesLUT['53']); 
-    // console.log(divisionSeriesLUT['54']); 
-    // console.log(divisionSeriesLUT['55']); 
-    // console.log(divisionSeriesLUT['56']); 
-    // console.log(divisionSeriesLUT['57']); 
-} catch (e) {
-    console.log(e); 
-}
+console.log('teams example', teamsLUT["1"])
+console.log('season example', seasonLUT["2020"])
+console.log('division series example', divisionSeriesLUT["1"])
+console.log('division example', divisions["1"])
+console.log('drill name example', drillNamesLUT["1"])
+console.log('event name example', eventNamesLUT["1"])
+console.log('unique drill example', uniqueDrillsLUT["1"])
+console.log('unique event example', uniqueEventsLUT["1"])
+console.log('event example', eventResultsLUT["1"])
 
-try {
-    const data = fs.readFileSync("./dataForMigration/4_divisions.txt", 'utf8'); 
-    addToTable(divisions, data,0); 
-    console.log('divisions: ', divisions)
-    // console.log(drillNamesLUT['1'])
-    // console.log(drillNamesLUT['2'])
-    // console.log(drillNamesLUT['3'])
-    // console.log(drillNamesLUT['4'])
-} catch (e) {
-    console.log(e); 
-}
+// additional data maps
 
-
-try {
-    const data = fs.readFileSync("./dataForMigration/5_drill_names.txt", 'utf8'); 
-    addToTable(drillNamesLUT, data,0); 
-    console.log('drillNamesLUT: ', drillNamesLUT['203'])
-    // console.log(drillNamesLUT['1'])
-    // console.log(drillNamesLUT['2'])
-    // console.log(drillNamesLUT['3'])
-    // console.log(drillNamesLUT['4'])
-} catch (e) {
-    console.log(e); 
-}
-
-try {
-    const data = fs.readFileSync("./dataForMigration/6_event_names.txt", 'utf8'); 
-    addToTable(eventNamesLUT, data,0); 
-    console.log('eventNamesLUT: ', eventNamesLUT['1'])
-} catch (e) {
-    console.log(e); 
-}
-
-try {
-    const data = fs.readFileSync("./dataForMigration/7_unique_drills.txt", 'utf8'); 
-    addToTable(uniqueDrillsLUT, data,0); 
-    console.log('uniqueDrillsLUT: ', uniqueDrillsLUT['2188'])
-    // console.log(uniqueDrillsLUT['1'])
-    // console.log(uniqueDrillsLUT['2'])
-    // console.log(uniqueDrillsLUT['3'])
-    // console.log(uniqueDrillsLUT['4'])
-    // console.log(uniqueDrillsLUT['5'])
-} catch (e) {
-    console.log(e); 
-}
-
-try {
-    const data = fs.readFileSync("./dataForMigration/8_unique_events.txt", 'utf8'); 
-    addToTable(uniqueEventsLUT, data,0); 
-    console.log('uniqueEventsLUT: ', uniqueEventsLUT['17002'])
-    // console.log(uniqueEventsLUT['1'])
-    // console.log(uniqueEventsLUT['2'])
-    // console.log(uniqueEventsLUT['3'])
-    // console.log(uniqueEventsLUT['4'])
-    // console.log(uniqueEventsLUT['5'])
-} catch (e) {
-    console.log(e); 
-}
-
-try {
-    const data = fs.readFileSync("./dataForMigration/9_event_results.txt", 'utf8'); 
-    addToTable(eventResultsLUT, data,0); 
-    console.log('three man?', Object.values(eventResultsLUT).filter(el => {return el.id == '250753' }))
-    // console.log(eventResultsLUT['2001'])
-    // console.log(eventResultsLUT['3002'])
-    // console.log(eventResultsLUT['4003'])
-    // console.log(eventResultsLUT['5004'])
-    // console.log(eventResultsLUT['6005'])
-} catch (e) {
-    console.log(e); 
-}
-
-
-let trackSet = new Set() 
-Object.values(uniqueDrillsLUT).forEach(el => {
-    trackSet.add(el.location); 
-})
-let trackLUT = {}; 
-trackSet.forEach(track => {
-    let newStr; 
-    let indOf_Track = track ? track.toLowerCase().search(' track') : -1
-    if(indOf_Track>=0){
-        let trackArr = track.split(''); 
-        trackArr.splice(indOf_Track, 6); 
-        newStr = trackArr.join(''); 
-    } else {
-        newStr = track; 
-    }
-    if(track && track!= 'NULL') {
-        trackLUT[track] = newStr
-    }; 
-})
-
-// load runs
-
-// var numWOType = 0; 
-// var numWoDate = 0; 
-// var numWoTourName = 0; 
-// var numWoTourId = 0; 
-// var runIdsWithError = new Set(); 
-
-// (async function(){
-//     const dbConnectionStr =
-//         `mongodb+srv://${dbUn}:${dbPass}@nysdrillteams.4t9radi.mongodb.net/?retryWrites=true&w=majority`;
-//     const dbPromise = await getDbPromise(dbConnectionStr, DB_NAME);
-//     const collection = await getCollectionPromise(dbPromise, 'runs'); 
-
-//     let runsForDb = []; 
-//     Object.values(eventResultsLUT).forEach(el => {
-//         try{
-//             runsForDb.push({
-//                 id: el.id, 
-//                 team: teamsLUT[el.individual_id].team_name, 
-//                 hometown: teamsLUT[el.individual_id].hometown,
-//                 nickname: teamsLUT[el.individual_id].nickname,
-//                 contest: getContest(el.event_id),
-//                 year: getDateYr(el.event_id), 
-//                 tournament: getTournamentName(el.event_id),
-//                 tournamentId: getTournamentId(el.event_id),
-//                 host: uniqueEventsLUT[el.event_id] ? uniqueEventsLUT[el.event_id].host : null, 
-//                 track: uniqueEventsLUT[el.event_id] ? uniqueEventsLUT[el.event_id].location : null,  
-//                 time: el.time, 
-//                 runningPosition: el.ro_number, 
-//                 nassauPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nass_cm_ : null : null, 
-//                 suffolkPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].suff_cm_ : null : null, 
-//                 westernPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].wny_cm_: null : null, 
-//                 northernPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nny_cm_: null : null, 
-//                 suffolkOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].suffof_cm_: null : null, 
-//                 nassauOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nassof_cm_: null : null, 
-//                 liOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].liof_cm_: null : null, 
-//                 juniorPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].jr_cm_: null : null,
-//                 date: getDate(el.event_id), 
-//                 urls: [], 
-//                 sanctioned: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].sanctioned : null : null,
-//                 points: el.points,
-//                 rank: el.rank,  
-//                 notes: '',
-//                 stateRecord: false,
-//                 currentStateRecord: false
-//             })    
-//         } catch (e){
-//             console.log('new error: ', e)
-//         }
-//     })
-//     console.log('number of runs: ', Object.values(eventResultsLUT).length)
-//     console.log('num of failed types: ', numWOType)
-//     console.log('num of failed dates: ', numWoDate)
-//     console.log('num of failed tourn name: ', numWoTourName)
-//     console.log('num of failed tournId: ', numWoTourId); 
-//     console.log('run example', runsForDb[286619], runsForDb[281619], runsForDb[280619])
-//     let errStr = 'The following runs Ids had errors when loading:\n\n'; 
-//     runIdsWithError.forEach(el => {
-//         errStr += el + ', '
-//     })
-//     fs.writeFileSync('runWithError.txt', errStr)
-
-//     let result
-//     try {
-//         console.log('starting write to db: '); 
-//         result = await collection.insertMany(runsForDb)
-//     } catch(e) {
-//         console.log('error during db write: ', e); 
-//         result = false; 
-//     }
-//     console.log('db result: ', result); 
-//     return
-// })()
-
-// // teams
-
+let trackNameLUT = buildTrackNameLUT(uniqueDrillsLUT)
 let circuitLU = {
     "1": "Nassau", 
     "2": "Western", 
     "3": "Northern", 
     "4": "Suffolk"
 }; 
-
 let classLU = {
     "1": "Motorized",
     "6": "Juniors"
 }; 
 
-// (async function(){
-//     const dbConnectionStr =
-//         `mongodb+srv://${dbUn}:${dbPass}@nysdrillteams.4t9radi.mongodb.net/?retryWrites=true&w=majority`;
-//     const dbPromise = await getDbPromise(dbConnectionStr, DB_NAME);
-//     const collection = await getCollectionPromise(dbPromise, 'teams'); 
+(async function(){
+    console.log('starting the collection buiids'); 
+    // let writeDocResults = await loadRuns(); 
+    // console.log("Write runs result: ", writeDocResults)
+    // let loadTeamsResult = await loadTeams(); 
+    // console.log('load teams result: ', loadTeamsResult); 
+    // let loadTracksResult = await loadTracks(); 
+    // console.log('load tracks result: ', loadTracksResult); 
+    let loadDrillsResult = await loadDrills(); 
+    console.log('load teams result: ', loadDrillsResult); 
 
-//     let teamsArr = []; 
-
-//     Object.values(teamsLUT).forEach(el => {
-//         teamsArr.push({
-//             id: el.id, 
-//             fullName: el.team_name, 
-//             nickname: el.nickname, 
-//             hometown: el.hometown, 
-//             circuit: circuitLU[el.region_code] ? circuitLU[el.region_code] : el.region_code,  
-//             imageUrl: el.avatar, 
-//             active: true, 
-//             class: classLU[el.class] ? classLU[el.class] : el.class
-//         })
-//     })
-//     let result
-//     try {
-//         console.log('starting write to db: '); 
-//         result = await collection.insertMany(teamsArr); 
-//         console.log('completed db write'); 
-//     } catch(e) {
-//         console.log('error during db write: ', e); 
-//         result = false; 
-//     }
-//     return
-
-// })(); 
-
-// Track
+})()
 
 
-
-( async function(){
-    const dbConnectionStr =
-        `mongodb+srv://${dbUn}:${dbPass}@nysdrillteams.4t9radi.mongodb.net/?retryWrites=true&w=majority`;
-    const dbPromise = await getDbPromise(dbConnectionStr, DB_NAME);
-    const collection = await getCollectionPromise(dbPromise, 'tracks'); 
-
-    let trackDocs = []; 
-    let trackSet2 = new Set(); 
-
-    Object.values(trackLUT).forEach(el => {
-        trackSet2.add(el); 
-    })
-    trackSet2.forEach(track => {
-        trackDocs.push({
-            name: track, 
-            address: '', 
-            city: '', 
-            notes: '', 
-            imageUrls: [], 
-            archHeight: null, 
-            distanceToHydrant: null
-        })
-    })
-
-    let result
-    try {
-        console.log('starting write to db: '); 
-        result = await collection.insertMany(trackDocs); 
-        console.log('completed db write'); 
-    } catch(e) {
-        console.log('error during db write: ', e); 
-        result = false; 
-    }
-    return
-})(); 
-
-
-
-function getContest(event_id){
-
-    let uniqueEvent = uniqueEventsLUT[event_id]; 
-    let type = uniqueEvent ? uniqueEvent.type : null; 
-    let eventName = type ? eventNamesLUT[type] : null; 
-    let result = eventName ? eventName.name : null; 
-    if(!result) {
-        runIdsWithError.add(event_id);
-        numWOType++;  
-    }
-    return result; 
-}
-
-function getDate(event_id, counting=true){
-    let uniqueEvent = uniqueEventsLUT[event_id]; 
-    let projectId = uniqueEvent ? uniqueEvent.projectround_id : null; 
-    let drill = projectId ? uniqueDrillsLUT[projectId] : null; 
-    let date = drill ? drill.start_date_field : null; 
-    if(!date && counting) {
-        runIdsWithError.add(event_id);
-        numWoDate++;  
-    }
-    return date; 
-}
-
-function getDateYr(event_id){
-    let dateVal = getDate(event_id, false); 
-    let yearVal = dateVal ? new Date(dateVal).getFullYear() : null; 
-    return yearVal; 
-}
-
-function getTournamentName(event_id){
-
-    let uniqueEvent = uniqueEventsLUT[event_id]; 
-    let projectId = uniqueEvent ? uniqueEvent.projectround_id : null;
-    let drill = projectId ? uniqueDrillsLUT[projectId] : null; 
-    let round_id = drill ? drill.round_id : null; 
-    let drillName = round_id ? drillNamesLUT[round_id] : null; 
-    let result = drillName ? drillName.name : null; 
-    if(!result) {
-        runIdsWithError.add(event_id);
-        numWoTourName++;  
-    }
-    return result; 
-}
-
-function getTournamentId(event_id){
-
-    let event = uniqueEventsLUT[event_id]; 
-    let projectId = event ? event.projectround_id : null ; 
-    if(!projectId) {
-        runIdsWithError.add(event_id);
-        numWoTourId++;  
-    }
-    return projectId; 
-}
+// data read / manip funcs
 
 function addToTable(lut, text, indexOfKey){
     const lines = text.split('\n')
@@ -377,4 +74,297 @@ function addToTable(lut, text, indexOfKey){
             innerObj[keys[ind]] = val; 
         })
     })
+}
+
+function readFileToObject(filename, indexOfKey){
+    let newObj = {}
+    try {
+        const data = fs.readFileSync(filename, 'utf8');
+        addToTable(newObj, data, indexOfKey); 
+    } catch (e) {
+        console.log('error reading: ', filename); 
+    }
+    return newObj; 
+}
+
+function buildTrackNameLUT(uniqueDrillsLUT){
+    let newLUT = {}; 
+
+    let trackSet = new Set() 
+    Object.values(uniqueDrillsLUT).forEach(el => {
+        trackSet.add(el.location); 
+    })
+    trackSet.forEach(track => {
+        let newStr; 
+        let indOf_Track = track ? track.toLowerCase().search(' track') : -1
+        if(indOf_Track>=0){
+            let trackArr = track.split(''); 
+            trackArr.splice(indOf_Track, 6); 
+            newStr = trackArr.join(''); 
+        } else {
+            newStr = track; 
+        }
+        if(track && track!= 'NULL') {
+            newLUT[track] = newStr
+        }; 
+    })
+    return newLUT; 
+}
+
+// db funcs
+
+async function getCollection(collectionName){
+    const dbConnectionStr =
+        `mongodb+srv://${dbUn}:${dbPass}@nysdrillteams.4t9radi.mongodb.net/?retryWrites=true&w=majority`;
+    const dbPromise = await getDbPromise(dbConnectionStr, DB_NAME);
+    const collection = await getCollectionPromise(dbPromise, collectionName); 
+    return collection; 
+}
+
+async function writeDocs(collectionName, documents){
+    let tempCollection = await getCollection(`temp-${collectionName}`); 
+    let result, renameResult; 
+    try {
+        console.log('starting write to db: '); 
+        result = await tempCollection.insertMany(documents)
+        console.log('write to db finished.  Starting rename.');
+        renameResult = await tempCollection.rename(collectionName, {dropTarget: true})
+        console.log('rename complete.');  
+    } catch(e) {
+        console.log('error during db write: ', e); 
+    }
+    return renameResult; 
+}
+
+
+// building collections
+
+async function loadRuns (){
+
+    var numWOContest = {ids: [], count: 0}; 
+    var numWoDate = {ids: [], count: 0}; 
+    var numWoDateYr = {ids: [], count: 0}; 
+    var numWoTourName = {ids: [], count: 0}; 
+    var numWoTourId = {ids: [], count: 0}; 
+
+    let runsForDb = []; 
+    Object.values(eventResultsLUT).forEach(el => {
+        try{
+            runsForDb.push({
+                id: el.id, 
+                team: teamsLUT[el.individual_id] ? teamsLUT[el.individual_id].team_name : null,
+                hometown: teamsLUT[el.individual_id] ? teamsLUT[el.individual_id].hometown : null,
+                nickname: teamsLUT[el.individual_id] ? teamsLUT[el.individual_id].nickname : null,
+                contest: getContest(el.event_id, numWOContest),
+                year: getDateYr(el.event_id, numWoDateYr), 
+                tournament: getTournamentName(el.event_id, numWoTourName),
+                tournamentId: getTournamentId(el.event_id, numWoTourId),
+                host: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].host : null : null, 
+                track: getTrack(el.event_id), 
+                time: el.time, 
+                runningPosition: el.ro_number, 
+                nassauPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nass_cm_ : null : null, 
+                suffolkPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].suff_cm_ : null : null, 
+                westernPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].wny_cm_: null : null, 
+                northernPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nny_cm_: null : null, 
+                suffolkOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].suffof_cm_: null : null, 
+                nassauOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nassof_cm_: null : null, 
+                liOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].liof_cm_: null : null, 
+                juniorPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].jr_cm_: null : null,
+                date: getDate(el.event_id, numWoDate), 
+                urls: [], 
+                sanctioned: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].sanctioned : null : null,
+                points: el.points,
+                rank: el.rank,  
+                notes: '',
+                stateRecord: false,
+                currentStateRecord: false
+            })    
+        } catch (e){
+            console.log('new error: ', e)
+        }
+    })
+    console.log('number of runs: ', Object.values(eventResultsLUT).length)
+    console.log('num of failed types: ', numWOContest.count)
+    console.log('num of failed dates: ', numWoDate.count)
+    console.log('num of failed tourn name: ', numWoTourName.count)
+    console.log('num of failed tournId: ', numWoTourId.count); 
+    console.log('run example', runsForDb[286619], runsForDb[281619], runsForDb[280619])
+    let errStr = 'The following runs Ids had errors when loading:\n\n'; 
+    errStr = addToErrString(errStr, 'contest', numWOContest.ids); 
+    errStr = addToErrString(errStr, 'date', numWoDate.ids); 
+    errStr = addToErrString(errStr, 'tournament name', numWoTourName.ids); 
+    errStr = addToErrString(errStr, 'tournament id', numWoTourId.ids); 
+    fs.writeFileSync('runWithError.txt', errStr)
+    return writeDocs('runs', runsForDb); 
+}
+
+async function loadTeams(){
+    let teamsArr = []; 
+    Object.values(teamsLUT).forEach(el => {
+        teamsArr.push({
+            id: el.id, 
+            fullName: el.team_name, 
+            nickname: el.nickname, 
+            hometown: el.hometown, 
+            circuit: circuitLU[el.region_code] ? circuitLU[el.region_code] : el.region_code,  
+            imageUrl: el.avatar, 
+            active: true, 
+            class: classLU[el.class] ? classLU[el.class] : el.class
+        })
+    })
+    return writeDocs('teams', teamsArr)
+}
+
+async function loadTracks(){
+    let trackDocs = []; 
+    let trackSet2 = new Set(); 
+    Object.values(trackNameLUT).forEach(el => {
+        trackSet2.add(el); 
+    })
+    trackSet2.forEach(track => {
+        trackDocs.push({
+            name: track, 
+            address: '', 
+            city: '', 
+            notes: '', 
+            imageUrls: [], 
+            archHeight: null, 
+            distanceToHydrant: null
+        })
+    })
+    return writeDocs('tracks', trackDocs)
+}
+
+async function loadDrills(){
+    let drillsArr = []; 
+
+    let events = Object.values(uniqueEventsLUT); 
+    Object.values(uniqueDrillsLUT).forEach(el => {
+        drillsArr.push({
+            id: el.id, 
+            name: getTournamentNameFromDrill(el.round_id), 
+            year: new Date(el.start_date_field).getFullYear(), 
+            date: el.start_date_field, 
+            startTime: el.start_time,
+            nassauPoints: el.nass_cm_, 
+            suffolkPoints: el.suff_cm_ , 
+            westernPoints: el.wny_cm_ , 
+            northernPoints: el.nny_cm_, 
+            suffolkOfPoints: el.suffof_cm_ , 
+            nassauOfPoints: el.nassof_cm_ , 
+            liOfPoints: el.liof_cm_ , 
+            juniorPoints: el.jr_cm_ ,
+            nassauSchedule: el.nass_cm_, 
+            suffolkSchedule: el.suff_cm_, 
+            westernSchedule: el.wny_cm_ , 
+            northernSchedule: el.nny_cm_, 
+            liOfSchedule:  el.liof_cm_ , 
+            juniorSchedule: el.jr_cm_ ,        
+            track: trackNameLUT[el.location] ? trackNameLUT[el.location] : null,
+            runningOrder: { },
+            sanctioned: el.sanctioned === '1', 
+            top5: [],  
+            contests: contestStrArr(events, el.id),
+            liveStreamPlanned: false,
+            urls: [], 
+            waterTime: el.water_time        
+        })
+    })
+    return writeDocs('tournaments', drillsArr)
+}
+
+
+// helper funcs for buildin collection funcs
+
+function contestStrArr(events, drillId){
+    return events.filter(el => {
+        return el.projectround_id == drillId; 
+    })
+    .sort((a,b) => {
+        return parseInt(a.event_num) < parseInt(b.event_num) ? -1 : 1; 
+    })
+    .map(el => eventNamesLUT[el.type] ? eventNamesLUT[el.type].name : el.type )
+}
+
+function addToErrString(errStr, header, idArr){
+    errStr += `${errStr}\n`
+    idArr.forEach(el => {
+        errStr += el + ", "
+    })
+    errStr += '\n'
+    return errStr; 
+}
+
+function getContest(event_id, numWOContest){
+
+    let uniqueEvent = uniqueEventsLUT[event_id]; 
+    let type = uniqueEvent ? uniqueEvent.type : null; 
+    let eventName = type ? eventNamesLUT[type] : null; 
+    let result = eventName ? eventName.name : null; 
+    if(!result) {
+        numWOContest.ids.push(event_id);
+        numWOContest.count++;  
+    }
+    return result; 
+}
+
+function getDate(event_id, numWoDate, counting=true){
+    let uniqueEvent = uniqueEventsLUT[event_id]; 
+    let projectId = uniqueEvent ? uniqueEvent.projectround_id : null; 
+    let drill = projectId ? uniqueDrillsLUT[projectId] : null; 
+    let date = drill ? drill.start_date_field : null; 
+    if(!date && counting) {
+        numWoDate.ids.push(event_id);
+        numWoDate.count++;  
+    }
+    return date; 
+}
+
+function getDateYr(event_id, numWoDateYr){
+    let dateVal = getDate(event_id, numWoDateYr, false); 
+    let yearVal = dateVal ? new Date(dateVal).getFullYear() : null; 
+    return yearVal; 
+}
+
+function getTournamentName(event_id, numWoTourName){
+
+    let uniqueEvent = uniqueEventsLUT[event_id]; 
+    let projectId = uniqueEvent ? uniqueEvent.projectround_id : null;
+    let drill = projectId ? uniqueDrillsLUT[projectId] : null; 
+    let round_id = drill ? drill.round_id : null; 
+    let drillName = round_id ? drillNamesLUT[round_id] : null; 
+    let result = drillName ? drillName.name : null; 
+    if(!result) {
+        numWoTourName.ids.push(event_id);
+        numWoTourName.count++;  
+    }
+    return result; 
+}
+
+function getTournamentNameFromDrill(round_id){
+    let drillName = round_id ? drillNamesLUT[round_id] : null; 
+    let result = drillName ? drillName.name : null; 
+    return result; 
+}
+
+
+function getTournamentId(event_id, numWoTourId){
+
+    let event = uniqueEventsLUT[event_id]; 
+    let projectId = event ? event.projectround_id : null ; 
+    if(!projectId) {
+        numWoTourId.ids.push(event_id);
+        numWoTourId.count++;  
+    }
+    return projectId; 
+}
+
+function getTrack(event_id){
+    let event = uniqueEventsLUT[event_id]; 
+    let projectId = event ? event.projectround_id : null;
+    let drill = projectId ? uniqueDrillsLUT[projectId] : null; 
+    let track = drill ? drill.location : null; 
+    let result = track ? trackNameLUT[track] : null; 
+    return result; 
 }
