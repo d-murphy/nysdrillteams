@@ -78,8 +78,9 @@ export type Tournament = {
     track: string,
     runningOrder?: { [runningPosition:number]: string },
     sanctioned: boolean, 
+    cfp: boolean, 
     top5?: {teamName: string, finishingPosition: string, points: number}[] 
-    contests: string[],
+    contests: {name:string, cfp:boolean, sanction:boolean}[],
     liveStreamPlanned?: boolean
     urls?: string[], 
     waterTime?: string

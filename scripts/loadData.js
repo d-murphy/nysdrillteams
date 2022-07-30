@@ -46,15 +46,14 @@ let classLU = {
 
 (async function(){
     console.log('starting the collection buiids'); 
-    // let writeDocResults = await loadRuns(); 
-    // console.log("Write runs result: ", writeDocResults)
-    // let loadTeamsResult = await loadTeams(); 
-    // console.log('load teams result: ', loadTeamsResult); 
-    // let loadTracksResult = await loadTracks(); 
-    // console.log('load tracks result: ', loadTracksResult); 
+    let writeDocResults = await loadRuns(); 
+    console.log("Write runs result: ", writeDocResults)
+    let loadTeamsResult = await loadTeams(); 
+    console.log('load teams result: ', loadTeamsResult); 
+    let loadTracksResult = await loadTracks(); 
+    console.log('load tracks result: ', loadTracksResult); 
     let loadDrillsResult = await loadDrills(); 
     console.log('load teams result: ', loadDrillsResult); 
-
 })()
 
 
@@ -162,7 +161,7 @@ async function loadRuns (){
                 host: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].host : null : null, 
                 track: getTrack(el.event_id), 
                 time: el.time, 
-                runningPosition: el.ro_number, 
+                runningPosition: parseInt(el.ro_number) ? parseInt(el.ro_number) : null, 
                 nassauPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nass_cm_ : null : null, 
                 suffolkPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].suff_cm_ : null : null, 
                 westernPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].wny_cm_: null : null, 
@@ -173,7 +172,8 @@ async function loadRuns (){
                 juniorPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].jr_cm_: null : null,
                 date: getDate(el.event_id, numWoDate), 
                 urls: [], 
-                sanctioned: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].sanctioned : null : null,
+                sanctioned: uniqueEventsLUT[el.event_id] ? ['1','Sanctioned'].includes(uniqueEventsLUT[el.event_id].sanction) : false,
+                cfp: uniqueEventsLUT[el.event_id] ? ['1','Counts For Points'].includes(uniqueEventsLUT[el.event_id].cfp) : false,
                 points: el.points,
                 rank: el.rank,  
                 notes: '',
@@ -241,6 +241,9 @@ async function loadDrills(){
 
     let events = Object.values(uniqueEventsLUT); 
     Object.values(uniqueDrillsLUT).forEach(el => {
+
+        let infoFromRuns = getInfoFromRuns(el.id)
+
         drillsArr.push({
             id: el.id, 
             name: getTournamentNameFromDrill(el.round_id), 
@@ -262,9 +265,10 @@ async function loadDrills(){
             liOfSchedule:  el.liof_cm_ , 
             juniorSchedule: el.jr_cm_ ,        
             track: trackNameLUT[el.location] ? trackNameLUT[el.location] : null,
-            runningOrder: { },
-            sanctioned: el.sanctioned === '1', 
-            top5: [],  
+            runningOrder: infoFromRuns.runningOrder,
+            sanctioned: ['1', 'Sanctioned'].includes(el.sanctioned), 
+            cfp: ['1', 'Sanctioned'].includes(el.cfp),
+            top5: infoFromRuns.top5,  
             contests: contestStrArr(events, el.id),
             liveStreamPlanned: false,
             urls: [], 
@@ -274,8 +278,63 @@ async function loadDrills(){
     return writeDocs('tournaments', drillsArr)
 }
 
+// helper funcs for building collection funcs
 
-// helper funcs for buildin collection funcs
+function getInfoFromRuns(tournId){
+    let eventIdArr = []; 
+    Object.values(uniqueEventsLUT).forEach(el => {
+        if(el.projectround_id == tournId && ['1','Counts For Points'].includes(el.cfp)) eventIdArr.push(el.id)
+    })
+    let runsForTourn = []; 
+    Object.values(eventResultsLUT).forEach(el => {
+        if(eventIdArr.includes(el.event_id)) {
+            runsForTourn.push(el)
+        }
+    })
+    runsForTourn = runsForTourn.map(el => {
+        return {
+            ...el,
+            team: teamsLUT[el.individual_id] ? teamsLUT[el.individual_id].team_name : null
+        }
+    })
+    let points = {}; 
+    runsForTourn.forEach(el => {
+        if(!points[el.team]){
+            points[el.team] = parseInt(el.points) ? parseInt(el.points) : 0; 
+        } else {
+            points[el.team] += parseInt(el.points) ? parseInt(el.points) : 0; 
+        }
+    })
+    let pointsArr = []; 
+    Object.keys(points).forEach(el => {
+        pointsArr.push({teamName: el, points: points[el]})
+    })
+    pointsArr.sort((a,b) => a.points > b.points ? -1 : 1); 
+    let finishes = ["1st Place", "2nd Place", "3rd Place", "4th Place", "5th Place"]; 
+    pointsArr.forEach((el, index) => {
+        if(index == 0) el.finishingPosition = finishes.shift(); 
+        if(index > 0) {
+            if(el.points == pointsArr[index-1].points && pointsArr[index-1].finishingPosition){
+                el.finishingPosition = pointsArr[index-1].finishingPosition; 
+                if(pointsArr.length) finishes.shift(); 
+            } else {
+                if(pointsArr.length) el.finishingPosition = finishes.shift(); 
+            }
+        }
+    })
+    pointsArr = pointsArr.filter(el => {
+        return el.finishingPosition
+    })
+
+    let runningOrder = {}; 
+    runsForTourn.forEach(el => {
+        let rowNum = parseInt(el.ro_number) ? parseInt(el.ro_number) : null; 
+        if(rowNum && !runningOrder[rowNum]){
+            runningOrder[rowNum] = el.team
+        }
+    })
+    return {top5: pointsArr, runningOrder: runningOrder}
+}
 
 function contestStrArr(events, drillId){
     return events.filter(el => {
@@ -284,7 +343,13 @@ function contestStrArr(events, drillId){
     .sort((a,b) => {
         return parseInt(a.event_num) < parseInt(b.event_num) ? -1 : 1; 
     })
-    .map(el => eventNamesLUT[el.type] ? eventNamesLUT[el.type].name : el.type )
+    .map(el => {
+        return {
+            name: eventNamesLUT[el.type] ? eventNamesLUT[el.type].name : el.type, 
+            cfp: ['1','Counts For Points'].includes(el.cfp), 
+            sanction: ['1','Sanctioned'].includes(el.sanction)
+        }
+    })
 }
 
 function addToErrString(errStr, header, idArr){
