@@ -9,7 +9,10 @@
 
 ### To Do
 
-* need Top5 and running order in tournaments collection
+* remove mocks
+* why do nassau teams have true booleans for suffolk points (2008 three man ladder @ central islip)
+    * maybe class can fix this? 
+* consider only return certain colums in all pulls
 * confirm types from collections match types file
 * add other endpoints
 

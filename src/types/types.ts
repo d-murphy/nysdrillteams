@@ -1,4 +1,4 @@
-import { Collection } from "mongodb"
+import { Collection, ObjectId } from "mongodb"
 
 export type Run = {
     id?: number, 
@@ -6,25 +6,25 @@ export type Run = {
     hometown?: string, 
     nickname?: string, 
     contest: string,
-    year?: number, 
-    tournament?: string,
+    year: number, 
+    tournament: string,
     tournamentId: number,
     track: string, 
     time: string, 
     runningPosition?: number, 
-    nassauPoints: boolean, 
-    suffolkPoints: boolean, 
-    westernPoints: boolean, 
-    northernPoints: boolean, 
-    suffolkOfPoints: boolean, 
-    nassauOfPoints: boolean, 
-    liOfPoints: boolean, 
-    juniorPoints: boolean,
+    nassauPoints?: boolean, 
+    suffolkPoints?: boolean, 
+    westernPoints?: boolean, 
+    northernPoints?: boolean, 
+    suffolkOfPoints?: boolean, 
+    nassauOfPoints?: boolean, 
+    liOfPoints?: boolean, 
+    juniorPoints?: boolean,
     date: Date, 
     urls: string[], 
     sanctioned: boolean, 
     points?: number, 
-    rank: string, 
+    rank?: string, 
     notes?: string,
     stateRecord?: string,
     currentStateRecord?: string
@@ -32,9 +32,9 @@ export type Run = {
 
 export interface RunsData {
     _dbCollection: Collection | undefined;  
-    insertRun(newRun: Run): Promise<insertRunResp>;
+    insertRun(newRun: Run): Promise<runDbResult>;
     deleteRun(runId: number): Promise<boolean>;
-    updateRun(runId: number, pointsUpdate: number, timeUpdate: string, rankUpdate: string): Promise<Run>; 
+    updateRun(runId: number, pointsUpdate: number, timeUpdate: string, rankUpdate: string): Promise<runDbResult>; 
     getRun(runId: number): Promise<Run | undefined>;
     getRunsFromTournament(tournamentId:number): Promise<Run[]>
     getFilteredRuns(        
@@ -49,9 +49,9 @@ export interface RunsData {
     ): Promise<Run[]>
 }
 
-export type insertRunResp = {
+export type runDbResult = {
     result: boolean, 
-    run: Run
+    run: Run | undefined
 }
 
 
@@ -87,7 +87,7 @@ export type Tournament = {
 }
 
 export interface TournamentsData {
-    insertTournament(newTournament: Tournament): insertTournamentResp;
+    insertTournament(newTournament: Tournament): tournamentDbResp;
     deleteTournament(tournamentId: number): boolean;
     updateTournament(updatedTournament:Tournament): Tournament; 
     getTournament(tournamentId:number): Tournament | undefined; 
@@ -96,9 +96,9 @@ export interface TournamentsData {
     getTournamentsByTrack(name:string):Tournament[]; 
 }
 
-export type insertTournamentResp = {
+export type tournamentDbResp = {
     result: boolean, 
-    tournament: Tournament
+    tournament: Tournament | undefined
 }
 
 
@@ -115,7 +115,7 @@ export type Track = {
 }
 
 export interface TracksData {
-    insertTrack(newTrack: Track): insertTrackResp;
+    insertTrack(newTrack: Track): trackDbResp;
     deleteTrack(trackId: number): boolean;
     updateTrack(updatedTrack:Track): Track; 
     getTrack(trackId:number): Track | undefined;
@@ -123,14 +123,15 @@ export interface TracksData {
     getTracks(): Track[];
 }
 
-export type insertTrackResp = {
+export type trackDbResp = {
     result: boolean, 
-    track: Track
+    track: Track | undefined
 }
 
 
 export type Team = {
-    id: number,
+    _id: ObjectId, 
+    id?: number,
     fullName: string,  
     circuit: string,
     imageUrl?: string, 
@@ -141,14 +142,14 @@ export type Team = {
 }
 
 export interface TeamData {
-    insertTeam(newTeam: Team): insertTeamResp;
-    deleteTeam(teamId: number): boolean;
-    updateTeam(updatedTeam:Team): Team; 
-    getTeam(teamId:number): Team | undefined;
-    getTeams(): Team[];
+    insertTeam(newTeam: Team): Promise<teamDbResp>;
+    deleteTeam(teamId: string): Promise<boolean>;
+    updateTeam(teamId:string, fieldsToUpdate: {}): Promise<boolean>; 
+    getTeam(teamId:number): Promise<Team | undefined>;
+    getTeams(): Promise<Team[]>;
 }
 
-export type insertTeamResp = {
+export type teamDbResp = {
     result: boolean, 
-    team: Team
+    team: Team | undefined
 }

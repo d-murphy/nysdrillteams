@@ -1,5 +1,4 @@
 import express, {Request, Response} from 'express'; 
-import { Db } from 'mongodb';
 
 import { RunsData } from '../../types/types';
 import RunsService from '../dataService/runsService';
@@ -32,7 +31,7 @@ export function runsRouter (runsDataSource:RunsData){
             res.status(401).send('malformed reqeust')
             return
         }
-        let result = await Runs.insertRun(newRun, tournament, team)
+        let result = await Runs.insertRun(newRun, tournament)
         if(!result.result){
             res.status(500).send('Internal server error')
         }

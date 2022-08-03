@@ -1,4 +1,4 @@
-import { Run, RunsData, Tournament, Team, insertRunResp } from '../../types/types'
+import { Run, RunsData, Tournament, Team, runDbResult } from '../../types/types'
 
 class RunsService {
 
@@ -21,33 +21,48 @@ class RunsService {
     public getRun(runId: number): Promise<Run | undefined> {
         return this.dataSource.getRun(runId); 
     } 
-    public insertRun(newRun: Run, tournament: Tournament, team: Team): Promise<insertRunResp> {
+    public insertRun(newRun: Run, tournament: Tournament ): Promise<runDbResult> {
         let run: Run = newRun;
-        run.team = team.name; 
-        run.hometown = team.hometown; 
-        run.nickname = team.nickname; 
         run.date = new Date(newRun.date); 
         run.year = run.date.getFullYear(); 
         run.tournament = tournament.name;
         run.tournamentId = tournament.id; 
         run.track = tournament.track; 
-        run.sanctioned = tournament.sanctioned; 
-        run.nassauPoints = tournament.circuits.includes("Nassau");
-        run.suffolkPoints = tournament.circuits.includes("Suffolk");
-        run.westernPoints = tournament.circuits.includes("Western");
-        run.northernPoints = tournament.circuits.includes("Northern");
-        run.suffolkOfPoints = tournament.circuits.includes("Suffolk-OF");
-        run.nassauOfPoints = tournament.circuits.includes("Nassau-OF");
-        run.liOfPoints = tournament.circuits.includes("LI-OF");
-        run.juniorPoints = tournament.circuits.includes("Junior");
+        run.sanctioned =  getSanction(tournament.contests, run.contest); 
+        run.nassauPoints = getCfp(tournament.contests, run.contest) && tournament.nassauPoints; 
+        run.suffolkPoints = getCfp(tournament.contests, run.contest) && tournament.suffolkPoints;
+        run.westernPoints = getCfp(tournament.contests, run.contest) && tournament.westernPoints;
+        run.northernPoints = getCfp(tournament.contests, run.contest) && tournament.northernPoints;
+        run.suffolkOfPoints = getCfp(tournament.contests, run.contest) && tournament.suffolkOfPoints;
+        run.nassauOfPoints = getCfp(tournament.contests, run.contest) && tournament.nassauOfPoints;
+        run.liOfPoints = getCfp(tournament.contests, run.contest) && tournament.liOfPoints;
+        run.juniorPoints = getCfp(tournament.contests, run.contest) && tournament.juniorPoints;
         return this.dataSource.insertRun(run);    
     }
     public deleteRun(runId: number): Promise<boolean> {
         return this.dataSource.deleteRun(runId);
     }
-    public updateRun(runId: number, pointsUpdate:number, timeUpdate: string, rankUpdate:string): Promise<Run> {
+    public updateRun(runId: number, pointsUpdate:number, timeUpdate: string, rankUpdate:string): Promise<runDbResult> {
         return this.dataSource.updateRun(runId, pointsUpdate, timeUpdate, rankUpdate);
     }
 }
     
 export default RunsService; 
+
+
+
+function getSanction(contestArr: {name:string, cfp:boolean, sanction:boolean}[], contest:string): boolean {
+    let contestObj = contestArr.find(el => {
+        return el.name == contest; 
+    })
+    if(contestObj) return contestObj.sanction; 
+    return false
+}
+
+function getCfp (contestArr: {name:string, cfp:boolean, sanction:boolean}[], contest:string): boolean {
+    let contestObj = contestArr.find(el => {
+        return el.name == contest; 
+    })
+    if(contestObj) return contestObj.cfp; 
+    return false
+}

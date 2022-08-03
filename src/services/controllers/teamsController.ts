@@ -1,60 +1,68 @@
 import express, {Request, Response} from 'express'; 
 const router = express.Router()
-
-import teamsData from '../database/teamsMock';
+import { TeamData } from '../../types/types'
 import TeamsService from '../dataService/teamsService';
 
-const Teams = new TeamsService(teamsData); 
-
-router.get('/getTeam', (req: Request, res: Response) => {
-    const teamId: number = (req.query.teamId as unknown as number);
-    if(!teamId){
-        res.status(400).send('run id not valid')
-        return
-    }
-    let team = Teams.getTeam(teamId);
-    res.send(team);
-})
 
 
-router.post('/insertTeam', (req: Request, res: Response) => {
+export function teamsRouter (teamsDataSource:TeamData){
+    const Teams = new TeamsService(teamsDataSource); 
+    const router = express.Router()
 
-    let newTeam = req.body.teamData;
-    if( !newTeam?.fullName || !newTeam.name || !newTeam.town || !newTeam.circuit ){
-        res.status(401).send('malformed reqeust')
-        return
-    }
-    let result = Teams.insertTeam(newTeam)
-    if(!result.result){
-        res.status(500).send('Internal server error')
-    }
-    res.status(200).send(result);
-})
-
-router.post('/deleteTeam', (req: Request, res: Response) => {
-    const teamId: number = (req.body.teamId as unknown as number);
-    if(!teamId){
-        res.status(400).send('team id not valid')
-        return
-    }
-    let result = Teams.deleteTeam(teamId);
-    res.send(`Delete successful: ${result}`);
-})
-
-router.post('/updateTeam', (req: Request, res: Response) => {
-    let updatedTeam = req.body.updatedTeam; 
-    if(!updatedTeam){
-        res.status(400).send('update body not valid')
-        return 
-    }
-    let run = Teams.updateTeam(updatedTeam);
-    res.send(run);
-})
+    router.get('/getTeam', async (req: Request, res: Response) => {
+        const teamId: number = (req.query?.teamId as unknown as number);
+        if(!teamId){
+            res.status(400).send('run id not valid')
+            return
+        }
+        let team = await Teams.getTeam(teamId);
+        res.send(team);
+    })
 
 
-router.get('/getTeams', (req: Request, res: Response) => {
-    let teams = Teams.getTeams(); 
-    res.send(teams); 
-})
+    router.post('/insertTeam', async (req: Request, res: Response) => {
+        console.log(req)
+        let newTeam = req.body;
+        console.log('new team: ', newTeam)
+        if( !newTeam?.fullName || !newTeam?.nickname || !newTeam?.hometown || !newTeam?.circuit ){
+            res.status(401).send('malformed reqeust')
+            return
+        }
+        let result = await Teams.insertTeam(newTeam)
+        if(!result?.result){
+            return res.status(500).send('Internal server error')
+        }
+        res.status(200).send(result);
+    })
 
-module.exports = router
+    router.post('/deleteTeam', async (req: Request, res: Response) => {
+        const teamId: string = (req.body?.teamId as unknown as string);
+        if(!teamId){
+            res.status(400).send('team id not valid')
+            return
+        }
+        let result = await Teams.deleteTeam(teamId);
+        res.send(result);
+    })
+
+    router.post('/updateTeam', async (req: Request, res: Response) => {
+        let teamId = req.body?.teamId; 
+        let fieldsToUpdate = req.body?.fieldsToUpdate; 
+        if(!teamId){
+            return res.status(400).send('update body not valid') 
+        }
+        let result = await Teams.updateTeam(teamId, fieldsToUpdate);
+        if(!result){
+            return res.status(500).send('Internal server error')
+        }
+        res.send(result);
+    })
+
+
+    router.get('/getTeams', async (req: Request, res: Response) => {
+        let teams = await Teams.getTeams(); 
+        if(!teams) return res.status(500).send('Internal server error'); 
+        res.send(teams); 
+    })
+    return router; 
+}

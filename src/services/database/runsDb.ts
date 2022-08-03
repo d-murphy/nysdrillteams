@@ -1,11 +1,11 @@
 import { Collection, Db, ObjectId } from 'mongodb';
-import { type } from 'os';
-import { Run, RunsData, insertRunResp } from '../../types/types'; 
+import { Run, RunsData, runDbResult } from '../../types/types'; 
 import { getCollectionPromise } from './db';
 
 export async function runsDbFactory(dbPromise: Promise<Db>, collectionName: string):Promise<RunsData | undefined> {
     let collection = await getCollectionPromise(dbPromise, collectionName); 
     if(collection) return new RunsDb(collection); 
+    return undefined; 
 }
 
 class RunsDb implements RunsData{
@@ -13,32 +13,29 @@ class RunsDb implements RunsData{
     constructor(collection: Collection) {
         this._dbCollection = collection; 
     }
-    async insertRun(newRun: Run): Promise<insertRunResp> {
+    async insertRun(newRun: Run): Promise<runDbResult> {
         let result; 
         try {
             result = await this._dbCollection.insertOne(newRun); 
         } catch (e) {
             console.log("Error inserting document: ", e); 
         }
-        console.log('here is the result from insert Run: ', result); 
         if(result) return { result: true, run: newRun } 
         return {result: false, run: newRun }
     }
     async deleteRun(runId: number): Promise<boolean> {
-        const query = { _id: runId };
+        const query = { _id: new ObjectId(runId) };
         let result; 
         try {
             result = await this._dbCollection.deleteOne(query);
         } catch (e) {
             console.log('Error deleting document'); 
         }
-        console.log('here is the result from delete Run: ', result); 
         if(result) return true;
         return false;  
     }
-    async updateRun(runId: number, pointsUpdate: number, timeUpdate: string, rankUpdate: string): Promise<Run> {
-
-        const filter = { _id: runId };
+    async updateRun(runId: number, pointsUpdate: number, timeUpdate: string, rankUpdate: string): Promise<runDbResult> {
+        const filter = { _id: new ObjectId(runId) };
         const updateDoc = {
             $set: {
                 rank: rankUpdate, 
@@ -46,15 +43,14 @@ class RunsDb implements RunsData{
                 time: timeUpdate
             },
         };
-        let result; 
-        try {
-            result = await this._dbCollection.updateOne(filter, updateDoc);         
+        let result:Run | undefined; 
+        try {  
+            result = (await this._dbCollection.updateOne(filter, updateDoc) as unknown as Run);         
         } catch (e) {
             console.log('There was an error updating document id: ', runId);          
         }
-        console.log('the result from updateRun: ', result); 
-        if(result) return result; 
-        return false; 
+        if(result) return {result: true, run: result}; 
+        return  {result: true, run: undefined};
     }
     async getRun(runId: number): Promise<Run | undefined> {
         const query = { _id: new ObjectId(runId) };
@@ -64,24 +60,19 @@ class RunsDb implements RunsData{
         } catch (e) {
             console.log ("There was an error retrieving document: ", runId); 
         }
-        console.log('find result: ', result); 
-        if(result){
-            console.log('yunoprint?')
-            return result;
-        }  
+        if(result) return result;
         return undefined; 
     }
     async getRunsFromTournament(tournamentId: number): Promise<Run[]> {
         const query = { tournamentId: tournamentId };
         let result; 
-        try {
-            result = await this._dbCollection.find(query).toArray(); 
+        try { 
+            result = await (this._dbCollection.find(query).toArray() as unknown as Run[]); 
         } catch (e) {
             console.log ("There was an error retrieving documents for tournament: ", tournamentId); 
         }
-        console.log('find result: ', result); 
         if(result) return result; 
-        return undefined; 
+        return []; 
     }
     async getFilteredRuns(
         years?: number[], 
@@ -119,6 +110,6 @@ class RunsDb implements RunsData{
             console.log ("There was an error in the getFilteredRuns function with query: ", query); 
         }
         if(result) return result; 
-        return []]; 
+        return []; 
     }
 }

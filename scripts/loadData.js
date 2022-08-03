@@ -45,15 +45,15 @@ let classLU = {
 }; 
 
 (async function(){
-    console.log('starting the collection buiids'); 
-    let writeDocResults = await loadRuns(); 
-    console.log("Write runs result: ", writeDocResults)
-    let loadTeamsResult = await loadTeams(); 
-    console.log('load teams result: ', loadTeamsResult); 
-    let loadTracksResult = await loadTracks(); 
-    console.log('load tracks result: ', loadTracksResult); 
-    let loadDrillsResult = await loadDrills(); 
-    console.log('load teams result: ', loadDrillsResult); 
+    // console.log('starting the collection buiids'); 
+    // let writeDocResults = await loadRuns(); 
+    // console.log("Write runs result: ", writeDocResults)
+    // let loadTeamsResult = await loadTeams(); 
+    // console.log('load teams result: ', loadTeamsResult); 
+    // let loadTracksResult = await loadTracks(); 
+    // console.log('load tracks result: ', loadTracksResult); 
+    // let loadDrillsResult = await loadDrills(); 
+    // console.log('load teams result: ', loadDrillsResult); 
 })()
 
 

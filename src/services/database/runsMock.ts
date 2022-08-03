@@ -5,11 +5,11 @@ const runs: Run[] = loadMockRuns();
 
 const runsData: RunsData = {
     _dbCollection: undefined, 
-    insertRun(newRun:Run): insertRunResp {
+    async insertRun(newRun:Run): Promise<insertRunResp> {
         runs.push(newRun); 
         return { result: true, run: newRun }
     },
-    deleteRun(runId:number): boolean {
+    async deleteRun(runId:number): Promise<boolean> {
         const index = runs.findIndex(el => {
             return el.id == runId
         })
@@ -20,7 +20,7 @@ const runsData: RunsData = {
             return false; 
         }
     }, 
-    updateRun(runId: number, pointsUpdate:number | undefined = undefined, timeUpdate:string | undefined = undefined):Run {
+    async updateRun(runId: number, pointsUpdate:number | undefined = undefined, timeUpdate:string | undefined = undefined):Promise<Run> {
         const index = runs.findIndex(el => {
             return el.id == runId
         })
@@ -28,7 +28,7 @@ const runsData: RunsData = {
         if(timeUpdate) runs[index].time = timeUpdate; 
         return runs[index]; 
     }, 
-    getRun(runId: number): Run | undefined{
+    async getRun(runId: number): Promise<Run | undefined>{
         return runs.find(el => el.id == runId)
     },
     async getRunsFromTournament(tournamentId:number):Promise<Run[]> {
@@ -37,12 +37,11 @@ const runsData: RunsData = {
             return el.tournamentId == tournamentId; 
         })
     }, 
-    getFilteredRuns( years: number[] = [], contests: string[] = [], teams: string[] = [], circuits: string[] = [] ):Run[] {
+    async getFilteredRuns( years: number[] = [], contests: string[] = [], teams: string[] = [] ):Promise<Run[]> {
         let returnArr = runs; 
         if(years.length) returnArr = returnArr.filter(el => years.includes(el.year !== undefined ? el.year : 0))
         if(contests.length) returnArr = returnArr.filter(el => contests.includes(el.contest))
         if(teams.length) returnArr = returnArr.filter(el => teams.includes(el.team)); 
-        if(circuits.length) returnArr = returnArr.filter(el => circuits.includes(el.circuit !== undefined ? el.circuit : '')); 
         return returnArr; 
     }
 }
@@ -62,7 +61,6 @@ function loadMockRuns(): Run[]{
             time: '6.32',
             runningPosition: 1, 
             track: "Central Islip",
-            circuit: "Suffolk", 
             date: new Date('7/28/2019'), 
             urls: [], 
             sanctioned:true,
@@ -78,7 +76,6 @@ function loadMockRuns(): Run[]{
             time: '5.27',
             runningPosition: 15, 
             track: "Hagerman",
-            circuit: "Suffolk", 
             date: new Date('7/28/2020'), 
             urls: [], 
             sanctioned:true,
@@ -94,7 +91,6 @@ function loadMockRuns(): Run[]{
             time: '9.3',
             runningPosition: 15, 
             track: "Hagerman",
-            circuit: "Suffolk", 
             date: new Date('7/28/2020'), 
             urls: [], 
             sanctioned:true,
@@ -110,7 +106,6 @@ function loadMockRuns(): Run[]{
             time: '12.5',
             runningPosition: 13, 
             track: "Hagerman",
-            circuit: "Suffolk", 
             date: new Date('7/28/2020'), 
             urls: [], 
             sanctioned:true,
@@ -126,7 +121,6 @@ function loadMockRuns(): Run[]{
             time: '9.67',
             runningPosition: 12, 
             track: "Hagerman",
-            circuit: "", 
             date: new Date('7/28/2020'), 
             urls: [], 
             sanctioned:true,
@@ -142,7 +136,6 @@ function loadMockRuns(): Run[]{
             time: '6.12',
             runningPosition: 13, 
             track: "Hagerman",
-            circuit: "Suffolk", 
             date: new Date('7/28/2020'), 
             urls: [], 
             sanctioned: true,
@@ -158,7 +151,6 @@ function loadMockRuns(): Run[]{
             time: '23.20',
             runningPosition: 13, 
             track: "Hagerman",
-            circuit: "Suffolk", 
             date: new Date('7/28/2020'), 
             urls: [], 
             sanctioned:true
@@ -173,7 +165,6 @@ function loadMockRuns(): Run[]{
             time: '6.32',
             runningPosition: 3, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: ["http://www.youtube.com"], 
             sanctioned:true,
@@ -189,7 +180,6 @@ function loadMockRuns(): Run[]{
             time: '6.62',
             runningPosition: 4, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: ["http://www.youtube.com"], 
             sanctioned:true,
@@ -205,7 +195,6 @@ function loadMockRuns(): Run[]{
             time: '6.99',
             runningPosition: 5, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: ["http://www.youtube.com"], 
             sanctioned:true,
@@ -221,7 +210,6 @@ function loadMockRuns(): Run[]{
             time: '6.45',
             runningPosition: 6, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: [], 
             sanctioned:true,
@@ -237,7 +225,6 @@ function loadMockRuns(): Run[]{
             time: '6.81',
             runningPosition: 3, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: ["http://www.youtube.com"], 
             sanctioned:true,
@@ -253,7 +240,6 @@ function loadMockRuns(): Run[]{
             time: 'NT',
             runningPosition: 3, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: [], 
             sanctioned:true,
@@ -269,7 +255,6 @@ function loadMockRuns(): Run[]{
             time: 'OT',
             runningPosition: 3, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: [], 
             sanctioned:true,
@@ -285,7 +270,6 @@ function loadMockRuns(): Run[]{
             time: '6.70',
             runningPosition: 3, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: [], 
             sanctioned:true,
@@ -301,7 +285,6 @@ function loadMockRuns(): Run[]{
             time: '8.20',
             runningPosition: 3, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: [], 
             sanctioned:true,
@@ -317,7 +300,6 @@ function loadMockRuns(): Run[]{
             time: '5.22',
             runningPosition: 3, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: ["http://www.youtube.com"], 
             sanctioned:true,
@@ -333,7 +315,6 @@ function loadMockRuns(): Run[]{
             time: '5.07',
             runningPosition: 3, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: ["http://www.youtube.com"], 
             sanctioned:true,
@@ -349,7 +330,6 @@ function loadMockRuns(): Run[]{
             time: '5.61',
             runningPosition: 3, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: ["http://www.youtube.com"], 
             sanctioned:true,
@@ -365,7 +345,6 @@ function loadMockRuns(): Run[]{
             time: '5.14',
             runningPosition: 3, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: [], 
             sanctioned:true,
@@ -381,7 +360,6 @@ function loadMockRuns(): Run[]{
             time: 'NT',
             runningPosition: 3, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: ["http://www.youtube.com"], 
             sanctioned:true,
@@ -397,7 +375,6 @@ function loadMockRuns(): Run[]{
             time: 'NT',
             runningPosition: 3, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: [], 
             sanctioned:true,
@@ -413,7 +390,6 @@ function loadMockRuns(): Run[]{
             time: 'OT',
             runningPosition: 3, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: [], 
             sanctioned:true,
@@ -429,7 +405,6 @@ function loadMockRuns(): Run[]{
             time: '5.45',
             runningPosition: 3, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: [], 
             sanctioned:true,
@@ -445,7 +420,6 @@ function loadMockRuns(): Run[]{
             time: 'OT',
             runningPosition: 3, 
             track: "Lindenhurst",
-            circuit: "Suffolk", 
             date: new Date('6/5/2022'), 
             urls: [], 
             sanctioned:true,
