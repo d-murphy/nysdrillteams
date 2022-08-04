@@ -11,6 +11,8 @@ import { runsRouter } from './services/controllers/runsControllers';
 import { runsDbFactory } from './services/database/runsDb';
 import { teamsRouter } from './services/controllers/teamsController';
 import { teamsDbFactory } from './services/database/teamsDb';
+import { tournamentsDbFactory } from './services/database/tournamentsDb';
+import { tournamentsRouter } from './services/controllers/tournamentsController';
 // import runsData from './services/database/runsMock'
 
 const dbConnectionStr:string =
@@ -42,8 +44,10 @@ const dbPromise = getDbPromise(dbConnectionStr, DB_NAME);
     
     let runsData = await runsDbFactory(dbPromise, 'runs');  
     let teamsData = await teamsDbFactory(dbPromise, 'teams'); 
+    let tournamentsData = await tournamentsDbFactory(dbPromise, 'tournaments'); 
     if(runsData) app.use('/runs', runsRouter(runsData)); 
     if(teamsData) app.use('/teams', teamsRouter(teamsData));
+    if(tournamentsData) app.use('/tournaments', tournamentsRouter(tournamentsData));
     // app.use('/teams', teamsRouter);
     // app.use('/tracks', tracksRouter);
     // app.use('/tournaments', tournamentsRouter); 

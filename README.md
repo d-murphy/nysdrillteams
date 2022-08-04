@@ -9,6 +9,9 @@
 
 ### To Do
 
+
+* 2011 Joe Hunter is sanctioned and cfp
+* 2011 states has no running order
 * remove mocks
 * why do nassau teams have true booleans for suffolk points (2008 three man ladder @ central islip)
     * maybe class can fix this? 

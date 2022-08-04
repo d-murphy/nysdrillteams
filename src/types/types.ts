@@ -87,13 +87,15 @@ export type Tournament = {
 }
 
 export interface TournamentsData {
-    insertTournament(newTournament: Tournament): tournamentDbResp;
-    deleteTournament(tournamentId: number): boolean;
-    updateTournament(updatedTournament:Tournament): Tournament; 
-    getTournament(tournamentId:number): Tournament | undefined; 
-    getTournaments(years:number[]): Tournament[]; 
-    getTournamentsByName(name:string):Tournament[]; 
-    getTournamentsByTrack(name:string):Tournament[]; 
+    insertTournament(newTournament: Tournament): Promise<tournamentDbResp>;
+    deleteTournament(tournamentId: number): Promise<boolean>;
+    updateTournament(tournamentId:string, fieldsToUpdate:{}): Promise<boolean>; 
+    getTournament(tournamentId:number): Promise<Tournament | undefined>; 
+    getFilteredTournaments(        
+        years?: number[], 
+        tracks?:string[], 
+        tournaments?:string[], 
+    ): Promise<Tournament[]>
 }
 
 export type tournamentDbResp = {

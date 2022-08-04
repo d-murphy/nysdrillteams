@@ -41,7 +41,6 @@ class TeamsDb implements TeamData{
         const updateDoc = {
             $set: fieldsToUpdate,
         };
-        console.log('a filter: ', filter, 'update doc: ', updateDoc)
         let result; 
         try {  
             result = await this._dbCollection.updateOne(filter, updateDoc);    
