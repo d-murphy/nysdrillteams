@@ -117,12 +117,12 @@ export type Track = {
 }
 
 export interface TracksData {
-    insertTrack(newTrack: Track): trackDbResp;
-    deleteTrack(trackId: number): boolean;
-    updateTrack(updatedTrack:Track): Track; 
-    getTrack(trackId:number): Track | undefined;
-    getTrackByName(trackName:string): Track | undefined;
-    getTracks(): Track[];
+    insertTrack(newTrack: Track): Promise<trackDbResp>;
+    deleteTrack(trackId: string): Promise<boolean>;
+    updateTrack(trackId:string, fieldsToUpdate:{}): Promise<boolean>; 
+    getTrack(trackId:string): Promise<Track | undefined>;
+    getTrackByName(trackName:string): Promise<Track | undefined>;
+    getTracks(): Promise<Track[]>;
 }
 
 export type trackDbResp = {

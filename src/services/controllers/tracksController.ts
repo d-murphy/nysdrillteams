@@ -1,71 +1,61 @@
 import express, {Request, Response} from 'express'; 
-const router = express.Router()
+import { TracksData } from '../../types/types'
 
-import tracksData from '../database/tracksMock';
 import TracksService from '../dataService/tracksService';
 
-const Tracks = new TracksService(tracksData); 
+export function tracksRouter (tracksDataSource:TracksData){
+    const Tracks = new TracksService(tracksDataSource); 
+    const router = express.Router()
 
-router.get('/getTrack', (req: Request, res: Response) => {
-    const trackId: number = (req.query.trackId as unknown as number);
-    if(!trackId){
-        res.status(400).send('run id not valid')
-        return
-    }
-    let track = Tracks.getTrack(trackId);
-    res.send(track);
-})
+    router.get('/getTrack', async (req: Request, res: Response) => {
+        const trackId: string = (req.query.trackId as unknown as string);
+        if(!trackId) return res.status(400).send('run id not valid')
+        let track = await Tracks.getTrack(trackId);
+        if(!track) return res.status(500).send("Internal server error"); 
+        res.status(200).send(track);
+    })
 
+    router.get('/getTrackByName', async (req: Request, res: Response) => {
+        const trackName: string = (req.query.trackName as unknown as string);
+        if(!trackName) return res.status(400).send('run id not valid')
+        let track = await Tracks.getTrackByName(trackName);
+        if(!track) return res.status(500).send("Internal server error"); 
+        res.status(200).send(track);
+    })
 
-router.get('/getTrackByName', (req: Request, res: Response) => {
-    const trackName: string = (req.query.trackName as unknown as string);
-    if(!trackName){
-        res.status(400).send('run id not valid')
-        return
-    }
-    let track = Tracks.getTrackByName(trackName);
-    res.send(track);
-})
+    router.post('/insertTrack', async (req: Request, res: Response) => {
+        let newTrack = req.body;
+        if( !newTrack?.name || !newTrack?.address || !newTrack?.city  ){
+            res.status(400).send('malformed reqeust')
+            return
+        }
+        let result = await Tracks.insertTrack(newTrack)
+        if(!result.result) res.status(500).send('Internal server error')
+        res.status(200).send(result);
+    })
 
+    router.post('/deleteTrack', async (req: Request, res: Response) => {
+        const trackId: string = (req.body.trackId as unknown as string);
+        if(!trackId) return res.status(400).send('team id not valid')
+        let result = await Tracks.deleteTrack(trackId);
+        if(!result) return res.status(500).send('Internal server error'); 
+        res.status(200).send(`Delete successful.`);
+    })
 
-router.post('/insertTrack', (req: Request, res: Response) => {
+    router.post('/updateTrack', async (req: Request, res: Response) => {
+        let trackId = req.body.trackId; 
+        let fieldsToUpdate = req.body.fieldsToUpdate; 
+        if(!trackId || !fieldsToUpdate) return res.status(400).send('update body not valid'); 
+        let result = await Tracks.updateTrack(trackId, fieldsToUpdate);
+        if(!result) return res.status(500).send("Internal server error"); 
+        res.status(200).send(result); 
+    })
 
-    let newTrack = req.body.trackData;
-    if( !newTrack?.name || !newTrack?.address || !newTrack?.city  ){
-        res.status(401).send('malformed reqeust')
-        return
-    }
-    let result = Tracks.insertTrack(newTrack)
-    if( !result  ){
-        res.status(500).send('Internal server error')
-    }
-    res.status(200).send(result);
-})
+    router.get('/getTracks', async (req: Request, res: Response) => {
+        let tracks = await Tracks.getTracks(); 
+        if(!tracks) res.status(500).send("Intenral server error"); 
+        res.status(200).send(tracks); 
+    })
+    return router; 
+}
 
-router.post('/deleteTrack', (req: Request, res: Response) => {
-    const trackId: number = (req.body.trackId as unknown as number);
-    if(!trackId){
-        res.status(400).send('team id not valid')
-        return
-    }
-    let result = Tracks.deleteTrack(trackId);
-    res.send(`Delete successful: ${result}`);
-})
-
-router.post('/updateTrack', (req: Request, res: Response) => {
-    let updatedTrack = req.body.updatedTrack; 
-    if(!updatedTrack){
-        res.status(400).send('update body not valid')
-        return 
-    }
-    let track = Tracks.updateTrack(updatedTrack);
-    res.send(track);
-})
-
-
-router.get('/getTracks', (req: Request, res: Response) => {
-    let tracks = Tracks.getTracks(); 
-    res.send(tracks); 
-})
-
-module.exports = router
