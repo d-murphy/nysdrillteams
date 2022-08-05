@@ -1,6 +1,6 @@
 import { Collection, Db, ObjectId } from 'mongodb';
 import { TeamData, Team, teamDbResp } from '../../types/types'; 
-import { getCollectionPromise } from './db';
+import { getCollectionPromise } from '../../library/db';
 
 export async function teamsDbFactory(dbPromise: Promise<Db>, collectionName: string):Promise<TeamData | undefined> {
     let collection = await getCollectionPromise(dbPromise, collectionName); 

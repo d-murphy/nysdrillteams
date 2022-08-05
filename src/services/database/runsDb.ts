@@ -1,6 +1,6 @@
 import { Collection, Db, ObjectId } from 'mongodb';
 import { Run, RunsData, runDbResult } from '../../types/types'; 
-import { getCollectionPromise } from './db';
+import { getCollectionPromise } from '../../library/db';
 
 export async function runsDbFactory(dbPromise: Promise<Db>, collectionName: string):Promise<RunsData | undefined> {
     let collection = await getCollectionPromise(dbPromise, collectionName); 

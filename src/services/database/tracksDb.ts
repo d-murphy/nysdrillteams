@@ -1,6 +1,6 @@
 import { Collection, Db, ObjectId } from 'mongodb';
 import { TracksData, Track, trackDbResp } from '../../types/types'; 
-import { getCollectionPromise } from './db';
+import { getCollectionPromise } from '../../library/db';
 
 export async function tracksDbFactory(dbPromise: Promise<Db>, collectionName: string):Promise<TracksData | undefined> {
     let collection = await getCollectionPromise(dbPromise, collectionName); 

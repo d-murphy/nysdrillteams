@@ -6,7 +6,7 @@ if(!DB_NAME) DB_NAME = 'nysdrillteams';
 const cors = require("cors")
 
 import express from 'express'; 
-import { getDbPromise } from './services/database/db';
+import { getDbPromise } from './library/db';
 import { runsRouter } from './services/controllers/runsControllers';
 import { teamsRouter } from './services/controllers/teamsController';
 import { tournamentsRouter } from './services/controllers/tournamentsController';
