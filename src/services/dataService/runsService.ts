@@ -1,9 +1,9 @@
-import { Run, RunsData, Tournament, Team, runDbResult } from '../../types/types'
+import { Run, RunsData, TournamentW_id, Team, runDbResult } from '../../types/types'
 
 class RunsService {
 
     constructor ( private dataSource : RunsData ){}
-    public getRunsFromTournament(tournamentId:number): Promise<Run[]> {
+    public getRunsFromTournament(tournamentId:string): Promise<Run[]> {
         return this.dataSource.getRunsFromTournament(tournamentId); 
     }
     public getFilteredRuns(
@@ -21,12 +21,12 @@ class RunsService {
     public getRun(runId: number): Promise<Run | undefined> {
         return this.dataSource.getRun(runId); 
     } 
-    public insertRun(newRun: Run, tournament: Tournament ): Promise<runDbResult> {
+    public insertRun(newRun: Run, tournament: TournamentW_id ): Promise<runDbResult> {
         let run: Run = newRun;
         run.date = new Date(newRun.date); 
         run.year = run.date.getFullYear(); 
         run.tournament = tournament.name;
-        run.tournamentId = tournament.id; 
+        run.tournamentId = (tournament._id as unknown as string); 
         run.track = tournament.track; 
         run.sanctioned =  getSanction(tournament.contests, run.contest); 
         run.nassauPoints = getCfp(tournament.contests, run.contest) && tournament.nassauPoints; 

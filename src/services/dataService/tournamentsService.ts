@@ -16,7 +16,7 @@ class TournamentsService {
     public updateTournament(tournamentId: string, fieldsToUpdate: {}): Promise<boolean> {
         return this.dataSource.updateTournament(tournamentId, fieldsToUpdate); 
     }
-    public getTournament(tournamentId:number): Promise<Tournament | undefined> {
+    public getTournament(tournamentId:string): Promise<Tournament | undefined> {
         return this.dataSource.getTournament(tournamentId); 
     }
     public getFilteredTournaments(years?: number[], tracks?:string[], tournaments?:string[]): Promise<Tournament[]>{

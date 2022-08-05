@@ -63,7 +63,7 @@ export function runsRouter (runsDataSource:RunsData){
     
     
     router.get('/getRunsFromTournament', async (req: Request, res: Response) => {
-        const tournamentId: number = (req.query.tournamentId as unknown as number);  
+        const tournamentId: string = (req.query.tournamentId as unknown as string);  
         if(!tournamentId){
             res.status(400).send('tournament id not valid')
             return

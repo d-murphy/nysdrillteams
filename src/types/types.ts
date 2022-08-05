@@ -8,7 +8,7 @@ export type Run = {
     contest: string,
     year: number, 
     tournament: string,
-    tournamentId: number,
+    tournamentId: string,
     track: string, 
     time: string, 
     runningPosition?: number, 
@@ -36,7 +36,7 @@ export interface RunsData {
     deleteRun(runId: number): Promise<boolean>;
     updateRun(runId: number, pointsUpdate: number, timeUpdate: string, rankUpdate: string): Promise<runDbResult>; 
     getRun(runId: number): Promise<Run | undefined>;
-    getRunsFromTournament(tournamentId:number): Promise<Run[]>
+    getRunsFromTournament(tournamentId:string): Promise<Run[]>
     getFilteredRuns(        
         years?: number[], 
         contests?: string[], 
@@ -56,7 +56,7 @@ export type runDbResult = {
 
 
 export type Tournament = {
-    id: number, 
+    id: string, 
     name: string, 
     year: number, 
     date: Date, 
@@ -86,11 +86,15 @@ export type Tournament = {
     waterTime?: string
 }
 
+export interface TournamentW_id extends Tournament {
+    _id?: ObjectId;
+}
+
 export interface TournamentsData {
     insertTournament(newTournament: Tournament): Promise<tournamentDbResp>;
     deleteTournament(tournamentId: number): Promise<boolean>;
     updateTournament(tournamentId:string, fieldsToUpdate:{}): Promise<boolean>; 
-    getTournament(tournamentId:number): Promise<Tournament | undefined>; 
+    getTournament(tournamentId:string): Promise<Tournament | undefined>; 
     getFilteredTournaments(        
         years?: number[], 
         tracks?:string[], 
@@ -132,7 +136,6 @@ export type trackDbResp = {
 
 
 export type Team = {
-    _id: ObjectId, 
     id?: number,
     fullName: string,  
     circuit: string,

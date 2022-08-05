@@ -2,7 +2,6 @@ import express, {Request, Response} from 'express';
 import { TournamentsData } from '../../types/types';
 const router = express.Router()
 
-import tournamentsData from '../database/tournamentsMock';
 import TournamentsService from '../dataService/tournamentsService';
 
 
@@ -12,7 +11,7 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData){
 
 
     router.get('/getTournament', async (req: Request, res: Response) => {
-        const tournamentId: number = (req.query?.tournamentId as unknown as number);
+        const tournamentId: string = (req.query?.tournamentId as unknown as string);
         if(!tournamentId){
             res.status(400).send('run id not valid')
             return
@@ -67,7 +66,6 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData){
         years = checkQuery(req, 'years').map(Number); 
         tracks = checkQuery(req, 'tracks'); 
         tournaments = checkQuery(req, 'tournaments'); 
-        console.log(years, tracks, tournaments); 
         let result = await Tournaments.getFilteredTournaments(years, tracks, tournaments); 
         res.status(200).send(result); 
     })

@@ -63,7 +63,7 @@ class RunsDb implements RunsData{
         if(result) return result;
         return undefined; 
     }
-    async getRunsFromTournament(tournamentId: number): Promise<Run[]> {
+    async getRunsFromTournament(tournamentId: string): Promise<Run[]> {
         const query = { tournamentId: tournamentId };
         let result; 
         try { 
