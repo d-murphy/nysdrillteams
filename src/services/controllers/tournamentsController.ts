@@ -11,7 +11,7 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData){
 
 
     router.get('/getTournament', async (req: Request, res: Response) => {
-        const tournamentId: string = (req.query?.tournamentId as unknown as string);
+        const tournamentId: number = (req.query?.tournamentId as unknown as number);
         if(!tournamentId){
             res.status(400).send('run id not valid')
             return

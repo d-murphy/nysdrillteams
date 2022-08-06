@@ -4,21 +4,26 @@ import { getCollectionPromise } from '../../library/db';
 
 export async function tournamentsDbFactory(dbPromise: Promise<Db>, collectionName: string):Promise<TournamentsData | undefined> {
     let collection = await getCollectionPromise(dbPromise, collectionName); 
-    if(collection) return new TournamentsDb(collection); 
+    let lastIdDoc = await (collection?.find().sort({id:-1}).limit(1).toArray() as unknown as Tournament[])
+    console.log('Current highest tournament id: ', lastIdDoc[0].id)
+    if(collection) return new TournamentsDb(collection, lastIdDoc[0].id); 
     return undefined; 
 }
 
 
 class TournamentsDb implements TournamentsData{
     _dbCollection: Collection; 
-    constructor(collection: Collection) {
-        this._dbCollection = collection; 
+    _lastId: number; 
+    constructor(collection: Collection, lastId: number) {
+        this._dbCollection = collection;
+        this._lastId = lastId; 
     }
     async insertTournament(newTournament: Tournament): Promise<tournamentDbResp> {        
         let result; 
         let docToInsert: TournamentW_id = newTournament; 
         docToInsert._id = new ObjectId;  
-        docToInsert.id = (docToInsert._id as unknown as string); 
+        this._lastId++; 
+        docToInsert.id = this._lastId;  
         try {
             result = await this._dbCollection.insertOne(docToInsert); 
         } catch (e) {
@@ -54,8 +59,8 @@ class TournamentsDb implements TournamentsData{
         if(result) return result.acknowledged && result.modifiedCount == 1 ? true : false; 
         return false; 
     }
-    async getTournament(tournamentId: string): Promise<Tournament | undefined> {
-        const query = { _id: new ObjectId(tournamentId) };
+    async getTournament(tournamentId: number): Promise<Tournament | undefined> {
+        const query = { id: tournamentId };
         let result:Tournament | undefined = undefined; 
         try {
             result = await (this._dbCollection.findOne(query)) as unknown as Tournament; 

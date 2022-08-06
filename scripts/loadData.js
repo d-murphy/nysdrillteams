@@ -10,7 +10,7 @@ let { PORT, DB_NAME, dbUn, dbPass } = process.env;
 
 let teamsLUT = readFileToObject("./dataForMigration/1_teams.txt", 0);  
 let seasonLUT = readFileToObject("./dataForMigration/2_season.txt", 1);  
-let divisionSeriesLUT = readFileToObject("./dataForMigration/3_division_series.txt", 0); 
+let divisionSeriesLUT = readFileToObject("./dataForMigration/3_division_season.txt", 0); 
 let divisions = readFileToObject("./dataForMigration/4_divisions.txt", 0); 
 let drillNamesLUT = readFileToObject("./dataForMigration/5_drill_names.txt", 0);  
 let eventNamesLUT = readFileToObject("./dataForMigration/6_event_names.txt", 0); 
@@ -22,7 +22,7 @@ let eventResultsLUT = readFileToObject("./dataForMigration/9_event_results.txt",
 
 console.log('teams example', teamsLUT["1"])
 console.log('season example', seasonLUT["2020"])
-console.log('division series example', divisionSeriesLUT["1"])
+console.log('division series example', divisionSeriesLUT['1'])
 console.log('division example', divisions["1"])
 console.log('drill name example', drillNamesLUT["1"])
 console.log('event name example', eventNamesLUT["1"])
@@ -81,7 +81,7 @@ function readFileToObject(filename, indexOfKey){
         const data = fs.readFileSync(filename, 'utf8');
         addToTable(newObj, data, indexOfKey); 
     } catch (e) {
-        console.log('error reading: ', filename); 
+        console.log('error reading: ', filename, e); 
     }
     return newObj; 
 }
@@ -245,25 +245,25 @@ async function loadDrills(){
         let infoFromRuns = getInfoFromRuns(el.id)
 
         drillsArr.push({
-            id: el.id, 
+            id: parseInt(el.id), 
             name: getTournamentNameFromDrill(el.round_id), 
             year: new Date(el.start_date_field).getFullYear(), 
             date: el.start_date_field, 
             startTime: el.start_time,
-            nassauPoints: el.nass_cm_, 
-            suffolkPoints: el.suff_cm_ , 
-            westernPoints: el.wny_cm_ , 
-            northernPoints: el.nny_cm_, 
-            suffolkOfPoints: el.suffof_cm_ , 
-            nassauOfPoints: el.nassof_cm_ , 
-            liOfPoints: el.liof_cm_ , 
-            juniorPoints: el.jr_cm_ ,
-            nassauSchedule: el.nass_cm_, 
-            suffolkSchedule: el.suff_cm_, 
-            westernSchedule: el.wny_cm_ , 
-            northernSchedule: el.nny_cm_, 
-            liOfSchedule:  el.liof_cm_ , 
-            juniorSchedule: el.jr_cm_ ,        
+            nassauPoints: parseInt(el.nass_cm_), 
+            suffolkPoints: parseInt(el.suff_cm_) , 
+            westernPoints: parseInt(el.wny_cm_) , 
+            northernPoints: parseInt(el.nny_cm_), 
+            suffolkOfPoints: parseInt(el.suffof_cm_) , 
+            nassauOfPoints: parseInt(el.nassof_cm_) , 
+            liOfPoints: parseInt(el.liof_cm_) , 
+            juniorPoints: parseInt(el.jr_cm_) ,
+            nassauSchedule: parseInt(el.nass_cm_), 
+            suffolkSchedule: parseInt(el.suff_cm_), 
+            westernSchedule: parseInt(el.wny_cm_) , 
+            northernSchedule: parseInt(el.nny_cm_), 
+            liOfSchedule:  parseInt(el.liof_cm_) , 
+            juniorSchedule: parseInt(el.jr_cm_) ,        
             track: trackNameLUT[el.location] ? trackNameLUT[el.location] : null,
             runningOrder: infoFromRuns.runningOrder,
             sanctioned: ['1', 'Sanctioned'].includes(el.sanctioned), 

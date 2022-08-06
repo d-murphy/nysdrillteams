@@ -56,25 +56,25 @@ export type runDbResult = {
 
 
 export type Tournament = {
-    id: string, 
+    id: number, 
     name: string, 
     year: number, 
     date: Date, 
     startTime: Date, 
-    nassauPoints: boolean, 
-    suffolkPoints: boolean, 
-    westernPoints: boolean, 
-    northernPoints: boolean, 
-    suffolkOfPoints: boolean, 
-    nassauOfPoints: boolean, 
-    liOfPoints: boolean, 
-    juniorPoints: boolean,
-    nassauSchedule: boolean, 
-    suffolkSchedule: boolean, 
-    westernSchedule: boolean, 
-    northernSchedule: boolean, 
-    liOfSchedule: boolean, 
-    juniorSchedule: boolean,
+    nassauPoints: number, 
+    suffolkPoints: number, 
+    westernPoints: number, 
+    northernPoints: number, 
+    suffolkOfPoints: number, 
+    nassauOfPoints: number, 
+    liOfPoints: number, 
+    juniorPoints: number,
+    nassauSchedule: number, 
+    suffolkSchedule: number, 
+    westernSchedule: number, 
+    northernSchedule: number, 
+    liOfSchedule: number, 
+    juniorSchedule: number,
     track: string,
     runningOrder?: { [runningPosition:number]: string },
     sanctioned: boolean, 
@@ -94,7 +94,7 @@ export interface TournamentsData {
     insertTournament(newTournament: Tournament): Promise<tournamentDbResp>;
     deleteTournament(tournamentId: number): Promise<boolean>;
     updateTournament(tournamentId:string, fieldsToUpdate:{}): Promise<boolean>; 
-    getTournament(tournamentId:string): Promise<Tournament | undefined>; 
+    getTournament(tournamentId:number): Promise<Tournament | undefined>; 
     getFilteredTournaments(        
         years?: number[], 
         tracks?:string[], 

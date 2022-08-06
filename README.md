@@ -16,9 +16,12 @@
     * maybe class can fix this? 
 * state record flags are run in runDb
 * update name of old id field
+* there is a tournament with id: 'hose tester checked on 8/13/93 found it to be illegal by rules committee.'
 
 ### To Do
 
+* query db for last old_id and save on class
+* collation to sort strings as numbers?
 * need a new column in runs - can do this from a query? 
 * considering select columns for some requests
 * handle cursor for getFilteredRuns
