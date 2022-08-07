@@ -8,26 +8,27 @@ export type Run = {
     contest: string,
     year: number, 
     tournament: string,
-    tournamentId: string,
+    tournamentId: number,
     track: string, 
     time: string, 
+    timeNum: number, 
     runningPosition?: number, 
-    nassauPoints?: boolean, 
-    suffolkPoints?: boolean, 
-    westernPoints?: boolean, 
-    northernPoints?: boolean, 
-    suffolkOfPoints?: boolean, 
-    nassauOfPoints?: boolean, 
-    liOfPoints?: boolean, 
-    juniorPoints?: boolean,
+    nassauPoints?: number, 
+    suffolkPoints?: number, 
+    westernPoints?: number, 
+    northernPoints?: number, 
+    suffolkOfPoints?: number, 
+    nassauOfPoints?: number, 
+    liOfPoints?: number, 
+    juniorPoints?: number,
     date: Date, 
     urls: string[], 
-    sanctioned: boolean, 
+    sanctioned: number, 
     points?: number, 
     rank?: string, 
     notes?: string,
-    stateRecord?: string,
-    currentStateRecord?: string
+    stateRecord?: number,
+    currentStateRecord?: number
 }
 
 export interface RunsData {
@@ -143,7 +144,7 @@ export type Team = {
     active?: boolean, 
     hometown: string, 
     nickname: string, 
-    class: string
+    region: string
 }
 
 export interface TeamData {

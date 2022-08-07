@@ -40,20 +40,25 @@ let circuitLU = {
     "4": "Suffolk"
 }; 
 let classLU = {
-    "1": "Motorized",
+    "0": "Uncategorized", 
+    "1": "Nassau", 
+    "2": "Suffolk", 
+    "3": "Old Fashioned", 
+    "4": "Western", 
+    "5": "Northern", 
     "6": "Juniors"
 }; 
 
 (async function(){
-    // console.log('starting the collection buiids'); 
-    // let writeDocResults = await loadRuns(); 
-    // console.log("Write runs result: ", writeDocResults)
-    // let loadTeamsResult = await loadTeams(); 
-    // console.log('load teams result: ', loadTeamsResult); 
-    // let loadTracksResult = await loadTracks(); 
-    // console.log('load tracks result: ', loadTracksResult); 
-    // let loadDrillsResult = await loadDrills(); 
-    // console.log('load teams result: ', loadDrillsResult); 
+    console.log('starting the collection buiids'); 
+    let writeDocResults = await loadRuns(); 
+    console.log("Write runs result: ", writeDocResults)
+    let loadTeamsResult = await loadTeams(); 
+    console.log('load teams result: ', loadTeamsResult); 
+    let loadTracksResult = await loadTracks(); 
+    console.log('load tracks result: ', loadTracksResult); 
+    let loadDrillsResult = await loadDrills(); 
+    console.log('load teams result: ', loadDrillsResult); 
 })()
 
 
@@ -147,6 +152,7 @@ async function loadRuns (){
     var numWoTourId = {ids: [], count: 0}; 
 
     let runsForDb = []; 
+
     Object.values(eventResultsLUT).forEach(el => {
         try{
             runsForDb.push({
@@ -161,15 +167,16 @@ async function loadRuns (){
                 host: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].host : null : null, 
                 track: getTrack(el.event_id), 
                 time: el.time, 
+                timeNum: parseFloat(el.time), 
                 runningPosition: parseInt(el.ro_number) ? parseInt(el.ro_number) : null, 
-                nassauPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nass_cm_ : null : null, 
-                suffolkPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].suff_cm_ : null : null, 
-                westernPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].wny_cm_: null : null, 
-                northernPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nny_cm_: null : null, 
-                suffolkOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].suffof_cm_: null : null, 
-                nassauOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].nassof_cm_: null : null, 
-                liOfPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].liof_cm_: null : null, 
-                juniorPoints: uniqueEventsLUT[el.event_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id] ? uniqueDrillsLUT[uniqueEventsLUT[el.event_id].projectround_id].jr_cm_: null : null,
+                nassauPoints: isNassau(el.event_id, el.individual_id), 
+                suffolkPoints: isSuffolk(el.event_id, el.individual_id), 
+                westernPoints: isWestern(el.event_id, el.individual_id), 
+                northernPoints: isNorthern(el.event_id, el.individual_id), 
+                suffolkOfPoints: isSuffolkOf(el.event_id, el.individual_id), 
+                nassauOfPoints: isNassauOf(el.event_id, el.individual_id), 
+                liOfPoints: isLiOf(el.event_id, el.individual_id), 
+                juniorPoints: isJr(el.event_id, el.individual_id),
                 date: getDate(el.event_id, numWoDate), 
                 urls: [], 
                 sanctioned: uniqueEventsLUT[el.event_id] ? ['1','Sanctioned'].includes(uniqueEventsLUT[el.event_id].sanction) : false,
@@ -177,8 +184,8 @@ async function loadRuns (){
                 points: el.points,
                 rank: el.rank,  
                 notes: '',
-                stateRecord: false,
-                currentStateRecord: false
+                stateRecord: 0,
+                currentStateRecord: 0
             })    
         } catch (e){
             console.log('new error: ', e)
@@ -207,10 +214,10 @@ async function loadTeams(){
             fullName: el.team_name, 
             nickname: el.nickname, 
             hometown: el.hometown, 
-            circuit: circuitLU[el.region_code] ? circuitLU[el.region_code] : el.region_code,  
+            circuit: classLU[el.class] ? classLU[el.class] : el.class,
             imageUrl: el.avatar, 
             active: true, 
-            class: classLU[el.class] ? classLU[el.class] : el.class
+            region: circuitLU[el.region_code] ? circuitLU[el.region_code] : el.region_code,
         })
     })
     return writeDocs('teams', teamsArr)
@@ -372,6 +379,68 @@ function getContest(event_id, numWOContest){
         numWOContest.count++;  
     }
     return result; 
+}
+
+function getUniqueDrill(event_id){
+    let uniqueEvent = uniqueEventsLUT[event_id]; 
+    let uniqueDrill = uniqueEvent ? uniqueDrillsLUT[uniqueEvent.projectround_id] : null; 
+    return uniqueDrill; 
+}
+
+function isNassau (event_id, team_id){
+    let team = teamsLUT[team_id]; 
+    let teamClass = team ? classLU[team.class] : null
+    let uniqueDrill = getUniqueDrill(event_id); 
+    return teamClass == "Nassau" && uniqueDrill && ["1", "2"].includes(uniqueDrill.nass_cm_) ? 1 : 0; 
+}
+
+function isSuffolk (event_id, team_id){
+    let team = teamsLUT[team_id]; 
+    let teamClass = team ? classLU[team.class] : null
+    let uniqueDrill = getUniqueDrill(event_id); 
+    return teamClass == "Suffolk" && uniqueDrill && ["1", "2"].includes(uniqueDrill.suff_cm_) ? 1 : 0; 
+}
+
+function isWestern (event_id, team_id){
+    let team = teamsLUT[team_id]; 
+    let teamClass = team ? classLU[team.class] : null
+    let uniqueDrill = getUniqueDrill(event_id); 
+    return teamClass == "Western" && uniqueDrill && ["1", "2"].includes(uniqueDrill.wny_cm_) ? 1 : 0; 
+}
+
+function isNorthern (event_id, team_id){
+    let team = teamsLUT[team_id]; 
+    let teamClass = team ? classLU[team.class] : null
+    let uniqueDrill = getUniqueDrill(event_id); 
+    return teamClass == "Northern" && uniqueDrill && ["1", "2"].includes(uniqueDrill.nny_cm_) ? 1 : 0; 
+}
+
+function isSuffolkOf (event_id, team_id){
+    let team = teamsLUT[team_id]; 
+    let teamClass = team ? classLU[team.class] : null
+    let uniqueDrill = getUniqueDrill(event_id); 
+    return teamClass == "Old Fashioned" && uniqueDrill && ["1", "2"].includes(uniqueDrill.suffof_cm_) ? 1 : 0; 
+}
+
+function isNassauOf (event_id, team_id){
+    let team = teamsLUT[team_id]; 
+    let teamClass = team ? classLU[team.class] : null
+    let uniqueDrill = getUniqueDrill(event_id); 
+    return teamClass == "Old Fashioned" && uniqueDrill && ["1", "2"].includes(uniqueDrill.nassof_cm_) ? 1 : 0; 
+}
+
+function isLiOf (event_id, team_id){
+    let team = teamsLUT[team_id]; 
+    let teamClass = team ? classLU[team.class] : null
+    let uniqueDrill = getUniqueDrill(event_id); 
+    return teamClass == "Old Fashioned" && uniqueDrill && ["1", "2"].includes(uniqueDrill.liof_cm_) ? 1 : 0; 
+}
+
+function isJr (event_id, team_id){
+    let team = teamsLUT[team_id]; 
+    let teamClass = team ? classLU[team.class] : null
+    let uniqueDrill = getUniqueDrill(event_id); 
+    return teamClass == "Juniors" && uniqueDrill && ["1", "2"].includes(uniqueDrill.jr_cm_) ? 1 : 0; 
 }
 
 function getDate(event_id, numWoDate, counting=true){
