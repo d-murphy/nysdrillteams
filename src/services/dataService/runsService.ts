@@ -1,7 +1,15 @@
 import { Run, RunsData, TournamentW_id, Team, runDbResult } from '../../types/types'
 
-class RunsService {
 
+interface big8Cache {
+    [key: number]: {
+        created: Date, 
+        result: {}[]
+    }
+ }
+
+class RunsService {
+    _big8Cache: big8Cache = {}
     constructor ( private dataSource : RunsData ){}
     public getRunsFromTournament(tournamentId:string): Promise<Run[]> {
         return this.dataSource.getRunsFromTournament(tournamentId); 
@@ -26,7 +34,7 @@ class RunsService {
         run.date = new Date(newRun.date); 
         run.year = run.date.getFullYear(); 
         run.tournament = tournament.name;
-        run.tournamentId = (tournament._id as unknown as string); 
+        run.tournamentId = (tournament._id as unknown as number); 
         run.track = tournament.track; 
         run.sanctioned =  getSanction(tournament.contests, run.contest); 
         run.nassauPoints = getCfp(tournament.contests, run.contest) && tournament.nassauPoints; 
@@ -44,6 +52,18 @@ class RunsService {
     }
     public updateRun(runId: number, pointsUpdate:number, timeUpdate: string, rankUpdate:string): Promise<runDbResult> {
         return this.dataSource.updateRun(runId, pointsUpdate, timeUpdate, rankUpdate);
+    }
+    public async getBig8(year:number): Promise<{}[]> {
+        console.log('big 8 service is decrementing year: ', year--)
+        if(!this._big8Cache[year] || ( this._big8Cache[year] && (+new Date() - +this._big8Cache[year].created) > 1000 * 60 * 60 *6 )) {
+                let result = await this.dataSource.getBig8(year);
+                if(result.length){
+                    console.log('Updating the Big 8 cache for year: ', year);
+                    this._big8Cache[year] = {result:[], created: new Date() };     
+                    this._big8Cache[year].result = result; 
+                }
+        }
+        return this._big8Cache[year]?.result ? this._big8Cache[year]?.result : [];   
     }
 }
     

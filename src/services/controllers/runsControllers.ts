@@ -86,6 +86,14 @@ export function runsRouter (runsDataSource:RunsData){
         let runs = await Runs.getFilteredRuns(years, contests, teams, tracks, tournaments, ranks, stateRecord, currentStateRecord); 
         res.send(runs); 
     })
+
+    router.get('/getBig8', async (req:Request, res: Response) => {
+        let year: number = (req.query.year as unknown as number); 
+        if(!year) return res.status(400).send('Missing year from request'); 
+        let runs = await Runs.getBig8(year); 
+        if(!runs.length) return res.status(500).send("Internal server error"); 
+        res.status(200).send(runs); 
+    })
     return router; 
 }
 

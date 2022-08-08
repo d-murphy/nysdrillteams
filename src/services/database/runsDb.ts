@@ -112,4 +112,31 @@ class RunsDb implements RunsData{
         if(result) return result; 
         return []; 
     }
+    async getBig8(year: number): Promise<{}[]> {
+        let result: {}[] | undefined = undefined;  
+        try {
+            result = await this._dbCollection.aggregate(
+                [
+                    {
+                        $match: {
+                            year: year, 
+                            contest: { $in: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"] }, 
+                            timeNum: { $ne: NaN }
+                        },
+                    },
+                    { $sort: { "timeNum": 1} }, 
+                    {
+                        $group: {
+                            _id: "$contest",
+                            "matched_doc": { "$first": "$$ROOT" }                     
+                         }
+                    }
+                ]
+            ).toArray() 
+        } catch(e){
+            console.log('Error retrieving big 8: ', e); 
+        }
+        if(!result) return []
+        return result; 
+    }
 }
