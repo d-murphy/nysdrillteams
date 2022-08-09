@@ -20,6 +20,7 @@
 
 ### To Do
 
+* need to parseInt for each query
 * cache the big 8 for every hour
 * query db for last old_id and save on class
 * collation to sort strings as numbers?

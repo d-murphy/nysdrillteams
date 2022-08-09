@@ -51,12 +51,12 @@ let classLU = {
 
 (async function(){
     console.log('starting the collection buiids'); 
-    let writeDocResults = await loadRuns(); 
-    console.log("Write runs result: ", writeDocResults)
-    let loadTeamsResult = await loadTeams(); 
-    console.log('load teams result: ', loadTeamsResult); 
-    let loadTracksResult = await loadTracks(); 
-    console.log('load tracks result: ', loadTracksResult); 
+    // let writeDocResults = await loadRuns(); 
+    // console.log("Write runs result: ", writeDocResults)
+    // let loadTeamsResult = await loadTeams(); 
+    // console.log('load teams result: ', loadTeamsResult); 
+    // let loadTracksResult = await loadTracks(); 
+    // console.log('load tracks result: ', loadTracksResult); 
     let loadDrillsResult = await loadDrills(); 
     console.log('load teams result: ', loadDrillsResult); 
 })()
@@ -257,20 +257,20 @@ async function loadDrills(){
             year: new Date(el.start_date_field).getFullYear(), 
             date: el.start_date_field, 
             startTime: el.start_time,
-            nassauPoints: parseInt(el.nass_cm_), 
-            suffolkPoints: parseInt(el.suff_cm_) , 
-            westernPoints: parseInt(el.wny_cm_) , 
-            northernPoints: parseInt(el.nny_cm_), 
-            suffolkOfPoints: parseInt(el.suffof_cm_) , 
-            nassauOfPoints: parseInt(el.nassof_cm_) , 
-            liOfPoints: parseInt(el.liof_cm_) , 
-            juniorPoints: parseInt(el.jr_cm_) ,
-            nassauSchedule: parseInt(el.nass_cm_), 
-            suffolkSchedule: parseInt(el.suff_cm_), 
-            westernSchedule: parseInt(el.wny_cm_) , 
-            northernSchedule: parseInt(el.nny_cm_), 
-            liOfSchedule:  parseInt(el.liof_cm_) , 
-            juniorSchedule: parseInt(el.jr_cm_) ,        
+            nassauPoints: parseInt(el.nass_cm_) > 0 , 
+            suffolkPoints: parseInt(el.suff_cm_) > 0 , 
+            westernPoints: parseInt(el.wny_cm_) > 0 , 
+            northernPoints: parseInt(el.nny_cm_)> 0 , 
+            suffolkOfPoints: parseInt(el.suffof_cm_) > 0 , 
+            nassauOfPoints: parseInt(el.nassof_cm_) > 0 , 
+            liOfPoints: parseInt(el.liof_cm_) > 0 , 
+            juniorPoints: parseInt(el.jr_cm_) > 0 ,
+            nassauSchedule: parseInt(el.nass_cm_)> 0 , 
+            suffolkSchedule: parseInt(el.suff_cm_) > 0 , 
+            westernSchedule: parseInt(el.wny_cm_) > 0 , 
+            northernSchedule: parseInt(el.nny_cm_) > 0 , 
+            liOfSchedule:  parseInt(el.liof_cm_) > 0 , 
+            juniorSchedule: parseInt(el.jr_cm_) > 0 ,        
             track: trackNameLUT[el.location] ? trackNameLUT[el.location] : null,
             runningOrder: infoFromRuns.runningOrder,
             sanctioned: ['1', 'Sanctioned'].includes(el.sanctioned), 
@@ -316,6 +316,7 @@ function getInfoFromRuns(tournId){
     Object.keys(points).forEach(el => {
         pointsArr.push({teamName: el, points: points[el]})
     })
+    pointsArr = pointsArr.filter(el => el.points > 0); 
     pointsArr.sort((a,b) => a.points > b.points ? -1 : 1); 
     let finishes = ["1st Place", "2nd Place", "3rd Place", "4th Place", "5th Place"]; 
     pointsArr.forEach((el, index) => {

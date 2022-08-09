@@ -54,7 +54,7 @@ class RunsService {
         return this.dataSource.updateRun(runId, pointsUpdate, timeUpdate, rankUpdate);
     }
     public async getBig8(year:number): Promise<{}[]> {
-        console.log('big 8 service is decrementing year: ', year--)
+        year = year*1; 
         if(!this._big8Cache[year] || ( this._big8Cache[year] && (+new Date() - +this._big8Cache[year].created) > 1000 * 60 * 60 *6 )) {
                 let result = await this.dataSource.getBig8(year);
                 if(result.length){
