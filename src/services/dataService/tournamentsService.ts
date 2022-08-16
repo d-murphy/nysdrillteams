@@ -22,6 +22,9 @@ class TournamentsService {
     public getFilteredTournaments(years?: number[], tracks?:string[], tournaments?:string[]): Promise<Tournament[]>{
         return this.dataSource.getFilteredTournaments(years, tracks, tournaments); 
     }
+    public getTournsCtByYear(): Promise<{_id: number, yearCount: number}[]>{
+        return this.dataSource.getTournsCtByYear(); 
+    }
     
 }
     

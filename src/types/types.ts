@@ -101,7 +101,8 @@ export interface TournamentsData {
         years?: number[], 
         tracks?:string[], 
         tournaments?:string[], 
-    ): Promise<Tournament[]>
+    ): Promise<Tournament[]>; 
+    getTournsCtByYear():Promise<{_id: number, yearCount: number }[]>
 }
 
 export type tournamentDbResp = {

@@ -20,7 +20,19 @@
 
 ### To Do
 
-* need to parseInt for each query
+* 2011 state tournament is weird
+* 2012 suffolk county drill displays the wrong winner
+* 2009 town of islip not display winner tie
+* OF doesn't work in schedule search
+* 2015 big 8 is weird
+* 1957 three man big 8 is blank, leads to error when clicked
+* add state tournament winners to past season page
+* check that video icons appear in proper places
+* add marker to all imported runs
+* add extra zeroes to time (FE) e.g. 7.5 to 7.50
+* running orders are in the 100s?
+* find way to ID parades.
+* times, points are getting 'NULL' strings instead of NULL
 * cache the big 8 for every hour
 * query db for last old_id and save on class
 * collation to sort strings as numbers?

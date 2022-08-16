@@ -88,4 +88,26 @@ class TournamentsDb implements TournamentsData{
         if(result) return result; 
         return []; 
     }
+    async getTournsCtByYear():Promise<{_id: number, yearCount: number}[]> {
+        let result: {_id: number, yearCount: number}[] | undefined = undefined;  
+        try {
+            result = (await this._dbCollection.aggregate(
+                [
+                    {
+                        $group: {
+                            _id: "$year",
+                            yearCount: {
+                                $count: {}
+                            }
+                        }
+                    }, 
+                    { $sort: { _id: -1 } }
+                ]
+            ).toArray() as unknown as {_id: number, yearCount: number}[])
+        } catch(e){
+            console.log('Error retrieving big 8: ', e); 
+        }
+        if(!result) return []
+        return result; 
+    }
 }

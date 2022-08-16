@@ -88,7 +88,7 @@ export function runsRouter (runsDataSource:RunsData){
     })
 
     router.get('/getBig8', async (req:Request, res: Response) => {
-        let year: number = (req.query.year as unknown as number); 
+        let year: number = parseInt(req.query.year as unknown as string); 
         if(!year) return res.status(400).send('Missing year from request'); 
         let runs = await Runs.getBig8(year); 
         if(!runs.length) return res.status(500).send("Internal server error"); 

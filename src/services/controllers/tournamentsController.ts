@@ -11,8 +11,7 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData){
 
 
     router.get('/getTournament', async (req: Request, res: Response) => {
-        let tournamentIdStr: string = (req.query?.tournamentId as unknown as string); 
-        let tournamentId:number = parseInt(tournamentIdStr); 
+        let tournamentId:number = parseInt(req.query?.tournamentId as unknown as string); 
         if(!tournamentId){
             res.status(400).send('run id not valid')
             return
@@ -69,6 +68,12 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData){
         tournaments = checkQuery(req, 'tournaments'); 
         let result = await Tournaments.getFilteredTournaments(years, tracks, tournaments); 
         res.status(200).send(result); 
+    })
+
+    router.get('/getTournsCtByYear', async( req: Request, res: Response) => {
+        let result = await Tournaments.getTournsCtByYear(); 
+        if(result && result.length) return res.status(200).send(result); 
+        res.status(500).send('Internal server error'); 
     })
     return router;
 }

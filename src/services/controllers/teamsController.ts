@@ -10,7 +10,7 @@ export function teamsRouter (teamsDataSource:TeamData){
     const router = express.Router()
 
     router.get('/getTeam', async (req: Request, res: Response) => {
-        const teamId: number = (req.query?.teamId as unknown as number);
+        const teamId: number = parseInt((req.query?.teamId as unknown as string));
         if(!teamId){
             res.status(400).send('run id not valid')
             return
@@ -21,9 +21,7 @@ export function teamsRouter (teamsDataSource:TeamData){
 
 
     router.post('/insertTeam', async (req: Request, res: Response) => {
-        console.log(req)
         let newTeam = req.body;
-        console.log('new team: ', newTeam)
         if( !newTeam?.fullName || !newTeam?.nickname || !newTeam?.hometown || !newTeam?.circuit ){
             res.status(401).send('malformed reqeust')
             return
