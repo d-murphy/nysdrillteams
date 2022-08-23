@@ -49,6 +49,7 @@ export interface RunsData {
         currentStateRecord?: boolean,
     ): Promise<Run[]>; 
     getBig8(year:number): Promise<{}[]>
+    getTopRuns(years?: number[], teams?: string[], tracks?: string[]): Promise<{}[][]>
 }
 
 export type runDbResult = {

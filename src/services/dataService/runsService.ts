@@ -8,8 +8,17 @@ interface big8Cache {
     }
  }
 
-class RunsService {
+ interface topRunsCache {
+    [key: string]: {
+        created: Date, 
+        result: {}[][]
+    }
+ }
+
+
+ class RunsService {
     _big8Cache: big8Cache = {}
+    _topRunsCache: topRunsCache = {}
     constructor ( private dataSource : RunsData ){}
     public getRunsFromTournament(tournamentId:string): Promise<Run[]> {
         return this.dataSource.getRunsFromTournament(tournamentId); 
@@ -65,6 +74,18 @@ class RunsService {
         }
         return this._big8Cache[year]?.result ? this._big8Cache[year]?.result : [];   
     }
+    public async getTopRuns(years?: number[], teams?: string[], tracks?: string[]): Promise<{}[]> {
+        let key = createTopRunsKey(years, teams, tracks); 
+        if(!this._topRunsCache[key] || ( this._topRunsCache[key] && (+new Date() - +this._topRunsCache[key].created) > 1000 * 60 * 60 * 24 * 7 )) {
+            let result = await this.dataSource.getTopRuns(years, teams, tracks); 
+            if(result.length){
+                console.log('Updating the Top Runs cache for key: ', key);
+                this._topRunsCache[key] = {result:[], created: new Date() };     
+                this._topRunsCache[key].result = result; 
+            }
+        }
+        return this._topRunsCache[key]?.result ? this._topRunsCache[key].result : []; 
+    }
 }
     
 export default RunsService; 
@@ -85,4 +106,25 @@ function getCfp (contestArr: {name:string, cfp:boolean, sanction:boolean}[], con
     })
     if(contestObj) return contestObj.cfp; 
     return false
+}
+
+function createTopRunsKey(years?: number[], teams?: string[], tracks?: string[]){
+    let key = 'years:'; 
+    key += addArrToKey(years) + ';'
+    key += 'teams:'; 
+    key += addArrToKey(teams) + ';'
+    key += 'tracks:'; 
+    key += addArrToKey(tracks) + ';'
+    return key; 
+}
+
+function addArrToKey(arr: (number | string)[] | undefined){
+    let strToReturn: string = "";
+    if(arr){
+        arr.forEach((el, ind) => {
+            strToReturn += el;
+            strToReturn += ind < arr.length-1 ? ',' : '';  
+        })    
+    } 
+    return strToReturn; 
 }

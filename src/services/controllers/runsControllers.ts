@@ -94,6 +94,18 @@ export function runsRouter (runsDataSource:RunsData){
         if(!runs.length) return res.status(500).send("Internal server error"); 
         res.status(200).send(runs); 
     })
+
+    router.get('/getTopRuns', async (req: Request, res: Response) => {
+        let years: number[], teams:string[], tracks:string[] 
+        years = checkQuery(req, 'years').map(Number); 
+        teams = checkQuery(req, 'teams'); 
+        tracks = checkQuery(req, 'tracks'); 
+
+        let runs = await Runs.getTopRuns(years, teams, tracks); 
+        if(!runs.length) return res.status(500).send("Internal server error"); 
+        res.status(200).send(runs); 
+    })
+
     return router; 
 }
 

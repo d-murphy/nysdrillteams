@@ -139,4 +139,39 @@ class RunsDb implements RunsData{
         if(!result) return []
         return result; 
     }
+    async getTopRuns(years?: number[], teams?: string[], tracks?: string[]): Promise<{}[][]> {
+        let contests = ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]; 
+        let promiseArr: Promise<{}[]>[] = []; 
+        let results: {}[][] | undefined = undefined;  
+        contests.forEach(contest => {
+            let filterObj: {year?:{}, team?:{}, track?: {}, contest?: {}, timeNum?: {}} = {}; 
+            if(years && years.length) filterObj.year =  { $in: years } 
+            if(teams && teams.length) filterObj.team =  { $in: teams } 
+            if(tracks && tracks.length) filterObj.track =  { $in: tracks } 
+            filterObj.contest = contest; 
+            filterObj.timeNum = { $nin: [NaN, 0] }
+            let dbProm = this._dbCollection.aggregate(
+                [
+                    {
+                        $match: filterObj,
+                    },
+                    {
+                        $sort: { "timeNum" : 1 }
+                    },
+                    {
+                        $limit: 10
+                    }
+                ]
+            ).toArray() 
+            promiseArr.push(dbProm); 
+        })
+        try {
+            results = await Promise.all(promiseArr); 
+        } catch(e){
+            console.log('Error retrieving top runs: ', e); 
+        }
+        if(results) return results;
+        return []; 
+    }
+
 }

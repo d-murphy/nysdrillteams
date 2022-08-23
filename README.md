@@ -18,8 +18,15 @@
 * update name of old id field
 * there is a tournament with id: 'hose tester checked on 8/13/93 found it to be illegal by rules committee.'
 
+### To Do Before live
+* tracks page, pictures, track records
+
 ### To Do
 
+* turn off locations for now
+* add link on tournament pages to see the top runs at this track (add query params to top runs page?)
+* total points
+* 1991 state tournament, total points don't include half values
 * 2011 state tournament is weird
 * 2012 suffolk county drill displays the wrong winner
 * 2009 town of islip not display winner tie
