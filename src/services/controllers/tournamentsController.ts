@@ -22,44 +22,44 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData){
     })
 
 
-    router.post('/insertTournament', async (req: Request, res: Response) => {
+    // router.post('/insertTournament', async (req: Request, res: Response) => {
 
-        let newTournament = req.body;
-        if( !newTournament?.name || !newTournament?.date ||  
-            !newTournament?.track   
-            ){
-            res.status(400).send('malformed reqeust')
-            return
-        }
-        let result = await Tournaments.insertTournament(newTournament)
-        if(!result?.result){
-            res.status(500).send('Internal server error')
-        }
-        res.status(200).send(result);
-    })
+    //     let newTournament = req.body;
+    //     if( !newTournament?.name || !newTournament?.date ||  
+    //         !newTournament?.track   
+    //         ){
+    //         res.status(400).send('malformed reqeust')
+    //         return
+    //     }
+    //     let result = await Tournaments.insertTournament(newTournament)
+    //     if(!result?.result){
+    //         res.status(500).send('Internal server error')
+    //     }
+    //     res.status(200).send(result);
+    // })
 
-    router.post('/deleteTournament', async (req: Request, res: Response) => {
-        const tournamentId: number = (req.body?.tournamentId as unknown as number);
-        if(!tournamentId){
-            res.status(400).send('team id not valid')
-            return
-        }
-        let result = await Tournaments.deleteTournament(tournamentId);
-        if(!result) return res.status(500).send('Internal server error'); 
-        res.status(200).send(`Delete successful`);
-    })
+    // router.post('/deleteTournament', async (req: Request, res: Response) => {
+    //     const tournamentId: number = (req.body?.tournamentId as unknown as number);
+    //     if(!tournamentId){
+    //         res.status(400).send('team id not valid')
+    //         return
+    //     }
+    //     let result = await Tournaments.deleteTournament(tournamentId);
+    //     if(!result) return res.status(500).send('Internal server error'); 
+    //     res.status(200).send(`Delete successful`);
+    // })
 
-    router.post('/updateTournament', async (req: Request, res: Response) => {
-        const tournamentId: string = (req.body?.tournamentId as unknown as string); 
-        const fieldsToUpdate: {} = (req.body?.fieldsToUpdate as unknown as {}); 
-        if(!tournamentId || !fieldsToUpdate){
-            res.status(400).send('update body not valid')
-            return 
-        }
-        let result = await Tournaments.updateTournament(tournamentId, fieldsToUpdate); 
-        if(!result) return res.status(500).send('Internal server error'); 
-        res.status(200).send(result);
-    })
+    // router.post('/updateTournament', async (req: Request, res: Response) => {
+    //     const tournamentId: string = (req.body?.tournamentId as unknown as string); 
+    //     const fieldsToUpdate: {} = (req.body?.fieldsToUpdate as unknown as {}); 
+    //     if(!tournamentId || !fieldsToUpdate){
+    //         res.status(400).send('update body not valid')
+    //         return 
+    //     }
+    //     let result = await Tournaments.updateTournament(tournamentId, fieldsToUpdate); 
+    //     if(!result) return res.status(500).send('Internal server error'); 
+    //     res.status(200).send(result);
+    // })
 
     router.get('/getFilteredTournaments', async (req: Request, res: Response) => {
         let years: number[], tracks:string[], tournaments: string[];  

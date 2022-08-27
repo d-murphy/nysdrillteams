@@ -23,33 +23,33 @@ export function tracksRouter (tracksDataSource:TracksData){
         res.status(200).send(track);
     })
 
-    router.post('/insertTrack', async (req: Request, res: Response) => {
-        let newTrack = req.body;
-        if( !newTrack?.name || !newTrack?.address || !newTrack?.city  ){
-            res.status(400).send('malformed reqeust')
-            return
-        }
-        let result = await Tracks.insertTrack(newTrack)
-        if(!result.result) res.status(500).send('Internal server error')
-        res.status(200).send(result);
-    })
+    // router.post('/insertTrack', async (req: Request, res: Response) => {
+    //     let newTrack = req.body;
+    //     if( !newTrack?.name || !newTrack?.address || !newTrack?.city  ){
+    //         res.status(400).send('malformed reqeust')
+    //         return
+    //     }
+    //     let result = await Tracks.insertTrack(newTrack)
+    //     if(!result.result) res.status(500).send('Internal server error')
+    //     res.status(200).send(result);
+    // })
 
-    router.post('/deleteTrack', async (req: Request, res: Response) => {
-        const trackId: string = (req.body.trackId as unknown as string);
-        if(!trackId) return res.status(400).send('team id not valid')
-        let result = await Tracks.deleteTrack(trackId);
-        if(!result) return res.status(500).send('Internal server error'); 
-        res.status(200).send(`Delete successful.`);
-    })
+    // router.post('/deleteTrack', async (req: Request, res: Response) => {
+    //     const trackId: string = (req.body.trackId as unknown as string);
+    //     if(!trackId) return res.status(400).send('team id not valid')
+    //     let result = await Tracks.deleteTrack(trackId);
+    //     if(!result) return res.status(500).send('Internal server error'); 
+    //     res.status(200).send(`Delete successful.`);
+    // })
 
-    router.post('/updateTrack', async (req: Request, res: Response) => {
-        let trackId = req.body.trackId; 
-        let fieldsToUpdate = req.body.fieldsToUpdate; 
-        if(!trackId || !fieldsToUpdate) return res.status(400).send('update body not valid'); 
-        let result = await Tracks.updateTrack(trackId, fieldsToUpdate);
-        if(!result) return res.status(500).send("Internal server error"); 
-        res.status(200).send(result); 
-    })
+    // router.post('/updateTrack', async (req: Request, res: Response) => {
+    //     let trackId = req.body.trackId; 
+    //     let fieldsToUpdate = req.body.fieldsToUpdate; 
+    //     if(!trackId || !fieldsToUpdate) return res.status(400).send('update body not valid'); 
+    //     let result = await Tracks.updateTrack(trackId, fieldsToUpdate);
+    //     if(!result) return res.status(500).send("Internal server error"); 
+    //     res.status(200).send(result); 
+    // })
 
     router.get('/getTracks', async (req: Request, res: Response) => {
         let tracks = await Tracks.getTracks(); 

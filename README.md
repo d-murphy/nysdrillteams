@@ -23,7 +23,10 @@
 
 ### To Do
 
+* re-install bootstrap and react-bootstrap for tooltips
+* add some try catch in controllers and move error handling up?
 * turn off locations for now
+* tournament winners page that defaults to NYSs, but can be filtered to see others
 * add link on tournament pages to see the top runs at this track (add query params to top runs page?)
 * total points
 * 1991 state tournament, total points don't include half values

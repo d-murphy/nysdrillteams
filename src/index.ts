@@ -41,6 +41,8 @@ const dbPromise = getDbPromise(dbConnectionStr, DB_NAME);
     if(tournamentsData) app.use('/tournaments', tournamentsRouter(tournamentsData));  
     if(tracksData) app.use('/tracks', tracksRouter(tracksData));  
 
+    app.get('test', (req, res) => res.status(200).send('hi'))
+    
     app.listen(PORT, () => {
         console.log('server up')
     })

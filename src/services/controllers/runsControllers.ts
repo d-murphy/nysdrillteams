@@ -18,48 +18,48 @@ export function runsRouter (runsDataSource:RunsData){
     })
     
     
-    router.post('/insertRun', async (req: Request, res: Response) => {
+    // router.post('/insertRun', async (req: Request, res: Response) => {
     
-        let newRun = req.body.runsData;
-        let team = req.body.teamData; 
-        let tournament = req.body.tournamentData; 
+    //     let newRun = req.body.runsData;
+    //     let team = req.body.teamData; 
+    //     let tournament = req.body.tournamentData; 
     
-        if(     !newRun?.contest || !newRun?.time || 
-                !team?.name || !team?.circuit || 
-                !tournament?.runningOrder || !tournament?.runningOrder[team?.name] || !tournament?.name || !tournament?.id || !tournament?.name || !tournament?.id
-            ){
-            res.status(401).send('malformed reqeust')
-            return
-        }
-        let result = await Runs.insertRun(newRun, tournament)
-        if(!result.result){
-            res.status(500).send('Internal server error')
-        }
-        res.status(200).send(result);
-    })
+    //     if(     !newRun?.contest || !newRun?.time || 
+    //             !team?.name || !team?.circuit || 
+    //             !tournament?.runningOrder || !tournament?.runningOrder[team?.name] || !tournament?.name || !tournament?.id || !tournament?.name || !tournament?.id
+    //         ){
+    //         res.status(401).send('malformed reqeust')
+    //         return
+    //     }
+    //     let result = await Runs.insertRun(newRun, tournament)
+    //     if(!result.result){
+    //         res.status(500).send('Internal server error')
+    //     }
+    //     res.status(200).send(result);
+    // })
     
-    router.post('/deleteRun', async (req: Request, res: Response) => {
-        const runId: number = (req.body.runId as unknown as number);
-        if(!runId){
-            res.status(400).send('run id not valid')
-            return
-        }
-        let run = await Runs.deleteRun(runId);
-        res.send(`Delete successful: ${run}`);
-    })
+    // router.post('/deleteRun', async (req: Request, res: Response) => {
+    //     const runId: number = (req.body.runId as unknown as number);
+    //     if(!runId){
+    //         res.status(400).send('run id not valid')
+    //         return
+    //     }
+    //     let run = await Runs.deleteRun(runId);
+    //     res.send(`Delete successful: ${run}`);
+    // })
     
-    router.post('/updateRun', async (req: Request, res: Response) => {
-        let runId = req.body.runId; 
-        let pointsUpdate = req.body.pointsUpdate;
-        let timeUpdate = req.body.timeUpdate;  
-        let rankUpdate = req.body.rankUpdate;  
-        if((!pointsUpdate && !timeUpdate && !rankUpdate) || !runId){
-            res.status(400).send('update body not valid')
-            return 
-        }
-        let run = await Runs.updateRun(runId, pointsUpdate, timeUpdate, rankUpdate);
-        res.send(run);
-    })
+    // router.post('/updateRun', async (req: Request, res: Response) => {
+    //     let runId = req.body.runId; 
+    //     let pointsUpdate = req.body.pointsUpdate;
+    //     let timeUpdate = req.body.timeUpdate;  
+    //     let rankUpdate = req.body.rankUpdate;  
+    //     if((!pointsUpdate && !timeUpdate && !rankUpdate) || !runId){
+    //         res.status(400).send('update body not valid')
+    //         return 
+    //     }
+    //     let run = await Runs.updateRun(runId, pointsUpdate, timeUpdate, rankUpdate);
+    //     res.send(run);
+    // })
     
     
     router.get('/getRunsFromTournament', async (req: Request, res: Response) => {
