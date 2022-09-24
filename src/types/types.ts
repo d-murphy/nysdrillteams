@@ -1,4 +1,4 @@
-import { Collection, ObjectId } from "mongodb"
+import { Collection, ObjectId, InsertOneResult, DeleteResult, UpdateResult } from "mongodb"
 
 export type Run = {
     id?: number, 
@@ -33,9 +33,9 @@ export type Run = {
 
 export interface RunsData {
     _dbCollection: Collection | undefined;  
-    insertRun(newRun: Run): Promise<runDbResult>;
-    deleteRun(runId: number): Promise<boolean>;
-    updateRun(runId: number, pointsUpdate: number, timeUpdate: string, rankUpdate: string): Promise<runDbResult>; 
+    insertRun(newRun: Run): Promise<InsertOneResult>;
+    deleteRun(runId: number): Promise<DeleteResult>;
+    updateRun(runId: number, pointsUpdate: number, timeUpdate: string, rankUpdate: string): Promise<UpdateResult>; 
     getRun(runId: number): Promise<Run | undefined>;
     getRunsFromTournament(tournamentId:string): Promise<Run[]>
     getFilteredRuns(        
@@ -50,13 +50,27 @@ export interface RunsData {
     ): Promise<Run[]>; 
     getBig8(year:number): Promise<{}[]>
     getTopRuns(years?: number[], teams?: string[], tracks?: string[]): Promise<{}[][]>
+    getTotalPoints(year: number, totalPointsFieldName: TotalPointsFields, contests?: string[]): Promise<{_id: string, points: number}[]>
 }
 
-export type runDbResult = {
-    result: boolean, 
-    run: Run | undefined
+export type Team = {
+    id?: number,
+    fullName: string,  
+    circuit: string,
+    imageUrl?: string, 
+    active?: boolean, 
+    hometown: string, 
+    nickname: string, 
+    region: string
 }
 
+export interface TeamData {
+    insertTeam(newTeam: Team): Promise<InsertOneResult>;
+    deleteTeam(teamId: string): Promise<DeleteResult>;
+    updateTeam(teamId:string, fieldsToUpdate: {}): Promise<UpdateResult>; 
+    getTeam(teamId:number): Promise<Team | undefined>;
+    getTeams(): Promise<Team[]>;
+}
 
 export type Tournament = {
     id: number, 
@@ -94,9 +108,9 @@ export interface TournamentW_id extends Tournament {
 }
 
 export interface TournamentsData {
-    insertTournament(newTournament: Tournament): Promise<tournamentDbResp>;
-    deleteTournament(tournamentId: number): Promise<boolean>;
-    updateTournament(tournamentId:string, fieldsToUpdate:{}): Promise<boolean>; 
+    insertTournament(newTournament: Tournament): Promise<InsertOneResult>;
+    deleteTournament(tournamentId: number): Promise<DeleteResult>;
+    updateTournament(tournamentId:string, fieldsToUpdate:{}): Promise<UpdateResult>; 
     getTournament(tournamentId:number): Promise<Tournament | undefined>; 
     getFilteredTournaments(        
         years?: number[], 
@@ -105,13 +119,6 @@ export interface TournamentsData {
     ): Promise<Tournament[]>; 
     getTournsCtByYear():Promise<{_id: number, yearCount: number }[]>
 }
-
-export type tournamentDbResp = {
-    result: boolean, 
-    tournament: Tournament | undefined
-}
-
-
 
 export type Track = {
     id: number, 
@@ -125,40 +132,13 @@ export type Track = {
 }
 
 export interface TracksData {
-    insertTrack(newTrack: Track): Promise<trackDbResp>;
-    deleteTrack(trackId: string): Promise<boolean>;
-    updateTrack(trackId:string, fieldsToUpdate:{}): Promise<boolean>; 
+    insertTrack(newTrack: Track): Promise<InsertOneResult>;
+    deleteTrack(trackId: string): Promise<DeleteResult>;
+    updateTrack(trackId:string, fieldsToUpdate:{}): Promise<UpdateResult>; 
     getTrack(trackId:string): Promise<Track | undefined>;
     getTrackByName(trackName:string): Promise<Track | undefined>;
     getTracks(): Promise<Track[]>;
 }
 
-export type trackDbResp = {
-    result: boolean, 
-    track: Track | undefined
-}
+export type TotalPointsFields = "Nassau" | "Suffolk" | "Western" | "Northern" | "Junior" | "Suffolk OF" | "Nassau OF" | "LI OF";  
 
-
-export type Team = {
-    id?: number,
-    fullName: string,  
-    circuit: string,
-    imageUrl?: string, 
-    active?: boolean, 
-    hometown: string, 
-    nickname: string, 
-    region: string
-}
-
-export interface TeamData {
-    insertTeam(newTeam: Team): Promise<teamDbResp>;
-    deleteTeam(teamId: string): Promise<boolean>;
-    updateTeam(teamId:string, fieldsToUpdate: {}): Promise<boolean>; 
-    getTeam(teamId:number): Promise<Team | undefined>;
-    getTeams(): Promise<Team[]>;
-}
-
-export type teamDbResp = {
-    result: boolean, 
-    team: Team | undefined
-}

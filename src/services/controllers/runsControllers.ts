@@ -1,6 +1,7 @@
 import express, {Request, Response} from 'express'; 
+import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
 
-import { RunsData } from '../../types/types';
+import { RunsData, TotalPointsFields, Run } from '../../types/types';
 import RunsService from '../dataService/runsService';
 
 
@@ -10,66 +11,80 @@ export function runsRouter (runsDataSource:RunsData){
     router.get('/getRun', async (req: Request, res: Response) => {
         const runId: number = (req.query.runId as unknown as number);
         if(!runId){
-            res.status(400).send('runId not valid')
-            return
+            return res.status(400).send('runId not valid')
         }
-        let run = await Runs.getRun(runId);
-        res.send(run);
+        let run: Run | undefined; 
+        try {
+            run = await Runs.getRun(runId); 
+        } catch(e) {
+            console.error("Error retrieving Run: ", e); 
+            return res.status(500).send("Internal server error"); 
+        }
+        res.status(200).send(run);
     })
     
     
-    // router.post('/insertRun', async (req: Request, res: Response) => {
+    router.post('/insertRun', async (req: Request, res: Response) => {
+        let newRun = req.body.runsData;
+        let team = req.body.teamData; 
+        let tournament = req.body.tournamentData; 
+        if(!newRun?.contest || !newRun?.time || 
+            !team?.name || !team?.circuit || 
+            !tournament?.runningOrder || !tournament?.runningOrder[team?.name] || !tournament?.name || !tournament?.id || !tournament?.name || !tournament?.id
+            ){
+            return res.status(400).send('malformed reqeust')
+        }
+        let result: InsertOneResult | undefined; 
+        try {
+            result = await Runs.insertRun(newRun, tournament)
+        } catch(e){
+            console.error("Error inserting run: ", e); 
+            return res.status(500).send("Internal server error."); 
+        }
+        return res.status(200).send(result);
+    })
     
-    //     let newRun = req.body.runsData;
-    //     let team = req.body.teamData; 
-    //     let tournament = req.body.tournamentData; 
+    router.post('/deleteRun', async (req: Request, res: Response) => {
+        const runId: number = (req.body.runId as unknown as number);
+        if(!runId) return res.status(400).send('run id not valid')
+        let runResult: DeleteResult | undefined; 
+        try {
+            runResult = await Runs.deleteRun(runId);
+        } catch(e){
+            console.error("Error during delete run: ", e); 
+            return res.status(500).send("Internal server error."); 
+        }
+        res.status(200).send(runResult);
+    })
     
-    //     if(     !newRun?.contest || !newRun?.time || 
-    //             !team?.name || !team?.circuit || 
-    //             !tournament?.runningOrder || !tournament?.runningOrder[team?.name] || !tournament?.name || !tournament?.id || !tournament?.name || !tournament?.id
-    //         ){
-    //         res.status(401).send('malformed reqeust')
-    //         return
-    //     }
-    //     let result = await Runs.insertRun(newRun, tournament)
-    //     if(!result.result){
-    //         res.status(500).send('Internal server error')
-    //     }
-    //     res.status(200).send(result);
-    // })
-    
-    // router.post('/deleteRun', async (req: Request, res: Response) => {
-    //     const runId: number = (req.body.runId as unknown as number);
-    //     if(!runId){
-    //         res.status(400).send('run id not valid')
-    //         return
-    //     }
-    //     let run = await Runs.deleteRun(runId);
-    //     res.send(`Delete successful: ${run}`);
-    // })
-    
-    // router.post('/updateRun', async (req: Request, res: Response) => {
-    //     let runId = req.body.runId; 
-    //     let pointsUpdate = req.body.pointsUpdate;
-    //     let timeUpdate = req.body.timeUpdate;  
-    //     let rankUpdate = req.body.rankUpdate;  
-    //     if((!pointsUpdate && !timeUpdate && !rankUpdate) || !runId){
-    //         res.status(400).send('update body not valid')
-    //         return 
-    //     }
-    //     let run = await Runs.updateRun(runId, pointsUpdate, timeUpdate, rankUpdate);
-    //     res.send(run);
-    // })
+    router.post('/updateRun', async (req: Request, res: Response) => {
+        let runId = req.body.runId; 
+        let pointsUpdate = req.body.pointsUpdate;
+        let timeUpdate = req.body.timeUpdate;  
+        let rankUpdate = req.body.rankUpdate;  
+        if((!pointsUpdate && !timeUpdate && !rankUpdate) || !runId) return res.status(400).send('update body not valid')
+        let run: UpdateResult | undefined; 
+        try {
+            run = await Runs.updateRun(runId, pointsUpdate, timeUpdate, rankUpdate); 
+        } catch(e){
+            console.error("Error updating run: ", e); 
+            return res.status(500).send("Internal server error."); 
+        }
+        return res.status(200).send(run);
+    })
     
     
     router.get('/getRunsFromTournament', async (req: Request, res: Response) => {
         const tournamentId: string = (req.query.tournamentId as unknown as string);  
-        if(!tournamentId){
-            res.status(400).send('tournament id not valid')
-            return
+        if(!tournamentId) return res.status(400).send('tournament id not valid')
+        let runs: Run[]; 
+        try {
+            runs = await Runs.getRunsFromTournament(tournamentId);
+        } catch(e) {
+            console.error("Error getting tournament runs: ", e); 
+            return res.status(500).send("Internal server error."); 
         }
-        let runs = await Runs.getRunsFromTournament(tournamentId); 
-        res.send(runs); 
+        return res.status(200).send(runs); 
     })
     
     router.get('/getFilteredRuns', async (req: Request, res: Response) => {
@@ -83,16 +98,27 @@ export function runsRouter (runsDataSource:RunsData){
         let stateRecord = req.query?.stateRecord ? true : false
         let currentStateRecord = req.query?.currentStateRecord ? true : false; 
 
-        let runs = await Runs.getFilteredRuns(years, contests, teams, tracks, tournaments, ranks, stateRecord, currentStateRecord); 
-        res.send(runs); 
+        let runs: Run[]; 
+        try {
+            runs = await Runs.getFilteredRuns(years, contests, teams, tracks, tournaments, ranks, stateRecord, currentStateRecord);
+        } catch(e){
+            console.error("Error filtering runs: ", e); 
+            return res.status(500).send('Internal server error.'); 
+        }
+        res.status(200).send(runs); 
     })
 
     router.get('/getBig8', async (req:Request, res: Response) => {
         let year: number = parseInt(req.query.year as unknown as string); 
         if(!year) return res.status(400).send('Missing year from request'); 
-        let runs = await Runs.getBig8(year); 
-        if(!runs.length) return res.status(500).send("Internal server error"); 
-        res.status(200).send(runs); 
+        let runs: {}[];
+        try {
+            runs = await Runs.getBig8(year); 
+        } catch(e){
+            console.error("Error making big 8 call: ", e); 
+            return res.status(500).send("Internal server error."); 
+        }
+        return res.status(200).send(runs); 
     })
 
     router.get('/getTopRuns', async (req: Request, res: Response) => {
@@ -101,9 +127,29 @@ export function runsRouter (runsDataSource:RunsData){
         teams = checkQuery(req, 'teams'); 
         tracks = checkQuery(req, 'tracks'); 
 
-        let runs = await Runs.getTopRuns(years, teams, tracks); 
-        if(!runs.length) return res.status(500).send("Internal server error"); 
-        res.status(200).send(runs); 
+        let runs: {}[]; 
+        try {
+            runs = await Runs.getTopRuns(years, teams, tracks); 
+        } catch(e){
+            console.error("Error getting top runs: ", e); 
+            return res.status(500).send("Internal server error."); 
+        }
+        return res.status(200).send(runs); 
+    })
+
+    router.get('/getTotalPoints', async (req: Request, res: Response) => {
+        let contests = checkQuery(req, 'contests');
+        let year = parseInt(req.query.year as unknown as string); 
+        let totalPointsFieldName = req.query.totalPointsFieldName as unknown as TotalPointsFields; 
+        if(["Nassau", "Suffolk", "Western", "Northern", "Junior", "Suffolk OF", "Nassau OF", "LI OF"].includes(totalPointsFieldName)) return res.status(400).send('Total Points field not valid.')
+        let totals; 
+        try {
+            totals = Runs.getTotalPoints(year, totalPointsFieldName, contests);  
+        } catch(e){
+            console.error("Error retrieving total points: ", e); 
+            return res.status(500).send('Internal server error.'); 
+        }
+        return res.status(200).send(totals); 
     })
 
     return router; 

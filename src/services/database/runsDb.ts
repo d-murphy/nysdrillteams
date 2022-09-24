@@ -1,5 +1,5 @@
-import { Collection, Db, ObjectId } from 'mongodb';
-import { Run, RunsData, runDbResult } from '../../types/types'; 
+import { Collection, Db, DeleteResult, InsertOneResult, ObjectId, UpdateResult } from 'mongodb';
+import { Run, RunsData, TotalPointsFields } from '../../types/types'; 
 import { getCollectionPromise } from '../../library/db';
 
 export async function runsDbFactory(dbPromise: Promise<Db>, collectionName: string):Promise<RunsData | undefined> {
@@ -8,33 +8,21 @@ export async function runsDbFactory(dbPromise: Promise<Db>, collectionName: stri
     return undefined; 
 }
 
+const DEFAULT_CONTESTS = ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]
+
 class RunsDb implements RunsData{
     _dbCollection: Collection; 
     constructor(collection: Collection) {
         this._dbCollection = collection; 
     }
-    async insertRun(newRun: Run): Promise<runDbResult> {
-        let result; 
-        try {
-            result = await this._dbCollection.insertOne(newRun); 
-        } catch (e) {
-            console.log("Error inserting document: ", e); 
-        }
-        if(result) return { result: true, run: newRun } 
-        return {result: false, run: newRun }
+    async insertRun(newRun: Run): Promise<InsertOneResult> {
+        return this._dbCollection.insertOne(newRun); 
     }
-    async deleteRun(runId: number): Promise<boolean> {
+    async deleteRun(runId: number): Promise<DeleteResult> {
         const query = { _id: new ObjectId(runId) };
-        let result; 
-        try {
-            result = await this._dbCollection.deleteOne(query);
-        } catch (e) {
-            console.log('Error deleting document'); 
-        }
-        if(result) return true;
-        return false;  
+        return this._dbCollection.deleteOne(query);
     }
-    async updateRun(runId: number, pointsUpdate: number, timeUpdate: string, rankUpdate: string): Promise<runDbResult> {
+    async updateRun(runId: number, pointsUpdate: number, timeUpdate: string, rankUpdate: string): Promise<UpdateResult> {
         const filter = { _id: new ObjectId(runId) };
         const updateDoc = {
             $set: {
@@ -43,36 +31,16 @@ class RunsDb implements RunsData{
                 time: timeUpdate
             },
         };
-        let result:Run | undefined; 
-        try {  
-            result = (await this._dbCollection.updateOne(filter, updateDoc) as unknown as Run);         
-        } catch (e) {
-            console.log('There was an error updating document id: ', runId);          
-        }
-        if(result) return {result: true, run: result}; 
-        return  {result: true, run: undefined};
+        return this._dbCollection.updateOne(filter, updateDoc);          
     }
     async getRun(runId: number): Promise<Run | undefined> {
         const query = { _id: new ObjectId(runId) };
         let result:Run | undefined = undefined; 
-        try {
-            result = await (this._dbCollection.findOne(query)) as unknown as Run; 
-        } catch (e) {
-            console.log ("There was an error retrieving document: ", runId); 
-        }
-        if(result) return result;
-        return undefined; 
+        return (this._dbCollection.findOne(query)) as unknown as Run; 
     }
     async getRunsFromTournament(tournamentId: string): Promise<Run[]> {
         const query = { tournamentId: tournamentId };
-        let result; 
-        try { 
-            result = await (this._dbCollection.find(query).toArray() as unknown as Run[]); 
-        } catch (e) {
-            console.log ("There was an error retrieving documents for tournament: ", tournamentId); 
-        }
-        if(result) return result; 
-        return []; 
+        return (this._dbCollection.find(query).toArray() as unknown as Run[]); 
     }
     async getFilteredRuns(
         years?: number[], 
@@ -102,47 +70,31 @@ class RunsDb implements RunsData{
         if(ranks && ranks.length) query.rank = {$in : ranks};
         if(stateRecord) query.stateRecord = stateRecord;
         if(currentStateRecord) query.currentStateRecord = currentStateRecord;
-
-        let result; 
-        try {
-            result = (await this._dbCollection.find(query).toArray() as unknown as Run[]); 
-        } catch (e) {
-            console.log ("There was an error in the getFilteredRuns function with query: ", query); 
-        }
-        if(result) return result; 
-        return []; 
+        return (this._dbCollection.find(query).toArray() as unknown as Run[]); 
     }
     async getBig8(year: number): Promise<{}[]> {
-        let result: {}[] | undefined = undefined;  
-        try {
-            result = await this._dbCollection.aggregate(
-                [
-                    {
-                        $match: {
-                            year: year, 
-                            contest: { $in: ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"] }, 
-                            timeNum: { $ne: NaN }
-                        },
+        return await this._dbCollection.aggregate(
+            [
+                {
+                    $match: {
+                        year: year, 
+                        contest: { $in: DEFAULT_CONTESTS }, 
+                        timeNum: { $ne: NaN }
                     },
-                    { $sort: { "timeNum": 1} }, 
-                    {
-                        $group: {
-                            _id: "$contest",
-                            "matched_doc": { "$first": "$$ROOT" }                     
-                         }
-                    }
-                ]
-            ).toArray() 
-        } catch(e){
-            console.log('Error retrieving big 8: ', e); 
-        }
-        if(!result) return []
-        return result; 
+                },
+                { $sort: { "timeNum": 1} }, 
+                {
+                    $group: {
+                        _id: "$contest",
+                        "matched_doc": { "$first": "$$ROOT" }                     
+                        }
+                }
+            ]
+        ).toArray() 
     }
     async getTopRuns(years?: number[], teams?: string[], tracks?: string[]): Promise<{}[][]> {
-        let contests = ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]; 
+        let contests = DEFAULT_CONTESTS; 
         let promiseArr: Promise<{}[]>[] = []; 
-        let results: {}[][] | undefined = undefined;  
         contests.forEach(contest => {
             let filterObj: {year?:{}, team?:{}, track?: {}, contest?: {}, timeNum?: {}} = {}; 
             if(years && years.length) filterObj.year =  { $in: years } 
@@ -165,13 +117,39 @@ class RunsDb implements RunsData{
             ).toArray() 
             promiseArr.push(dbProm); 
         })
-        try {
-            results = await Promise.all(promiseArr); 
-        } catch(e){
-            console.log('Error retrieving top runs: ', e); 
+        return Promise.all(promiseArr); 
+    }
+    async getTotalPoints(year: number, totalPointsFieldName: TotalPointsFields, contests: string[] = DEFAULT_CONTESTS): Promise<{_id: string, points: number}[]>  {
+        const tpFieldLookup = {
+            "Nassau": "nassauPoints", 
+            "Suffolk": "suffolkPoints", 
+            "Western": "westernPoints", 
+            "Northern": "northernPoints", 
+            "Junior": "juniorPoints", 
+            "Suffolk OF": "suffolkOfPoints", 
+            "Nassau OF": "nassauOfPoints", 
+            "LI OF": "liOfPoints"
         }
-        if(results) return results;
-        return []; 
+        const tpFieldName = tpFieldLookup[totalPointsFieldName]; 
+        let totalPoints: {_id: string, points: number}[] | undefined = undefined;  
+        return await this._dbCollection.aggregate(
+            [
+                {
+                    $match: {
+                        year: year, 
+                        contest: { $in: DEFAULT_CONTESTS }, 
+                        points: { $gt: 0}, 
+                        tpFieldName: { $gt: 0 }
+                    },
+                },
+                {
+                    $group: {
+                        _id: "$team",
+                        points: { "$sum": "$points" }
+                        }
+                }
+            ]
+        ).toArray() as unknown as {_id: string, points: number}[]
     }
 
 }

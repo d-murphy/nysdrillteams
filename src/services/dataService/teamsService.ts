@@ -1,16 +1,17 @@
-import { TeamData, Team, teamDbResp } from '../../types/types'
+import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
+import { TeamData, Team } from '../../types/types'
 
 class TeamsService {
 
     constructor ( private dataSource : TeamData ){}
 
-    public insertTeam(newTeam: Team): Promise<teamDbResp> {
+    public insertTeam(newTeam: Team): Promise<InsertOneResult> {
         return this.dataSource.insertTeam(newTeam); 
     }
-    public deleteTeam(teamId: string): Promise<boolean> {
+    public deleteTeam(teamId: string): Promise<DeleteResult> {
         return this.dataSource.deleteTeam(teamId); 
     }
-    public updateTeam(teamId:string, fieldsToUpdate: {}): Promise<boolean> {
+    public updateTeam(teamId:string, fieldsToUpdate: {}): Promise<UpdateResult> {
         return this.dataSource.updateTeam(teamId, fieldsToUpdate); 
     }
     public getTeam(teamId:number): Promise<Team | undefined> {
@@ -18,7 +19,6 @@ class TeamsService {
     }
     public getTeams(): Promise<Team[]> {
         return this.dataSource.getTeams(); 
-
     }
 }
     

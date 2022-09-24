@@ -1,19 +1,20 @@
-import { TournamentsData, Tournament, tournamentDbResp } from '../../types/types'
+import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
+import { TournamentsData, Tournament } from '../../types/types'
 
 
 class TournamentsService {
 
     constructor ( private dataSource : TournamentsData ){}
 
-    public insertTournament(newTournament: Tournament): Promise<tournamentDbResp> {
+    public insertTournament(newTournament: Tournament): Promise<InsertOneResult> {
         newTournament.date = new Date(newTournament.date); 
         newTournament.year = newTournament.date.getFullYear();
         return this.dataSource.insertTournament(newTournament); 
     }
-    public deleteTournament(tournamentId: number): Promise<boolean> {
+    public deleteTournament(tournamentId: number): Promise<DeleteResult> {
         return this.dataSource.deleteTournament(tournamentId); 
     }
-    public updateTournament(tournamentId: string, fieldsToUpdate: {}): Promise<boolean> {
+    public updateTournament(tournamentId: string, fieldsToUpdate: {}): Promise<UpdateResult> {
         return this.dataSource.updateTournament(tournamentId, fieldsToUpdate); 
     }
     public getTournament(tournamentId:number): Promise<Tournament | undefined> {
@@ -25,7 +26,6 @@ class TournamentsService {
     public getTournsCtByYear(): Promise<{_id: number, yearCount: number}[]>{
         return this.dataSource.getTournsCtByYear(); 
     }
-    
 }
     
 export default TournamentsService; 

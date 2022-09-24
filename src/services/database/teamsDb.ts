@@ -1,5 +1,5 @@
-import { Collection, Db, ObjectId } from 'mongodb';
-import { TeamData, Team, teamDbResp } from '../../types/types'; 
+import { Collection, Db, DeleteResult, InsertOneResult, UpdateResult, ObjectId } from 'mongodb';
+import { TeamData, Team } from '../../types/types'; 
 import { getCollectionPromise } from '../../library/db';
 
 export async function teamsDbFactory(dbPromise: Promise<Db>, collectionName: string):Promise<TeamData | undefined> {
@@ -14,63 +14,25 @@ class TeamsDb implements TeamData{
     constructor(collection: Collection) {
         this._dbCollection = collection; 
     }
-    async insertTeam(newTeam:Team): Promise<teamDbResp> {
-        let result; 
-        try {
-            result = await this._dbCollection.insertOne(newTeam); 
-        } catch (e) {
-            console.log("Error inserting document: ", e); 
-        }
-        if(result) return { result: true, team: newTeam } 
-        return {result: false, team: newTeam }
-
+    async insertTeam(newTeam:Team): Promise<InsertOneResult> {
+        return this._dbCollection.insertOne(newTeam); 
     }
-    async deleteTeam(teamId:string): Promise<boolean> {
+    async deleteTeam(teamId:string): Promise<DeleteResult> {
         const query = { _id: new ObjectId(teamId) };
-        let result; 
-        try {
-            result = await this._dbCollection.deleteOne(query);
-        } catch (e) {
-            console.log('Error deleting document'); 
-        }
-        if(result) return result.deletedCount == 1 ? true : false; 
-        return false;  
+        return this._dbCollection.deleteOne(query);
     } 
-    async updateTeam(teamId:string, fieldsToUpdate: {}):Promise<boolean> {
+    async updateTeam(teamId:string, fieldsToUpdate: {}):Promise<UpdateResult> {
         const filter = { _id: new ObjectId(teamId) };
         const updateDoc = {
             $set: fieldsToUpdate,
         };
-        let result; 
-        try {  
-            result = await this._dbCollection.updateOne(filter, updateDoc);    
-            console.log('db result: ', result);      
-        } catch (e) {
-            console.log('There was an error updating document id: ', teamId);          
-        }
-        if(result) return result.acknowledged && result.modifiedCount == 1 ? true : false; 
-        return false; 
+        return this._dbCollection.updateOne(filter, updateDoc);    
     } 
     async getTeam(teamId:number):Promise<Team | undefined> {
         const query = { _id: new ObjectId(teamId) };
-        let result:Team | undefined = undefined; 
-        try {
-            result = await (this._dbCollection.findOne(query)) as unknown as Team; 
-        } catch (e) {
-            console.log ("There was an error retrieving document: ", teamId); 
-        }
-        if(result) return result;
-        return undefined; 
-
+        return (this._dbCollection.findOne(query)) as unknown as Team; 
     } 
     async getTeams():Promise<Team[]> {
-        let result: Team[] | undefined; 
-        try {
-            result = await (this._dbCollection.find().toArray()) as unknown as Team[]
-        } catch (e) {
-            console.log("There was an error retrieving the teams list")
-        }
-        if(result) return result; 
-        return []; 
+        return (this._dbCollection.find().toArray()) as unknown as Team[]
     }
 }

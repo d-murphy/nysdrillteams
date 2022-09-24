@@ -1,5 +1,6 @@
 import express, {Request, Response} from 'express'; 
-import { TournamentsData } from '../../types/types';
+import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
+import { Tournament, TournamentsData } from '../../types/types';
 const router = express.Router()
 
 import TournamentsService from '../dataService/tournamentsService';
@@ -9,71 +10,87 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData){
     const Tournaments = new TournamentsService(tournamentsDataSource); 
     const router = express.Router()
 
-
     router.get('/getTournament', async (req: Request, res: Response) => {
         let tournamentId:number = parseInt(req.query?.tournamentId as unknown as string); 
-        if(!tournamentId){
-            res.status(400).send('run id not valid')
-            return
+        if(!tournamentId) return res.status(400).send('Tournament id not valid.')
+        let tournament: Tournament | undefined; 
+        try {
+            tournament = await Tournaments.getTournament(tournamentId);
+        } catch(e) {
+            console.error("Error retrieving tournament: ", e); 
+            return res.status(500).send("Internal server error."); 
         }
-        let tournament = await Tournaments.getTournament(tournamentId);
-        if(!tournament) return res.status(500).send('Internal server error'); 
         res.status(200).send(tournament);
     })
 
+    router.post('/insertTournament', async (req: Request, res: Response) => {
+        let newTournament = req.body;
+        if( !newTournament?.name || !newTournament?.date ||  
+            !newTournament?.track   
+            ){
+            return res.status(400).send('malformed reqeust')
+        }
+        let result: InsertOneResult; 
+        try {
+            result = await Tournaments.insertTournament(newTournament)
+        } catch(e) {
+            console.error("Error inserting tournament: ", e); 
+            return res.status(500).send("Internal server error."); 
+        }
+        res.status(200).send(result);
+    })
 
-    // router.post('/insertTournament', async (req: Request, res: Response) => {
+    router.post('/deleteTournament', async (req: Request, res: Response) => {
+        const tournamentId: number = (req.body?.tournamentId as unknown as number);
+        if(!tournamentId) return res.status(400).send('team id not valid')
+        let result: DeleteResult; 
+        try {
+            result = await Tournaments.deleteTournament(tournamentId); 
+        } catch(e) {
+            console.error("Error deleting tournament:  ", e); 
+            return res.status(500).send("Internal server error."); 
+        }
+        res.status(200).send(result);
+    })
 
-    //     let newTournament = req.body;
-    //     if( !newTournament?.name || !newTournament?.date ||  
-    //         !newTournament?.track   
-    //         ){
-    //         res.status(400).send('malformed reqeust')
-    //         return
-    //     }
-    //     let result = await Tournaments.insertTournament(newTournament)
-    //     if(!result?.result){
-    //         res.status(500).send('Internal server error')
-    //     }
-    //     res.status(200).send(result);
-    // })
-
-    // router.post('/deleteTournament', async (req: Request, res: Response) => {
-    //     const tournamentId: number = (req.body?.tournamentId as unknown as number);
-    //     if(!tournamentId){
-    //         res.status(400).send('team id not valid')
-    //         return
-    //     }
-    //     let result = await Tournaments.deleteTournament(tournamentId);
-    //     if(!result) return res.status(500).send('Internal server error'); 
-    //     res.status(200).send(`Delete successful`);
-    // })
-
-    // router.post('/updateTournament', async (req: Request, res: Response) => {
-    //     const tournamentId: string = (req.body?.tournamentId as unknown as string); 
-    //     const fieldsToUpdate: {} = (req.body?.fieldsToUpdate as unknown as {}); 
-    //     if(!tournamentId || !fieldsToUpdate){
-    //         res.status(400).send('update body not valid')
-    //         return 
-    //     }
-    //     let result = await Tournaments.updateTournament(tournamentId, fieldsToUpdate); 
-    //     if(!result) return res.status(500).send('Internal server error'); 
-    //     res.status(200).send(result);
-    // })
+    router.post('/updateTournament', async (req: Request, res: Response) => {
+        const tournamentId: string = (req.body?.tournamentId as unknown as string); 
+        const fieldsToUpdate: {} = (req.body?.fieldsToUpdate as unknown as {}); 
+        if(!tournamentId || !fieldsToUpdate) return res.status(400).send('update body not valid'); 
+        let result: UpdateResult; 
+        try {
+            result = await Tournaments.updateTournament(tournamentId, fieldsToUpdate);
+        } catch(e) {
+            console.error("Error updating tournament: ", e); 
+            return res.status(500).send("Internal server error."); 
+        }
+        return res.status(200).send(result);
+    })
 
     router.get('/getFilteredTournaments', async (req: Request, res: Response) => {
         let years: number[], tracks:string[], tournaments: string[];  
         years = checkQuery(req, 'years').map(Number); 
         tracks = checkQuery(req, 'tracks'); 
         tournaments = checkQuery(req, 'tournaments'); 
-        let result = await Tournaments.getFilteredTournaments(years, tracks, tournaments); 
-        res.status(200).send(result); 
+        let result: Tournament[]; 
+        try {
+            result = await Tournaments.getFilteredTournaments(years, tracks, tournaments); 
+        } catch(e) {
+            console.error("Error getting filtered tournaments: ", e); 
+            return res.status(500).send("Internal server error."); 
+        }
+        return res.status(200).send(result); 
     })
 
     router.get('/getTournsCtByYear', async( req: Request, res: Response) => {
-        let result = await Tournaments.getTournsCtByYear(); 
-        if(result && result.length) return res.status(200).send(result); 
-        res.status(500).send('Internal server error'); 
+        let result: {_id: number, yearCount:number}[]
+        try {
+            result = await Tournaments.getTournsCtByYear();
+        } catch(e) {
+            console.error("Error getting tournament counts: ", e); 
+            return res.status(500).send("Internal server error."); 
+        }
+        res.status(200).send(result); 
     })
     return router;
 }

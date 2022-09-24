@@ -1,4 +1,5 @@
-import { Run, RunsData, TournamentW_id, Team, runDbResult } from '../../types/types'
+import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb'
+import { Run, RunsData, TournamentW_id, TotalPointsFields } from '../../types/types'
 
 
 interface big8Cache {
@@ -20,25 +21,7 @@ interface big8Cache {
     _big8Cache: big8Cache = {}
     _topRunsCache: topRunsCache = {}
     constructor ( private dataSource : RunsData ){}
-    public getRunsFromTournament(tournamentId:string): Promise<Run[]> {
-        return this.dataSource.getRunsFromTournament(tournamentId); 
-    }
-    public getFilteredRuns(
-        years?: number[], 
-        contests?: string[], 
-        teams?: string[], 
-        tracks?:string[], 
-        tournaments?:string[], 
-        ranks?:string[], 
-        stateRecord?: boolean, 
-        currentStateRecord?: boolean,
-        ): Promise<Run[]> {
-        return this.dataSource.getFilteredRuns(years, contests, teams, tracks, tournaments, ranks, stateRecord, currentStateRecord); 
-    }
-    public getRun(runId: number): Promise<Run | undefined> {
-        return this.dataSource.getRun(runId); 
-    } 
-    public insertRun(newRun: Run, tournament: TournamentW_id ): Promise<runDbResult> {
+    public insertRun(newRun: Run, tournament: TournamentW_id ): Promise<InsertOneResult> {
         let run: Run = newRun;
         run.date = new Date(newRun.date); 
         run.year = run.date.getFullYear(); 
@@ -56,11 +39,29 @@ interface big8Cache {
         run.juniorPoints = getCfp(tournament.contests, run.contest) && tournament.juniorPoints;
         return this.dataSource.insertRun(run);    
     }
-    public deleteRun(runId: number): Promise<boolean> {
+    public deleteRun(runId: number): Promise<DeleteResult> {
         return this.dataSource.deleteRun(runId);
     }
-    public updateRun(runId: number, pointsUpdate:number, timeUpdate: string, rankUpdate:string): Promise<runDbResult> {
+    public updateRun(runId: number, pointsUpdate:number, timeUpdate: string, rankUpdate:string): Promise<UpdateResult> {
         return this.dataSource.updateRun(runId, pointsUpdate, timeUpdate, rankUpdate);
+    }
+    public getRun(runId: number): Promise<Run | undefined> {
+        return this.dataSource.getRun(runId); 
+    } 
+    public getRunsFromTournament(tournamentId:string): Promise<Run[]> {
+        return this.dataSource.getRunsFromTournament(tournamentId); 
+    }
+    public getFilteredRuns(
+        years?: number[], 
+        contests?: string[], 
+        teams?: string[], 
+        tracks?:string[], 
+        tournaments?:string[], 
+        ranks?:string[], 
+        stateRecord?: boolean, 
+        currentStateRecord?: boolean,
+        ): Promise<Run[]> {
+        return this.dataSource.getFilteredRuns(years, contests, teams, tracks, tournaments, ranks, stateRecord, currentStateRecord); 
     }
     public async getBig8(year:number): Promise<{}[]> {
         year = year*1; 
@@ -85,6 +86,15 @@ interface big8Cache {
             }
         }
         return this._topRunsCache[key]?.result ? this._topRunsCache[key].result : []; 
+    }
+    public async getTotalPoints(year: number, totalPointsFieldName:TotalPointsFields, contests?: string[]): Promise<{}[]> {
+        let result; 
+        if(contests && contests.length){ 
+            result = await this.dataSource.getTotalPoints(year, totalPointsFieldName, contests); 
+        } else {
+            result = await this.dataSource.getTotalPoints(year, totalPointsFieldName); 
+        }
+        return result; 
     }
 }
     

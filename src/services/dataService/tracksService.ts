@@ -1,16 +1,17 @@
-import { TracksData, Track, trackDbResp } from '../../types/types'
+import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
+import { TracksData, Track } from '../../types/types'
 
 class TracksService {
 
     constructor ( private dataSource : TracksData ){}
 
-    public insertTrack(newTrack: Track): Promise<trackDbResp> {
+    public insertTrack(newTrack: Track): Promise<InsertOneResult> {
         return this.dataSource.insertTrack(newTrack); 
     }
-    public deleteTrack(trackId: string): Promise<boolean> {
+    public deleteTrack(trackId: string): Promise<DeleteResult> {
         return this.dataSource.deleteTrack(trackId); 
     }
-    public updateTrack(trackId:string, fieldsToUpdate:{}): Promise<boolean> {
+    public updateTrack(trackId:string, fieldsToUpdate:{}): Promise<UpdateResult> {
         return this.dataSource.updateTrack(trackId, fieldsToUpdate); 
     }
     public getTrack(trackId:string): Promise<Track | undefined> {
@@ -21,7 +22,6 @@ class TracksService {
     }
     public getTracks(): Promise<Track[]> {
         return this.dataSource.getTracks(); 
-
     }
 }
     
