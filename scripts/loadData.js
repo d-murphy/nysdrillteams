@@ -51,14 +51,14 @@ let classLU = {
 
 (async function(){
     console.log('starting the collection buiids'); 
-    // let writeDocResults = await loadRuns(); 
-    // console.log("Write runs result: ", writeDocResults)
+    let writeDocResults = await loadRuns(); 
+    console.log("Write runs result: ", writeDocResults)
     // let loadTeamsResult = await loadTeams(); 
     // console.log('load teams result: ', loadTeamsResult); 
     // let loadTracksResult = await loadTracks(); 
     // console.log('load tracks result: ', loadTracksResult); 
-    let loadDrillsResult = await loadDrills(); 
-    console.log('load teams result: ', loadDrillsResult); 
+    // let loadDrillsResult = await loadDrills(); 
+    // console.log('load teams result: ', loadDrillsResult); 
 })()
 
 
@@ -181,7 +181,7 @@ async function loadRuns (){
                 urls: [], 
                 sanctioned: uniqueEventsLUT[el.event_id] ? ['1','Sanctioned'].includes(uniqueEventsLUT[el.event_id].sanction) : false,
                 cfp: uniqueEventsLUT[el.event_id] ? ['1','Counts For Points'].includes(uniqueEventsLUT[el.event_id].cfp) : false,
-                points: el.points,
+                points: parseFloat(el.points),
                 rank: el.rank,  
                 notes: '',
                 stateRecord: 0,

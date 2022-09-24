@@ -1,4 +1,4 @@
-import { Collection, Db, DeleteResult, InsertOneResult, ObjectId, UpdateResult } from 'mongodb';
+import { Collection, Db, DeleteResult, InsertOneResult, ObjectId, UpdateResult, Decimal128 } from 'mongodb';
 import { Run, RunsData, TotalPointsFields } from '../../types/types'; 
 import { getCollectionPromise } from '../../library/db';
 
@@ -131,25 +131,32 @@ class RunsDb implements RunsData{
             "LI OF": "liOfPoints"
         }
         const tpFieldName = tpFieldLookup[totalPointsFieldName]; 
-        let totalPoints: {_id: string, points: number}[] | undefined = undefined;  
-        return await this._dbCollection.aggregate(
+
+        let matchObj: {[index:string]: any} = {
+            year: year, 
+            contest: { $in: DEFAULT_CONTESTS }, 
+            points: {"$gt" : 0}
+        }
+        // using a variable for the column name, so set match object dynamically.
+        matchObj[tpFieldName] = { $gt: 0 }; 
+        return this._dbCollection.aggregate(
             [
                 {
-                    $match: {
-                        year: year, 
-                        contest: { $in: DEFAULT_CONTESTS }, 
-                        points: { $gt: 0}, 
-                        tpFieldName: { $gt: 0 }
-                    },
+                    $match: matchObj,
                 },
                 {
                     $group: {
                         _id: "$team",
                         points: { "$sum": "$points" }
                         }
+                }, 
+                {
+                    $sort: {
+                        points: -1
+                    }
                 }
             ]
         ).toArray() as unknown as {_id: string, points: number}[]
     }
-
 }
+

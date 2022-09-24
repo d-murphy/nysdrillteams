@@ -141,10 +141,10 @@ export function runsRouter (runsDataSource:RunsData){
         let contests = checkQuery(req, 'contests');
         let year = parseInt(req.query.year as unknown as string); 
         let totalPointsFieldName = req.query.totalPointsFieldName as unknown as TotalPointsFields; 
-        if(["Nassau", "Suffolk", "Western", "Northern", "Junior", "Suffolk OF", "Nassau OF", "LI OF"].includes(totalPointsFieldName)) return res.status(400).send('Total Points field not valid.')
-        let totals; 
+        if(!year || !["Nassau", "Suffolk", "Western", "Northern", "Junior", "Suffolk OF", "Nassau OF", "LI OF"].includes(totalPointsFieldName)) return res.status(400).send('totalPointsFieldName or year not valid.')
+        let totals: {}[]; 
         try {
-            totals = Runs.getTotalPoints(year, totalPointsFieldName, contests);  
+            totals = await Runs.getTotalPoints(year, totalPointsFieldName, contests);  
         } catch(e){
             console.error("Error retrieving total points: ", e); 
             return res.status(500).send('Internal server error.'); 

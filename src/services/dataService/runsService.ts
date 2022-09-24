@@ -9,17 +9,25 @@ interface big8Cache {
     }
  }
 
- interface topRunsCache {
+interface topRunsCache {
     [key: string]: {
         created: Date, 
         result: {}[][]
     }
- }
+}
+
+interface totalPointsCache {
+    [key: string]: {
+        created: Date, 
+        result: {}[]
+    }
+}
 
 
  class RunsService {
     _big8Cache: big8Cache = {}
     _topRunsCache: topRunsCache = {}
+    _totalPointsCache: totalPointsCache = {}
     constructor ( private dataSource : RunsData ){}
     public insertRun(newRun: Run, tournament: TournamentW_id ): Promise<InsertOneResult> {
         let run: Run = newRun;
@@ -88,13 +96,19 @@ interface big8Cache {
         return this._topRunsCache[key]?.result ? this._topRunsCache[key].result : []; 
     }
     public async getTotalPoints(year: number, totalPointsFieldName:TotalPointsFields, contests?: string[]): Promise<{}[]> {
-        let result; 
-        if(contests && contests.length){ 
-            result = await this.dataSource.getTotalPoints(year, totalPointsFieldName, contests); 
-        } else {
-            result = await this.dataSource.getTotalPoints(year, totalPointsFieldName); 
+        if(!contests) contests = [];
+        let key = createTotalPointsCacheKey(year, totalPointsFieldName, contests); 
+        if(!this._totalPointsCache[key] || ( this._totalPointsCache[key] && (+new Date() - +this._totalPointsCache[key].created) > 1000 * 60 * 60 * 24 * 7 )){
+            console.log("Creating total points cache for: ", key); 
+            let result: {}[]; 
+            if(contests.length){ 
+                result = await this.dataSource.getTotalPoints(year, totalPointsFieldName, contests); 
+            } else {
+                result = await this.dataSource.getTotalPoints(year, totalPointsFieldName); 
+            }
+            this._totalPointsCache[key] = {result: result, created: new Date()}; 
         }
-        return result; 
+        return this._totalPointsCache[key].result; 
     }
 }
     
@@ -125,6 +139,17 @@ function createTopRunsKey(years?: number[], teams?: string[], tracks?: string[])
     key += addArrToKey(teams) + ';'
     key += 'tracks:'; 
     key += addArrToKey(tracks) + ';'
+    return key; 
+}
+
+function createTotalPointsCacheKey(year:number, totalPointsFieldName:string, contests: string[]){
+    let key = ""; 
+    key += `Year:${year};`; 
+    key += `TotalPointsFieldName:${totalPointsFieldName};`; 
+    key += "Contests:"; 
+    contests.forEach(contest => {
+        key += `${contest},`
+    })
     return key; 
 }
 

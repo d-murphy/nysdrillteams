@@ -26,38 +26,41 @@
 
 ### To Do
 
+* total points
+
 * re-install bootstrap and react-bootstrap for tooltips
-* add some try catch in controllers and move error handling up?
-* turn off locations for now
+* turn off locations until images
 * tournament winners page that defaults to NYSs, but can be filtered to see others
 * add link on tournament pages to see the top runs at this track (add query params to top runs page?)
-* total points
+* OF doesn't work in schedule search
+* add state tournament winners to past season page
+* check that video icons appear in proper places
+* 
+
 * 1991 state tournament, total points don't include half values
 * 2011 state tournament is weird
 * 2012 suffolk county drill displays the wrong winner
 * 2009 town of islip not display winner tie
-* OF doesn't work in schedule search
 * 2015 big 8 is weird
 * 1957 three man big 8 is blank, leads to error when clicked
-* add state tournament winners to past season page
-* check that video icons appear in proper places
-* add marker to all imported runs
+
+* add marker to all imported runs / all new runs
 * add extra zeroes to time (FE) e.g. 7.5 to 7.50
 * running orders are in the 100s?
 * find way to ID parades.
 * times, points are getting 'NULL' strings instead of NULL
-* cache the big 8 for every hour
-* query db for last old_id and save on class
-* collation to sort strings as numbers?
-* need a new column in runs - can do this from a query? 
+* cache the big 8 for every hour (check other places for cacheing, total points)
 * considering select columns for some requests
 * handle cursor for getFilteredRuns
-* add cors
 * aws to save images
-* getSeasons - agg query on tournaments
 
 ### Ideas
 * index on tournamentId (convert to numeric?)?
 * Most points scored in year, circuit, sanctioned
+
+### Finished: 
+* error handling in controllers
+* query db for last old_id and save on class
+* getSeasons - agg query on tournaments
 
 
