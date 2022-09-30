@@ -8,7 +8,7 @@
 [Article](https://blog.cloudthat.com/step-by-step-guide-to-deploy-reactjs-app-on-aws-s3/) on deploying fe to s3
 [Article](https://webpack.js.org/plugins/define-plugin) env vars in FE with webpack
 [Article](https://docs.bitnami.com/aws/infrastructure/nodejs/) on working with Bitnami (be deployment)
-
+[Article](https://lightsail.aws.amazon.com/ls/docs/en_us/articles/amazon-lightsail-using-lets-encrypt-certificates-with-nginx) using Lets Encrypt on lightsail
 
 ### Data Issues to investigate
 * update classes

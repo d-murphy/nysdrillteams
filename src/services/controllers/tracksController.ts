@@ -34,45 +34,45 @@ export function tracksRouter (tracksDataSource:TracksData){
         res.status(200).send(track);
     })
 
-    router.post('/insertTrack', async (req: Request, res: Response) => {
-        let newTrack = req.body;
-        if( !newTrack?.name || !newTrack?.address || !newTrack?.city  ) return res.status(400).send('malformed reqeust'); 
-        let result: InsertOneResult | undefined; 
-        try {
-            result = await Tracks.insertTrack(newTrack); 
-        } catch(e) {
-            console.error("Error inserting track: ", e); 
-            return res.status(500).send("Internal server error."); 
-        }
-        return res.status(200).send(result); 
-    })
+    // router.post('/insertTrack', async (req: Request, res: Response) => {
+    //     let newTrack = req.body;
+    //     if( !newTrack?.name || !newTrack?.address || !newTrack?.city  ) return res.status(400).send('malformed reqeust'); 
+    //     let result: InsertOneResult | undefined; 
+    //     try {
+    //         result = await Tracks.insertTrack(newTrack); 
+    //     } catch(e) {
+    //         console.error("Error inserting track: ", e); 
+    //         return res.status(500).send("Internal server error."); 
+    //     }
+    //     return res.status(200).send(result); 
+    // })
 
-    router.post('/deleteTrack', async (req: Request, res: Response) => {
-        const trackId: string = (req.body.trackId as unknown as string);
-        if(!trackId) return res.status(400).send('team id not valid')
-        let result: DeleteResult | undefined; 
-        try {
-            result = await Tracks.deleteTrack(trackId);
-        } catch(e) {
-            console.error("Error deleting track: ", e); 
-            return res.status(500).send("Internal server error."); 
-        }
-        return res.status(200).send(`Delete successful.`);
-    })
+    // router.post('/deleteTrack', async (req: Request, res: Response) => {
+    //     const trackId: string = (req.body.trackId as unknown as string);
+    //     if(!trackId) return res.status(400).send('team id not valid')
+    //     let result: DeleteResult | undefined; 
+    //     try {
+    //         result = await Tracks.deleteTrack(trackId);
+    //     } catch(e) {
+    //         console.error("Error deleting track: ", e); 
+    //         return res.status(500).send("Internal server error."); 
+    //     }
+    //     return res.status(200).send(`Delete successful.`);
+    // })
 
-    router.post('/updateTrack', async (req: Request, res: Response) => {
-        let trackId = req.body.trackId; 
-        let fieldsToUpdate = req.body.fieldsToUpdate; 
-        if(!trackId || !fieldsToUpdate) return res.status(400).send('update body not valid'); 
-        let result: UpdateResult | undefined; 
-        try {
-            result = await Tracks.updateTrack(trackId, fieldsToUpdate); 
-        } catch(e) {
-            console.error("Error updating track: ", e); 
-            return res.status(500).send("Internal server error."); 
-        }
-        return res.status(200).send(result); 
-    })
+    // router.post('/updateTrack', async (req: Request, res: Response) => {
+    //     let trackId = req.body.trackId; 
+    //     let fieldsToUpdate = req.body.fieldsToUpdate; 
+    //     if(!trackId || !fieldsToUpdate) return res.status(400).send('update body not valid'); 
+    //     let result: UpdateResult | undefined; 
+    //     try {
+    //         result = await Tracks.updateTrack(trackId, fieldsToUpdate); 
+    //     } catch(e) {
+    //         console.error("Error updating track: ", e); 
+    //         return res.status(500).send("Internal server error."); 
+    //     }
+    //     return res.status(200).send(result); 
+    // })
 
     router.get('/getTracks', async (req: Request, res: Response) => {
         let tracks: Track[]; 
