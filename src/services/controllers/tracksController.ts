@@ -1,11 +1,15 @@
 import express, {Request, Response} from 'express'; 
 import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
 import { TracksData, Track } from '../../types/types'
-
 import TracksService from '../dataService/tracksService';
+import SessionAdmin from '../../library/session';
+import { createAuthMdw, createSessionsMdw } from './createSessionAndAuthMdw';
 
-export function tracksRouter (tracksDataSource:TracksData){
+export function tracksRouter (tracksDataSource:TracksData, sessionAdmin:SessionAdmin){
     const Tracks = new TracksService(tracksDataSource); 
+    const sessionsMdw = createSessionsMdw(sessionAdmin); 
+    const authMdw = createAuthMdw(sessionAdmin, ['admin', 'scorekeeper']); 
+
     const router = express.Router()
 
     router.get('/getTrack', async (req: Request, res: Response) => {
@@ -34,7 +38,7 @@ export function tracksRouter (tracksDataSource:TracksData){
         res.status(200).send(track);
     })
 
-    router.post('/insertTrack', async (req: Request, res: Response) => {
+    router.post('/insertTrack', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         let newTrack = req.body;
         if( !newTrack?.name || !newTrack?.address || !newTrack?.city  ) return res.status(400).send('malformed reqeust'); 
         let result: InsertOneResult | undefined; 
@@ -47,7 +51,7 @@ export function tracksRouter (tracksDataSource:TracksData){
         return res.status(200).send(result); 
     })
 
-    router.post('/deleteTrack', async (req: Request, res: Response) => {
+    router.post('/deleteTrack', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         const trackId: string = (req.body.trackId as unknown as string);
         if(!trackId) return res.status(400).send('team id not valid')
         let result: DeleteResult | undefined; 
@@ -60,7 +64,7 @@ export function tracksRouter (tracksDataSource:TracksData){
         return res.status(200).send(`Delete successful.`);
     })
 
-    router.post('/updateTrack', async (req: Request, res: Response) => {
+    router.post('/updateTrack', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         let trackId = req.body.trackId; 
         let fieldsToUpdate = req.body.fieldsToUpdate; 
         if(!trackId || !fieldsToUpdate) return res.status(400).send('update body not valid'); 

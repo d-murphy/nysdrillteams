@@ -26,7 +26,11 @@
 
 ### To Do
 
-* total points
+* add mdws to all other controllers
+* add login and integrate with sessionAdmin; 
+
+* make a separate endpoint with lowest auth for link adders.  
+* db backups?
 
 * re-install bootstrap and react-bootstrap for tooltips
 * turn off locations until images
@@ -62,5 +66,6 @@
 * error handling in controllers
 * query db for last old_id and save on class
 * getSeasons - agg query on tournaments
+* total points
 
 

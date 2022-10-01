@@ -3,10 +3,16 @@ import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
 
 import { RunsData, TotalPointsFields, Run } from '../../types/types';
 import RunsService from '../dataService/runsService';
+import SessionAdmin from '../../library/session'
+import { createAuthMdw, createSessionsMdw } from './createSessionAndAuthMdw';
 
 
-export function runsRouter (runsDataSource:RunsData){
+
+export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin){
     const Runs = new RunsService(runsDataSource); 
+    const sessionsMdw = createSessionsMdw(sessionAdmin); 
+    const authMdw = createAuthMdw(sessionAdmin, ['admin', 'scorekeeper']); 
+
     const router = express.Router()
     router.get('/getRun', async (req: Request, res: Response) => {
         const runId: number = (req.query.runId as unknown as number);
@@ -24,7 +30,7 @@ export function runsRouter (runsDataSource:RunsData){
     })
     
     
-    router.post('/insertRun', async (req: Request, res: Response) => {
+    router.post('/insertRun', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         let newRun = req.body.runsData;
         let team = req.body.teamData; 
         let tournament = req.body.tournamentData; 
@@ -44,7 +50,7 @@ export function runsRouter (runsDataSource:RunsData){
         return res.status(200).send(result);
     })
     
-    router.post('/deleteRun', async (req: Request, res: Response) => {
+    router.post('/deleteRun', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         const runId: number = (req.body.runId as unknown as number);
         if(!runId) return res.status(400).send('run id not valid')
         let runResult: DeleteResult | undefined; 
@@ -57,7 +63,7 @@ export function runsRouter (runsDataSource:RunsData){
         res.status(200).send(runResult);
     })
     
-    router.post('/updateRun', async (req: Request, res: Response) => {
+    router.post('/updateRun', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         let runId = req.body.runId; 
         let pointsUpdate = req.body.pointsUpdate;
         let timeUpdate = req.body.timeUpdate;  

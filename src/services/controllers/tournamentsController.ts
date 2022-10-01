@@ -1,13 +1,16 @@
 import express, {Request, Response} from 'express'; 
 import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
 import { Tournament, TournamentsData } from '../../types/types';
-const router = express.Router()
-
 import TournamentsService from '../dataService/tournamentsService';
+import SessionAdmin from '../../library/session'
+import { createAuthMdw, createSessionsMdw } from './createSessionAndAuthMdw';
 
 
-export function tournamentsRouter (tournamentsDataSource:TournamentsData){
+export function tournamentsRouter (tournamentsDataSource:TournamentsData, sessionAdmin:SessionAdmin){
     const Tournaments = new TournamentsService(tournamentsDataSource); 
+    const sessionsMdw = createSessionsMdw(sessionAdmin); 
+    const authMdw = createAuthMdw(sessionAdmin, ['admin', 'scorekeeper']); 
+
     const router = express.Router()
 
     router.get('/getTournament', async (req: Request, res: Response) => {
@@ -23,7 +26,7 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData){
         res.status(200).send(tournament);
     })
 
-    router.post('/insertTournament', async (req: Request, res: Response) => {
+    router.post('/insertTournament', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         let newTournament = req.body;
         if( !newTournament?.name || !newTournament?.date ||  
             !newTournament?.track   
@@ -40,7 +43,7 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData){
         res.status(200).send(result);
     })
 
-    router.post('/deleteTournament', async (req: Request, res: Response) => {
+    router.post('/deleteTournament', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         const tournamentId: number = (req.body?.tournamentId as unknown as number);
         if(!tournamentId) return res.status(400).send('team id not valid')
         let result: DeleteResult; 
@@ -53,7 +56,7 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData){
         res.status(200).send(result);
     })
 
-    router.post('/updateTournament', async (req: Request, res: Response) => {
+    router.post('/updateTournament', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         const tournamentId: string = (req.body?.tournamentId as unknown as string); 
         const fieldsToUpdate: {} = (req.body?.fieldsToUpdate as unknown as {}); 
         if(!tournamentId || !fieldsToUpdate) return res.status(400).send('update body not valid'); 

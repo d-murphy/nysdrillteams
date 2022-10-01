@@ -15,6 +15,7 @@ import { runsDbFactory } from './services/database/runsDb';
 import { teamsDbFactory } from './services/database/teamsDb';
 import { tournamentsDbFactory } from './services/database/tournamentsDb';
 import { tracksDbFactory } from './services/database/tracksDb';
+import SessionAdmin from './library/session'; 
 
 const dbConnectionStr:string =
   `mongodb+srv://${dbUn}:${dbPass}@nysdrillteams.4t9radi.mongodb.net/?retryWrites=true&w=majority`;
@@ -31,15 +32,16 @@ const dbPromise = getDbPromise(dbConnectionStr, DB_NAME);
     
     app.use(express.static("static/user"))
     
+    const sessionAdmin = new SessionAdmin(); 
     
     let runsData = await runsDbFactory(dbPromise, 'runs');  
     let teamsData = await teamsDbFactory(dbPromise, 'teams'); 
     let tournamentsData = await tournamentsDbFactory(dbPromise, 'tournaments'); 
     let tracksData = await tracksDbFactory(dbPromise, 'tracks'); 
-    if(runsData) app.use('/runs', runsRouter(runsData)); 
-    if(teamsData) app.use('/teams', teamsRouter(teamsData));
-    if(tournamentsData) app.use('/tournaments', tournamentsRouter(tournamentsData));  
-    if(tracksData) app.use('/tracks', tracksRouter(tracksData));  
+    if(runsData) app.use('/runs', runsRouter(runsData, sessionAdmin)); 
+    if(teamsData) app.use('/teams', teamsRouter(teamsData, sessionAdmin));
+    if(tournamentsData) app.use('/tournaments', tournamentsRouter(tournamentsData, sessionAdmin));  
+    if(tracksData) app.use('/tracks', tracksRouter(tracksData, sessionAdmin));  
 
     app.get('/test', (req, res) => res.status(200).send('hi'))
     

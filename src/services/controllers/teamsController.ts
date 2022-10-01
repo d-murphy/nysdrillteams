@@ -3,10 +3,15 @@ import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
 const router = express.Router()
 import { TeamData, Team } from '../../types/types'
 import TeamsService from '../dataService/teamsService';
+import SessionAdmin from '../../library/session'
+import { createAuthMdw, createSessionsMdw } from './createSessionAndAuthMdw';
 
-export function teamsRouter (teamsDataSource:TeamData){
+
+export function teamsRouter (teamsDataSource:TeamData, sessionAdmin: SessionAdmin){
     const Teams = new TeamsService(teamsDataSource); 
     const router = express.Router()
+    const sessionsMdw = createSessionsMdw(sessionAdmin); 
+    const authMdw = createAuthMdw(sessionAdmin, ['admin', 'scorekeeper']); 
 
     router.get('/getTeam', async (req: Request, res: Response) => {
         const teamId: number = parseInt((req.query?.teamId as unknown as string));
@@ -23,7 +28,7 @@ export function teamsRouter (teamsDataSource:TeamData){
     })
 
 
-    router.post('/insertTeam', async (req: Request, res: Response) => {
+    router.post('/insertTeam', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         let newTeam = req.body;
         if(!newTeam?.fullName || !newTeam?.nickname || !newTeam?.hometown || !newTeam?.circuit ) return res.status(401).send('malformed reqeust')
         let result: InsertOneResult; 
@@ -36,7 +41,7 @@ export function teamsRouter (teamsDataSource:TeamData){
         res.status(200).send(result);
     })
 
-    router.post('/deleteTeam', async (req: Request, res: Response) => {
+    router.post('/deleteTeam', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         const teamId: string = (req.body?.teamId as unknown as string);
         if(!teamId) return res.status(400).send('team id not valid')
         let result: DeleteResult; 
@@ -49,7 +54,7 @@ export function teamsRouter (teamsDataSource:TeamData){
         res.status(200).send(result);
     })
 
-    router.post('/updateTeam', async (req: Request, res: Response) => {
+    router.post('/updateTeam', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         let teamId = req.body?.teamId; 
         let fieldsToUpdate = req.body?.fieldsToUpdate; 
         if(!teamId || !fieldsToUpdate) return res.status(400).send('update body not valid') 
