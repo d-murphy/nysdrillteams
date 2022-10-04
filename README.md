@@ -26,8 +26,9 @@
 
 ### To Do
 
-* add mdws to all other controllers
 * add login and integrate with sessionAdmin; 
+* add logout and use deleteSession; 
+* make a users controller db and server with 3 layers
 
 * make a separate endpoint with lowest auth for link adders.  
 * db backups?
