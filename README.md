@@ -8,6 +8,7 @@
 [Article](https://blog.cloudthat.com/step-by-step-guide-to-deploy-reactjs-app-on-aws-s3/) on deploying fe to s3
 [Article](https://webpack.js.org/plugins/define-plugin) env vars in FE with webpack
 [Article](https://docs.bitnami.com/aws/infrastructure/nodejs/) on working with Bitnami (be deployment)
+[Video](https://www.youtube.com/watch?v=rtshCulV2hk&list=LL&index=1) on lightsail, apache, ssl
 
 
 ### Data Issues to investigate
@@ -25,6 +26,7 @@
 * tracks page, pictures, track records
 
 ### To Do
+* cloudfront to secure FE, I think this will fix the cors issue then - not sure, but going to keep going.  
 
 * add login and integrate with sessionAdmin; 
 * add logout and use deleteSession; 
