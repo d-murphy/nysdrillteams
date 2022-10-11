@@ -142,3 +142,16 @@ export interface TracksData {
 
 export type TotalPointsFields = "Nassau" | "Suffolk" | "Western" | "Northern" | "Junior" | "Suffolk OF" | "Nassau OF" | "LI OF";  
 
+export interface User {
+    username: string, 
+    password: string, 
+    rolesArr: string []
+}
+
+export interface UsersData {
+    insertUser(user: User): Promise<InsertOneResult>,
+    deleteUser(userId: number): Promise<DeleteResult>,
+    updateUser(userId: number, roleArr?: string[], password?: string): Promise<UpdateResult>,
+    getUsers(): Promise<User[]> 
+    getUser(username:string): Promise<User | undefined>
+}
