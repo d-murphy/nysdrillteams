@@ -3,7 +3,7 @@ import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
 const router = express.Router()
 import { TeamData, Team } from '../../types/types'
 import TeamsService from '../dataService/teamsService';
-import SessionAdmin from '../../library/session'
+import SessionAdmin from '../dataService/session'
 import { createAuthMdw, createSessionsMdw } from './createSessionAndAuthMdw';
 
 

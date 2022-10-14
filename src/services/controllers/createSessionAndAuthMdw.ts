@@ -1,4 +1,4 @@
-import SessionAdmin from '../../library/session'
+import SessionAdmin from '../dataService/session'
 import { Handler } from 'express'
 
 export function createSessionsMdw(sessionAdmin:SessionAdmin):Handler{

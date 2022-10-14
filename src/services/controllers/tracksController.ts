@@ -2,8 +2,8 @@ import express, {Request, Response} from 'express';
 import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
 import { TracksData, Track } from '../../types/types'
 import TracksService from '../dataService/tracksService';
-import SessionAdmin from '../../library/session';
-import { createAuthMdw, createSessionsMdw } from './createSessionAndAuthMdw';
+import SessionAdmin from '../dataService/session';
+import { createAuthMdw, createSessionsMdw } from './createSessionAndAuthMdw'; 
 
 export function tracksRouter (tracksDataSource:TracksData, sessionAdmin:SessionAdmin){
     const Tracks = new TracksService(tracksDataSource); 

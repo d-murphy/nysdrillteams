@@ -3,7 +3,7 @@ import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
 
 import { RunsData, TotalPointsFields, Run } from '../../types/types';
 import RunsService from '../dataService/runsService';
-import SessionAdmin from '../../library/session'
+import SessionAdmin from '../dataService/session'
 import { createAuthMdw, createSessionsMdw } from './createSessionAndAuthMdw';
 
 

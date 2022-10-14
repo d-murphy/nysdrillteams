@@ -2,7 +2,7 @@ import express, {Request, Response} from 'express';
 import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
 import { Tournament, TournamentsData } from '../../types/types';
 import TournamentsService from '../dataService/tournamentsService';
-import SessionAdmin from '../../library/session'
+import SessionAdmin from '../dataService/session'
 import { createAuthMdw, createSessionsMdw } from './createSessionAndAuthMdw';
 
 
