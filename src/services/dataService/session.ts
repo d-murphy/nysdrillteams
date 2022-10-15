@@ -10,17 +10,22 @@ class SessionAdmin {
         this.checkCt = 0; 
     }
     checkSession(ip:string, userJwt:string, jwtSecret:string): {username:string, rolesArr:string[]} | null {
-        let decoded = jwt.verify(userJwt, jwtSecret) as {username:string, rolesArr:string[]}
+        let decoded
+        try {
+            decoded = jwt.verify(userJwt, jwtSecret) as {username:string, rolesArr:string[]} 
+        } catch(e){
+            decoded = null; 
+        }
         if(!decoded) return null; 
-
         let session = this.users[decoded.username];  
+        if(!session) return null; 
         let sessionCurrent = (
                 +session.last - +(new Date()) > SESSION_MAX ||
                 session.ip != ip || 
                 session.jwt != userJwt 
             ) ? false : true; 
         if(!sessionCurrent) {
-            this.deleteSession(decoded.username); 
+            this.deleteSession(userJwt, jwtSecret); 
             return null; 
         }
         session.last = new Date(); 
@@ -32,10 +37,16 @@ class SessionAdmin {
         if(this.checkCt==20) this.cleanSessions(); 
         return true; 
     }
-    deleteSession(user:string):boolean{
+    deleteSession(userJwt:string, jwtSecret:string):boolean{
+        let decoded; 
         let entryDeleted = false; 
-        if(this.users[user]){
-            delete this.users[user]; 
+        try{
+            decoded = jwt.verify(userJwt, jwtSecret) as {username:string, rolesArr:string[]}
+        } catch(e) {
+            return entryDeleted
+        }
+        if(this.users[decoded.username]){
+            delete this.users[decoded.username]; 
             entryDeleted = true; 
         }
         return entryDeleted; 

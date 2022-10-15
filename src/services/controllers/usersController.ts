@@ -81,6 +81,20 @@ export function usersRouter (usersDataSource:UsersData, sessionAdmin:SessionAdmi
         return res.status(200).send(checkPassResult.userJwt); 
     })
 
+    router.post("/logout", async(req:Request, res:Response) => {
+        const jwt = (req.query?.jwt as unknown as string); 
+        if(!jwt) return res.status(400).send("Need jwt to logout."); 
+        let logoutResult; 
+        try{
+            logoutResult = await sessionAdmin.deleteSession(jwt, jwtSecret);  
+        } catch(e) {
+            console.error("Error attempting logout: ", e); 
+            return res.status(500).send("Internal server error."); 
+        }
+        return res.status(200).send(logoutResult); 
+    })
+
+
     return router; 
 }
 

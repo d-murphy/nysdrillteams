@@ -29,9 +29,8 @@
 ### To Do
 * cloudfront to secure FE, I think this will fix the cors issue then - not sure, but going to keep going.  
 
-* add login and integrate with sessionAdmin; 
 * add logout and use deleteSession; 
-* make a users controller db and server with 3 layers
+* test session expiration
 
 * make a separate endpoint with lowest auth for link adders.  
 * db backups?
