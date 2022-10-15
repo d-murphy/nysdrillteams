@@ -1,32 +1,36 @@
+import jwt from 'jsonwebtoken'; 
+
 const SESSION_MAX = 1000 * 60 * 1; 
 
 class SessionAdmin {
-    users: {[index:string]: {last: Date, ip: string, sessionId: string, role: string}}
+    users: {[index:string]: {last: Date, ip: string, jwt: string, rolesArr: string[]}}
     checkCt: number
     constructor(){
         this.users = {}; 
         this.checkCt = 0; 
     }
-    checkSession(user:string, ip:string, sessionId:string):boolean{
-        if(!this.users[user]) return false; 
-        let session = this.users[user]; 
+    checkSession(ip:string, userJwt:string, jwtSecret:string): {username:string, rolesArr:string[]} | null {
+        let decoded = jwt.verify(userJwt, jwtSecret) as {username:string, rolesArr:string[]}
+        if(!decoded) return null; 
+
+        let session = this.users[decoded.username];  
         let sessionCurrent = (
                 +session.last - +(new Date()) > SESSION_MAX ||
                 session.ip != ip || 
-                session.sessionId != sessionId 
+                session.jwt != userJwt 
             ) ? false : true; 
-        if(!sessionCurrent) this.deleteSession(user); 
-        if(sessionCurrent) session.last = new Date(); 
-        return sessionCurrent; 
+        if(!sessionCurrent) {
+            this.deleteSession(decoded.username); 
+            return null; 
+        }
+        session.last = new Date(); 
+        return decoded; 
     }
-    checkRole(user:string, roles:string[]){
-        return roles.includes(this.users[user].role); 
-    }
-    createSession(user:string, ip:string, sessionId:string, role:string):string{
-        this.users[user] = {last: new Date(), ip: ip, sessionId: makeid(), role: role}; 
+    createSession(user:string, ip:string, userJwt:string, rolesArr:string[]):boolean{
+        this.users[user] = {last: new Date(), ip: ip, jwt: userJwt, rolesArr: rolesArr}; 
         this.checkCt++; 
         if(this.checkCt==20) this.cleanSessions(); 
-        return this.users[user].sessionId; 
+        return true; 
     }
     deleteSession(user:string):boolean{
         let entryDeleted = false; 
@@ -36,7 +40,7 @@ class SessionAdmin {
         }
         return entryDeleted; 
     }
-    cleanSessions(){
+    async cleanSessions(){
         let users = Object.keys(this.users); 
         users.forEach(user => {
             if(+this.users[user].last - +(new Date()) > SESSION_MAX ) delete this.users[user]
@@ -46,17 +50,3 @@ class SessionAdmin {
 }; 
 
 export default SessionAdmin; 
-
-
-
-function makeid() {
-    const ID_LENGTH = 20; 
-    var result = '';
-    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
-    for ( var i = 0; i < ID_LENGTH; i++ ) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-   return result;
-}
-

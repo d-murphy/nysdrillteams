@@ -3,11 +3,11 @@ import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
 import { TracksData, Track } from '../../types/types'
 import TracksService from '../dataService/tracksService';
 import SessionAdmin from '../dataService/session';
-import { createAuthMdw, createSessionsMdw } from './createSessionAndAuthMdw'; 
+import { createAuthMdw, checkSessionsMdw } from './createSessionAndAuthMdw'; 
 
-export function tracksRouter (tracksDataSource:TracksData, sessionAdmin:SessionAdmin){
+export function tracksRouter (tracksDataSource:TracksData, sessionAdmin:SessionAdmin, jwtSecret:string){
     const Tracks = new TracksService(tracksDataSource); 
-    const sessionsMdw = createSessionsMdw(sessionAdmin); 
+    const sessionsMdw = checkSessionsMdw(sessionAdmin, jwtSecret); 
     const authMdw = createAuthMdw(sessionAdmin, ['admin', 'scorekeeper']); 
 
     const router = express.Router()

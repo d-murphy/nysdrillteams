@@ -3,12 +3,9 @@ import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
 import { UsersData, User } from '../../types/types'
 import UsersService from '../dataService/usersService';
 import SessionAdmin from '../dataService/session';
-import { createAuthMdw, createSessionsMdw } from './createSessionAndAuthMdw';
 
 export function usersRouter (usersDataSource:UsersData, sessionAdmin:SessionAdmin, jwtSecret:string){
     const Users = new UsersService(usersDataSource, jwtSecret); 
-    const sessionsMdw = createSessionsMdw(sessionAdmin); 
-    const authMdw = createAuthMdw(sessionAdmin, ['admin', 'scorekeeper']); 
 
     const router = express.Router()
 
@@ -71,14 +68,17 @@ export function usersRouter (usersDataSource:UsersData, sessionAdmin:SessionAdmi
         const username = req.body.username; 
         const password = req.body.password; 
         if(!username || !password) return res.status(400).send("malformed request."); 
-        let result; 
+        let checkPassResult; 
         try{
-            result = await Users.checkPass(username, password); 
+            checkPassResult = await Users.checkPass(username, password); 
         } catch(e) {
             console.error("Error attempting login: ", e); 
             return res.status(500).send("Internal server error."); 
         }
-        return res.status(200).send(result); 
+        if(!checkPassResult) return res.status(400).send("Username and password not a match.");
+        let ip = req.socket.remoteAddress || ''
+        sessionAdmin.createSession(username, ip, checkPassResult?.userJwt, checkPassResult?.rolesArr  )
+        return res.status(200).send(checkPassResult.userJwt); 
     })
 
     return router; 

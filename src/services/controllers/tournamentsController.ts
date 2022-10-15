@@ -3,12 +3,12 @@ import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
 import { Tournament, TournamentsData } from '../../types/types';
 import TournamentsService from '../dataService/tournamentsService';
 import SessionAdmin from '../dataService/session'
-import { createAuthMdw, createSessionsMdw } from './createSessionAndAuthMdw';
+import { createAuthMdw, checkSessionsMdw } from './createSessionAndAuthMdw';
 
 
-export function tournamentsRouter (tournamentsDataSource:TournamentsData, sessionAdmin:SessionAdmin){
+export function tournamentsRouter (tournamentsDataSource:TournamentsData, sessionAdmin:SessionAdmin, jwtSecret:string){
     const Tournaments = new TournamentsService(tournamentsDataSource); 
-    const sessionsMdw = createSessionsMdw(sessionAdmin); 
+    const sessionsMdw = checkSessionsMdw(sessionAdmin, jwtSecret); 
     const authMdw = createAuthMdw(sessionAdmin, ['admin', 'scorekeeper']); 
 
     const router = express.Router()

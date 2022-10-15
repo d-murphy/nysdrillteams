@@ -4,13 +4,13 @@ import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
 import { RunsData, TotalPointsFields, Run } from '../../types/types';
 import RunsService from '../dataService/runsService';
 import SessionAdmin from '../dataService/session'
-import { createAuthMdw, createSessionsMdw } from './createSessionAndAuthMdw';
+import { createAuthMdw, checkSessionsMdw } from './createSessionAndAuthMdw';
 
 
 
-export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin){
+export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin, jwtSecret:string){
     const Runs = new RunsService(runsDataSource); 
-    const sessionsMdw = createSessionsMdw(sessionAdmin); 
+    const sessionsMdw = checkSessionsMdw(sessionAdmin, jwtSecret); 
     const authMdw = createAuthMdw(sessionAdmin, ['admin', 'scorekeeper']); 
 
     const router = express.Router()

@@ -4,13 +4,13 @@ const router = express.Router()
 import { TeamData, Team } from '../../types/types'
 import TeamsService from '../dataService/teamsService';
 import SessionAdmin from '../dataService/session'
-import { createAuthMdw, createSessionsMdw } from './createSessionAndAuthMdw';
+import { createAuthMdw, checkSessionsMdw } from './createSessionAndAuthMdw';
 
 
-export function teamsRouter (teamsDataSource:TeamData, sessionAdmin: SessionAdmin){
+export function teamsRouter (teamsDataSource:TeamData, sessionAdmin: SessionAdmin, jwtSecret:string){
     const Teams = new TeamsService(teamsDataSource); 
     const router = express.Router()
-    const sessionsMdw = createSessionsMdw(sessionAdmin); 
+    const sessionsMdw = checkSessionsMdw(sessionAdmin, jwtSecret); 
     const authMdw = createAuthMdw(sessionAdmin, ['admin', 'scorekeeper']); 
 
     router.get('/getTeam', async (req: Request, res: Response) => {

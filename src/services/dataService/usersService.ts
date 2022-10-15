@@ -22,13 +22,14 @@ class UsersService {
     public getUsers(): Promise<User[]> {
         return this.dataSource.getUsers(); 
     }
-    public async checkPass(username: string, password:string): Promise<String | null> {
+    public async checkPass(username: string, password:string): Promise<{userJwt:string, rolesArr:string[]} | null> {
         let user = await this.dataSource.getUser(username); 
         if(!user) return null; 
         if(!bcrypt.compare(password, user.password)) return null;         
         let userWoPass: {username: string, rolesArr: string[], password?:string} = user; 
         delete userWoPass.password; 
-        return jwt.sign(userWoPass, this.jwtSecret);
+        let userJwt = jwt.sign(userWoPass, this.jwtSecret);
+        return {userJwt: userJwt, rolesArr: userWoPass.rolesArr}
     }
 }
     

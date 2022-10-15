@@ -44,10 +44,10 @@ const dbPromise = getDbPromise(dbConnectionStr, DB_NAME);
     let tournamentsData = await tournamentsDbFactory(dbPromise, 'tournaments'); 
     let tracksData = await tracksDbFactory(dbPromise, 'tracks'); 
     let usersData = await usersDbFactory(dbPromise, 'users'); 
-    if(runsData) app.use('/runs', runsRouter(runsData, sessionAdmin)); 
-    if(teamsData) app.use('/teams', teamsRouter(teamsData, sessionAdmin));
-    if(tournamentsData) app.use('/tournaments', tournamentsRouter(tournamentsData, sessionAdmin));  
-    if(tracksData) app.use('/tracks', tracksRouter(tracksData, sessionAdmin));  
+    if(runsData) app.use('/runs', runsRouter(runsData, sessionAdmin, jwtSecret)); 
+    if(teamsData) app.use('/teams', teamsRouter(teamsData, sessionAdmin, jwtSecret));
+    if(tournamentsData) app.use('/tournaments', tournamentsRouter(tournamentsData, sessionAdmin, jwtSecret));  
+    if(tracksData) app.use('/tracks', tracksRouter(tracksData, sessionAdmin, jwtSecret));  
     if(usersData) app.use('/users', usersRouter(usersData, sessionAdmin, jwtSecret))
 
     app.get('/test', (req, res) => res.status(200).send('hi'))
