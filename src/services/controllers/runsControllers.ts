@@ -8,10 +8,10 @@ import { createAuthMdw, checkSessionsMdw } from './createSessionAndAuthMdw';
 
 
 
-export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin, jwtSecret:string){
+export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin){
     const Runs = new RunsService(runsDataSource); 
-    const sessionsMdw = checkSessionsMdw(sessionAdmin, jwtSecret); 
-    const authMdw = createAuthMdw(sessionAdmin, ['admin', 'scorekeeper']); 
+    const sessionsMdw = checkSessionsMdw(sessionAdmin); 
+    const authMdw = createAuthMdw(['admin', 'scorekeeper']); 
 
     const router = express.Router()
     router.get('/getRun', async (req: Request, res: Response) => {

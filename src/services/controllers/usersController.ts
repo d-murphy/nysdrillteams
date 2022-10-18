@@ -4,8 +4,8 @@ import { UsersData, User } from '../../types/types'
 import UsersService from '../dataService/usersService';
 import SessionAdmin from '../dataService/session';
 
-export function usersRouter (usersDataSource:UsersData, sessionAdmin:SessionAdmin, jwtSecret:string){
-    const Users = new UsersService(usersDataSource, jwtSecret); 
+export function usersRouter (usersDataSource:UsersData, sessionAdmin:SessionAdmin){
+    const Users = new UsersService(usersDataSource); 
 
     const router = express.Router()
 
@@ -77,16 +77,16 @@ export function usersRouter (usersDataSource:UsersData, sessionAdmin:SessionAdmi
         }
         if(!checkPassResult) return res.status(400).send("Username and password not a match.");
         let ip = req.socket.remoteAddress || ''
-        sessionAdmin.createSession(username, ip, checkPassResult?.userJwt, checkPassResult?.rolesArr  )
-        return res.status(200).send(checkPassResult.userJwt); 
+        let sessionId = sessionAdmin.createSession(ip, username, checkPassResult.rolesArr)
+        return res.status(200).send({username:username, sessionId:sessionId, rolesArr:checkPassResult.rolesArr}); 
     })
 
     router.post("/logout", async(req:Request, res:Response) => {
-        const jwt = (req.query?.jwt as unknown as string); 
-        if(!jwt) return res.status(400).send("Need jwt to logout."); 
+        const sessionId = (req.query?.sessionId as unknown as string); 
+        if(!sessionId) return res.status(400).send("Need sessionId to logout."); 
         let logoutResult; 
         try{
-            logoutResult = await sessionAdmin.deleteSession(jwt, jwtSecret);  
+            logoutResult = await sessionAdmin.deleteSession(sessionId);  
         } catch(e) {
             console.error("Error attempting logout: ", e); 
             return res.status(500).send("Internal server error."); 

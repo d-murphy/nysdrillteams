@@ -1,60 +1,47 @@
-import jwt from 'jsonwebtoken'; 
+import { v4 as uuidv4 } from 'uuid';
 
 const SESSION_MAX = 1000 * 60 * 1; 
 
 class SessionAdmin {
-    users: {[index:string]: {last: Date, ip: string, jwt: string, rolesArr: string[]}}
+    sessions: {[index:string]: {last: Date, ip: string, username:string, rolesArr:string[]}}
     checkCt: number
     constructor(){
-        this.users = {}; 
+        this.sessions = {}; 
         this.checkCt = 0; 
     }
-    checkSession(ip:string, userJwt:string, jwtSecret:string): {username:string, rolesArr:string[]} | null {
-        let decoded
-        try {
-            decoded = jwt.verify(userJwt, jwtSecret) as {username:string, rolesArr:string[]} 
-        } catch(e){
-            decoded = null; 
-        }
-        if(!decoded) return null; 
-        let session = this.users[decoded.username];  
+    checkSession(ip:string, sessionId:string): {last: Date, ip:string, username:string, rolesArr:string[]} | null {
+        let session = this.sessions[sessionId];  
         if(!session) return null; 
         let sessionCurrent = (
                 +session.last - +(new Date()) > SESSION_MAX ||
-                session.ip != ip || 
-                session.jwt != userJwt 
+                session.ip != ip  
             ) ? false : true; 
         if(!sessionCurrent) {
-            this.deleteSession(userJwt, jwtSecret); 
+            this.deleteSession(sessionId); 
             return null; 
         }
         session.last = new Date(); 
-        return decoded; 
+        return session;  
     }
-    createSession(user:string, ip:string, userJwt:string, rolesArr:string[]):boolean{
-        this.users[user] = {last: new Date(), ip: ip, jwt: userJwt, rolesArr: rolesArr}; 
+    createSession(ip:string, username:string, rolesArr:string[]):string{
+        let sessionId = uuidv4(); 
+        this.sessions[sessionId] = {last: new Date(), ip: ip, username:username, rolesArr:rolesArr}; 
         this.checkCt++; 
         if(this.checkCt==20) this.cleanSessions(); 
-        return true; 
+        return sessionId; 
     }
-    deleteSession(userJwt:string, jwtSecret:string):boolean{
-        let decoded; 
+    deleteSession(sessionId:string):boolean{
         let entryDeleted = false; 
-        try{
-            decoded = jwt.verify(userJwt, jwtSecret) as {username:string, rolesArr:string[]}
-        } catch(e) {
-            return entryDeleted
-        }
-        if(this.users[decoded.username]){
-            delete this.users[decoded.username]; 
+        if(this.sessions[sessionId]){
+            delete this.sessions[sessionId]; 
             entryDeleted = true; 
         }
         return entryDeleted; 
     }
     async cleanSessions(){
-        let users = Object.keys(this.users); 
-        users.forEach(user => {
-            if(+this.users[user].last - +(new Date()) > SESSION_MAX ) delete this.users[user]
+        let sessionIds = Object.keys(this.sessions); 
+        sessionIds.forEach(sessionId => {
+            if(+this.sessions[sessionId].last - +(new Date()) > SESSION_MAX ) delete this.sessions[sessionId]
         })
         this.checkCt = 0; 
     }

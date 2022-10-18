@@ -6,10 +6,10 @@ import SessionAdmin from '../dataService/session'
 import { createAuthMdw, checkSessionsMdw } from './createSessionAndAuthMdw';
 
 
-export function tournamentsRouter (tournamentsDataSource:TournamentsData, sessionAdmin:SessionAdmin, jwtSecret:string){
+export function tournamentsRouter (tournamentsDataSource:TournamentsData, sessionAdmin:SessionAdmin){
     const Tournaments = new TournamentsService(tournamentsDataSource); 
-    const sessionsMdw = checkSessionsMdw(sessionAdmin, jwtSecret); 
-    const authMdw = createAuthMdw(sessionAdmin, ['admin', 'scorekeeper']); 
+    const sessionsMdw = checkSessionsMdw(sessionAdmin); 
+    const authMdw = createAuthMdw(['admin', 'scorekeeper']); 
 
     const router = express.Router()
 

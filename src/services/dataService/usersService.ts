@@ -1,11 +1,10 @@
 import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
 import { User, UsersData  } from '../../types/types'; 
 import bcrypt from 'bcrypt'; 
-import jwt from 'jsonwebtoken'; 
 
 class UsersService {
 
-    constructor ( private dataSource : UsersData, private jwtSecret: string ){}
+    constructor ( private dataSource : UsersData ){}
     public async insertUser(user: User): Promise<InsertOneResult> {
         user.password = await bcrypt.hash(user.password, 10); 
         return this.dataSource.insertUser(user); 
@@ -22,14 +21,13 @@ class UsersService {
     public getUsers(): Promise<User[]> {
         return this.dataSource.getUsers(); 
     }
-    public async checkPass(username: string, password:string): Promise<{userJwt:string, rolesArr:string[]} | null> {
+    public async checkPass(username: string, password:string): Promise<{username:string, rolesArr:string[]} | null> {
         let user = await this.dataSource.getUser(username); 
         if(!user) return null; 
         if(!bcrypt.compare(password, user.password)) return null;         
         let userWoPass: {username: string, rolesArr: string[], password?:string} = user; 
         delete userWoPass.password; 
-        let userJwt = jwt.sign(userWoPass, this.jwtSecret);
-        return {userJwt: userJwt, rolesArr: userWoPass.rolesArr}
+        return userWoPass; 
     }
 }
     

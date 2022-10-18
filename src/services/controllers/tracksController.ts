@@ -5,10 +5,10 @@ import TracksService from '../dataService/tracksService';
 import SessionAdmin from '../dataService/session';
 import { createAuthMdw, checkSessionsMdw } from './createSessionAndAuthMdw'; 
 
-export function tracksRouter (tracksDataSource:TracksData, sessionAdmin:SessionAdmin, jwtSecret:string){
+export function tracksRouter (tracksDataSource:TracksData, sessionAdmin:SessionAdmin){
     const Tracks = new TracksService(tracksDataSource); 
-    const sessionsMdw = checkSessionsMdw(sessionAdmin, jwtSecret); 
-    const authMdw = createAuthMdw(sessionAdmin, ['admin', 'scorekeeper']); 
+    const sessionsMdw = checkSessionsMdw(sessionAdmin); 
+    const authMdw = createAuthMdw(['admin', 'scorekeeper']); 
 
     const router = express.Router()
 

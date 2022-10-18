@@ -7,11 +7,11 @@ import SessionAdmin from '../dataService/session'
 import { createAuthMdw, checkSessionsMdw } from './createSessionAndAuthMdw';
 
 
-export function teamsRouter (teamsDataSource:TeamData, sessionAdmin: SessionAdmin, jwtSecret:string){
+export function teamsRouter (teamsDataSource:TeamData, sessionAdmin: SessionAdmin){
     const Teams = new TeamsService(teamsDataSource); 
     const router = express.Router()
-    const sessionsMdw = checkSessionsMdw(sessionAdmin, jwtSecret); 
-    const authMdw = createAuthMdw(sessionAdmin, ['admin', 'scorekeeper']); 
+    const sessionsMdw = checkSessionsMdw(sessionAdmin); 
+    const authMdw = createAuthMdw(['admin', 'scorekeeper']); 
 
     router.get('/getTeam', async (req: Request, res: Response) => {
         const teamId: number = parseInt((req.query?.teamId as unknown as string));

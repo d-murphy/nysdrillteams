@@ -2,7 +2,6 @@ const dotenv = require('dotenv');
 dotenv.config(); 
 
 let { PORT, DB_NAME, dbUn, dbPass } = process.env; 
-let jwtSecret = (process.env.jwtSecret as unknown as string); 
 if(!DB_NAME) DB_NAME = 'nysdrillteams'; 
 
 const cors = require("cors")
@@ -44,11 +43,11 @@ const dbPromise = getDbPromise(dbConnectionStr, DB_NAME);
     let tournamentsData = await tournamentsDbFactory(dbPromise, 'tournaments'); 
     let tracksData = await tracksDbFactory(dbPromise, 'tracks'); 
     let usersData = await usersDbFactory(dbPromise, 'users'); 
-    if(runsData) app.use('/runs', runsRouter(runsData, sessionAdmin, jwtSecret)); 
-    if(teamsData) app.use('/teams', teamsRouter(teamsData, sessionAdmin, jwtSecret));
-    if(tournamentsData) app.use('/tournaments', tournamentsRouter(tournamentsData, sessionAdmin, jwtSecret));  
-    if(tracksData) app.use('/tracks', tracksRouter(tracksData, sessionAdmin, jwtSecret));  
-    if(usersData) app.use('/users', usersRouter(usersData, sessionAdmin, jwtSecret))
+    if(runsData) app.use('/runs', runsRouter(runsData, sessionAdmin)); 
+    if(teamsData) app.use('/teams', teamsRouter(teamsData, sessionAdmin));
+    if(tournamentsData) app.use('/tournaments', tournamentsRouter(tournamentsData, sessionAdmin));  
+    if(tracksData) app.use('/tracks', tracksRouter(tracksData, sessionAdmin));  
+    if(usersData) app.use('/users', usersRouter(usersData, sessionAdmin))
 
     app.get('/test', (req, res) => res.status(200).send('hi'))
     
