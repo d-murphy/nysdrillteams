@@ -27,14 +27,18 @@ const dbPromise = getDbPromise(dbConnectionStr, DB_NAME);
 (async function(){
     const app = express();
 
+    app.options('*', cors());
+    app.use(cors()); 
     app.use(express.urlencoded({
         extended: true
     }));
     app.use(express.json());
-    app.use(cors()); 
-    app.options('*', cors());
     
     app.use(express.static("static/user"))
+    app.use((req,res,next) => {
+        console.log(req.body); 
+        next(); 
+    })
     
     const sessionAdmin = new SessionAdmin(); 
     

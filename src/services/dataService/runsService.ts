@@ -29,29 +29,14 @@ interface totalPointsCache {
     _topRunsCache: topRunsCache = {}
     _totalPointsCache: totalPointsCache = {}
     constructor ( private dataSource : RunsData ){}
-    public insertRun(newRun: Run, tournament: TournamentW_id ): Promise<InsertOneResult> {
-        let run: Run = newRun;
-        run.date = new Date(newRun.date); 
-        run.year = run.date.getFullYear(); 
-        run.tournament = tournament.name;
-        run.tournamentId = (tournament._id as unknown as number); 
-        run.track = tournament.track; 
-        run.sanctioned =  getSanction(tournament.contests, run.contest); 
-        run.nassauPoints = getCfp(tournament.contests, run.contest) && tournament.nassauPoints; 
-        run.suffolkPoints = getCfp(tournament.contests, run.contest) && tournament.suffolkPoints;
-        run.westernPoints = getCfp(tournament.contests, run.contest) && tournament.westernPoints;
-        run.northernPoints = getCfp(tournament.contests, run.contest) && tournament.northernPoints;
-        run.suffolkOfPoints = getCfp(tournament.contests, run.contest) && tournament.suffolkOfPoints;
-        run.nassauOfPoints = getCfp(tournament.contests, run.contest) && tournament.nassauOfPoints;
-        run.liOfPoints = getCfp(tournament.contests, run.contest) && tournament.liOfPoints;
-        run.juniorPoints = getCfp(tournament.contests, run.contest) && tournament.juniorPoints;
-        return this.dataSource.insertRun(run);    
+    public insertRun(newRun: Run ): Promise<InsertOneResult> {
+        return this.dataSource.insertRun(newRun);    
     }
     public deleteRun(runId: number): Promise<DeleteResult> {
         return this.dataSource.deleteRun(runId);
     }
-    public updateRun(runId: number, pointsUpdate:number, timeUpdate: string, rankUpdate:string): Promise<UpdateResult> {
-        return this.dataSource.updateRun(runId, pointsUpdate, timeUpdate, rankUpdate);
+    public updateRun(runId: number, fieldsToUpdate:{}): Promise<UpdateResult> {
+        return this.dataSource.updateRun(runId, fieldsToUpdate);
     }
     public getRun(runId: number): Promise<Run | undefined> {
         return this.dataSource.getRun(runId); 
@@ -114,23 +99,6 @@ interface totalPointsCache {
     
 export default RunsService; 
 
-
-
-function getSanction(contestArr: {name:string, cfp:boolean, sanction:boolean}[], contest:string): boolean {
-    let contestObj = contestArr.find(el => {
-        return el.name == contest; 
-    })
-    if(contestObj) return contestObj.sanction; 
-    return false
-}
-
-function getCfp (contestArr: {name:string, cfp:boolean, sanction:boolean}[], contest:string): boolean {
-    let contestObj = contestArr.find(el => {
-        return el.name == contest; 
-    })
-    if(contestObj) return contestObj.cfp; 
-    return false
-}
 
 function createTopRunsKey(years?: number[], teams?: string[], tracks?: string[]){
     let key = 'years:'; 

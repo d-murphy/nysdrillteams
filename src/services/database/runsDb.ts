@@ -22,16 +22,12 @@ class RunsDb implements RunsData{
         const query = { _id: new ObjectId(runId) };
         return this._dbCollection.deleteOne(query);
     }
-    async updateRun(runId: number, pointsUpdate: number, timeUpdate: string, rankUpdate: string): Promise<UpdateResult> {
+    async updateRun(runId: number, fieldsToUpdate: {}): Promise<UpdateResult> {
         const filter = { _id: new ObjectId(runId) };
         const updateDoc = {
-            $set: {
-                rank: rankUpdate, 
-                points: pointsUpdate, 
-                time: timeUpdate
-            },
-        };
-        return this._dbCollection.updateOne(filter, updateDoc);          
+            $set: fieldsToUpdate,
+        }
+        return this._dbCollection.updateOne(filter, updateDoc);     
     }
     async getRun(runId: number): Promise<Run | undefined> {
         const query = { _id: new ObjectId(runId) };

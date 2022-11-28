@@ -32,17 +32,12 @@ export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin){
     
     router.post('/insertRun', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         let newRun = req.body.runsData;
-        let team = req.body.teamData; 
-        let tournament = req.body.tournamentData; 
-        if(!newRun?.contest || !newRun?.time || 
-            !team?.name || !team?.circuit || 
-            !tournament?.runningOrder || !tournament?.runningOrder[team?.name] || !tournament?.name || !tournament?.id || !tournament?.name || !tournament?.id
-            ){
+        if(!newRun?.contest || !newRun?.time || !newRun?.timeNum || !newRun?.team){
             return res.status(400).send('malformed reqeust')
         }
         let result: InsertOneResult | undefined; 
         try {
-            result = await Runs.insertRun(newRun, tournament)
+            result = await Runs.insertRun(newRun)
         } catch(e){
             console.error("Error inserting run: ", e); 
             return res.status(500).send("Internal server error."); 
@@ -65,13 +60,11 @@ export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin){
     
     router.post('/updateRun', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         let runId = req.body.runId; 
-        let pointsUpdate = req.body.pointsUpdate;
-        let timeUpdate = req.body.timeUpdate;  
-        let rankUpdate = req.body.rankUpdate;  
-        if((!pointsUpdate && !timeUpdate && !rankUpdate) || !runId) return res.status(400).send('update body not valid')
+        let fieldsToUpdate = req.body?.fieldsToUpdate; 
+        if(!fieldsToUpdate || !runId) return res.status(400).send('update body not valid')
         let run: UpdateResult | undefined; 
         try {
-            run = await Runs.updateRun(runId, pointsUpdate, timeUpdate, rankUpdate); 
+            run = await Runs.updateRun(runId, fieldsToUpdate); 
         } catch(e){
             console.error("Error updating run: ", e); 
             return res.status(500).send("Internal server error."); 

@@ -8,7 +8,7 @@ export type Run = {
     contest: string,
     year: number, 
     tournament: string,
-    tournamentId: number,
+    tournamentId: string,
     track: string, 
     time: string, 
     timeNum: number, 
@@ -35,7 +35,7 @@ export interface RunsData {
     _dbCollection: Collection | undefined;  
     insertRun(newRun: Run): Promise<InsertOneResult>;
     deleteRun(runId: number): Promise<DeleteResult>;
-    updateRun(runId: number, pointsUpdate: number, timeUpdate: string, rankUpdate: string): Promise<UpdateResult>; 
+    updateRun(runId: number, fieldsToUpdate: {}): Promise<UpdateResult>; 
     getRun(runId: number): Promise<Run | undefined>;
     getRunsFromTournament(tournamentId:string): Promise<Run[]>
     getFilteredRuns(        
@@ -73,7 +73,7 @@ export interface TeamData {
 }
 
 export type Tournament = {
-    id: number, 
+    id: string, 
     name: string, 
     year: number, 
     date: Date, 
@@ -127,8 +127,9 @@ export type Track = {
     city: string, 
     notes: string,
     imageUrls: string[], 
-    archHeight: string | null,
-    distanceToHydrant: number | null
+    archHeightFt: number, 
+    archHeightInches: number, 
+    distanceToHydrant: 200 | 225
 }
 
 export interface TracksData {
