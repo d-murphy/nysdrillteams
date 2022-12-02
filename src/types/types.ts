@@ -73,7 +73,7 @@ export interface TeamData {
 }
 
 export type Tournament = {
-    id: string, 
+    id: number, 
     name: string, 
     year: number, 
     date: Date, 
@@ -109,7 +109,7 @@ export interface TournamentW_id extends Tournament {
 
 export interface TournamentsData {
     insertTournament(newTournament: Tournament): Promise<InsertOneResult>;
-    deleteTournament(tournamentId: number): Promise<DeleteResult>;
+    deleteTournament(tournamentId: string): Promise<DeleteResult>;
     updateTournament(tournamentId:string, fieldsToUpdate:{}): Promise<UpdateResult>; 
     getTournament(tournamentId:number): Promise<Tournament | undefined>; 
     getFilteredTournaments(        

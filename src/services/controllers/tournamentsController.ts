@@ -44,7 +44,7 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData, sessio
     })
 
     router.post('/deleteTournament', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
-        const tournamentId: number = (req.body?.tournamentId as unknown as number);
+        const tournamentId = (req.body?.tournamentId as unknown as string);
         if(!tournamentId) return res.status(400).send('team id not valid')
         let result: DeleteResult; 
         try {

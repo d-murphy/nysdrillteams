@@ -8,7 +8,7 @@ export async function tournamentsDbFactory(dbPromise: Promise<Db>, collectionNam
             .sort({id:-1})
             .collation( {locale: 'en_US',  numericOrdering: true}).limit(1).toArray() as unknown as Tournament[])
     console.log('Current highest tournament id: ', lastIdDoc[0].id)
-    if(collection) return new TournamentsDb(collection, parseInt(lastIdDoc[0].id)); 
+    if(collection) return new TournamentsDb(collection, lastIdDoc[0].id); 
     return undefined; 
 }
 
@@ -24,10 +24,10 @@ class TournamentsDb implements TournamentsData{
         let docToInsert: TournamentW_id = newTournament; 
         docToInsert._id = new ObjectId;  
         this._lastId++; 
-        docToInsert.id = String(this._lastId);  
+        docToInsert.id = this._lastId;   
         return this._dbCollection.insertOne(docToInsert);
     }
-    async deleteTournament(tournamentId: number): Promise<DeleteResult> {
+    async deleteTournament(tournamentId: string): Promise<DeleteResult> {
         const query = { _id: new ObjectId(tournamentId) };
         return this._dbCollection.deleteOne(query);
     }

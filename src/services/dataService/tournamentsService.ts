@@ -11,7 +11,7 @@ class TournamentsService {
         newTournament.year = newTournament.date.getFullYear();
         return this.dataSource.insertTournament(newTournament); 
     }
-    public deleteTournament(tournamentId: number): Promise<DeleteResult> {
+    public deleteTournament(tournamentId: string): Promise<DeleteResult> {
         return this.dataSource.deleteTournament(tournamentId); 
     }
     public updateTournament(tournamentId: string, fieldsToUpdate: {}): Promise<UpdateResult> {

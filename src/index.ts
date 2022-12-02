@@ -36,7 +36,6 @@ const dbPromise = getDbPromise(dbConnectionStr, DB_NAME);
     
     app.use(express.static("static/user"))
     app.use((req,res,next) => {
-        console.log(req.body); 
         next(); 
     })
     

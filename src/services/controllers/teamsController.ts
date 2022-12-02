@@ -23,7 +23,6 @@ export function teamsRouter (teamsDataSource:TeamData, sessionAdmin: SessionAdmi
             console.error("Error getting team: ", e); 
             return res.status(500).send('Internal server error.'); 
         }
-        console.log('the team: ', team); 
         return res.status(200).send(team);
     })
 
