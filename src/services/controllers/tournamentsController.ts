@@ -95,6 +95,16 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData, sessio
         }
         res.status(200).send(result); 
     })
+    router.get('/getTournamentNames', async( req: Request, res: Response) => {
+        let result: {_id: string, nameCount:number}[]
+        try {
+            result = await Tournaments.getTournamentNames();
+        } catch(e) {
+            console.error("Error getting tournament names: ", e); 
+            return res.status(500).send("Internal server error."); 
+        }
+        res.status(200).send(result); 
+    })
     return router;
 }
 

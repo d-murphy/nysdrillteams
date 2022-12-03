@@ -26,6 +26,9 @@ class TournamentsService {
     public getTournsCtByYear(): Promise<{_id: number, yearCount: number}[]>{
         return this.dataSource.getTournsCtByYear(); 
     }
+    public getTournamentNames(): Promise<{_id: string, nameCount:number}[]>{
+        return this.dataSource.getTournamentNames(); 
+    }
 }
     
 export default TournamentsService; 

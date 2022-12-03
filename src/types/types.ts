@@ -117,7 +117,8 @@ export interface TournamentsData {
         tracks?:string[], 
         tournaments?:string[], 
     ): Promise<Tournament[]>; 
-    getTournsCtByYear():Promise<{_id: number, yearCount: number }[]>
+    getTournsCtByYear():Promise<{_id: number, yearCount: number }[]>; 
+    getTournamentNames(): Promise<{_id: string, nameCount:number}[]>; 
 }
 
 export type Track = {

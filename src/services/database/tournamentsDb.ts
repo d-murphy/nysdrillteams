@@ -68,4 +68,19 @@ class TournamentsDb implements TournamentsData{
             ]
         ).toArray() as unknown as {_id: number, yearCount: number}[]
     }
+    async getTournamentNames():Promise<{_id: string, nameCount:number}[]>{
+        return this._dbCollection.aggregate(
+            [
+                {
+                    $group: {
+                        _id: "$name",
+                        nameCount: {
+                            $count: {}
+                        }
+                    }
+                }, 
+                { $sort: { _id: 1 } }
+            ]
+        ).toArray() as unknown as {_id: string, nameCount:number}[]
+    }
 }
