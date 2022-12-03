@@ -13,11 +13,13 @@ import { teamsRouter } from './services/controllers/teamsController';
 import { tournamentsRouter } from './services/controllers/tournamentsController';
 import { tracksRouter } from './services/controllers/tracksController'; 
 import { usersRouter } from './services/controllers/usersController';
+import { updatesRouter } from './services/controllers/updatesController'; 
 import { runsDbFactory } from './services/database/runsDb';
 import { teamsDbFactory } from './services/database/teamsDb';
 import { tournamentsDbFactory } from './services/database/tournamentsDb';
 import { tracksDbFactory } from './services/database/tracksDb';
 import { usersDbFactory } from './services/database/usersDb';
+import { updatesDbFactory } from './services/database/updatesDb';
 import SessionAdmin from './services/dataService/session'; 
 
 const dbConnectionStr:string =
@@ -46,11 +48,13 @@ const dbPromise = getDbPromise(dbConnectionStr, DB_NAME);
     let tournamentsData = await tournamentsDbFactory(dbPromise, 'tournaments'); 
     let tracksData = await tracksDbFactory(dbPromise, 'tracks'); 
     let usersData = await usersDbFactory(dbPromise, 'users'); 
+    let updatesData = await updatesDbFactory(dbPromise, 'updates'); 
     if(runsData) app.use('/runs', runsRouter(runsData, sessionAdmin)); 
     if(teamsData) app.use('/teams', teamsRouter(teamsData, sessionAdmin));
     if(tournamentsData) app.use('/tournaments', tournamentsRouter(tournamentsData, sessionAdmin));  
     if(tracksData) app.use('/tracks', tracksRouter(tracksData, sessionAdmin));  
     if(usersData) app.use('/users', usersRouter(usersData, sessionAdmin))
+    if(updatesData) app.use('/updates', updatesRouter(updatesData, sessionAdmin))
 
     app.get('/test', (req, res) => res.status(200).send('hi'))
     

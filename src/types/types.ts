@@ -157,3 +157,15 @@ export interface UsersData {
     getUsers(): Promise<User[]> 
     getUser(username:string): Promise<User | undefined>
 }
+
+export interface Update {
+    _id?: ObjectId,
+    date: Date, 
+    user: string, 
+    update: string
+}
+
+export interface UpdatesData {
+    insertUpdate(newUpdate: Update): Promise<InsertOneResult>,  
+    getRecent(): Promise<Update[]>
+}
