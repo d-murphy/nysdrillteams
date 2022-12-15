@@ -19,16 +19,10 @@
 * 2011 states has no running order
 * why do nassau teams have true booleans for suffolk points (2008 three man ladder @ central islip)
     * maybe class can fix this? 
-* state record flags are run in runDb
-* update name of old id field
 * there is a tournament with id: 'hose tester checked on 8/13/93 found it to be illegal by rules committee.'
-
-### To Do Before live
-* tracks page, pictures, track records
 
 ### To Do
 * cloudfront to secure FE, I think this will fix the cors issue then - not sure, but going to keep going.  
-
 * add logout and use deleteSession; 
 * test session expiration
 
@@ -55,20 +49,5 @@
 * add extra zeroes to time (FE) e.g. 7.5 to 7.50
 * running orders are in the 100s?
 * find way to ID parades.
-* times, points are getting 'NULL' strings instead of NULL
-* cache the big 8 for every hour (check other places for cacheing, total points)
-* considering select columns for some requests
-* handle cursor for getFilteredRuns
-* aws to save images
-
-### Ideas
-* index on tournamentId (convert to numeric?)?
-* Most points scored in year, circuit, sanctioned
-
-### Finished: 
-* error handling in controllers
-* query db for last old_id and save on class
-* getSeasons - agg query on tournaments
-* total points
 
 

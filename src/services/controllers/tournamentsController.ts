@@ -1,6 +1,5 @@
-import express, {Request, Response} from 'express'; 
-import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
-import { Tournament, TournamentsData } from '../../types/types';
+import express, {Request, Response, NextFunction} from 'express'; 
+import { TournamentsData } from '../../types/types';
 import TournamentsService from '../dataService/tournamentsService';
 import SessionAdmin from '../dataService/session'
 import { createAuthMdw, checkSessionsMdw } from './createSessionAndAuthMdw';
@@ -16,13 +15,7 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData, sessio
     router.get('/getTournament', async (req: Request, res: Response) => {
         let tournamentId:number = parseInt(req.query?.tournamentId as unknown as string); 
         if(!tournamentId) return res.status(400).send('Tournament id not valid.')
-        let tournament: Tournament | undefined; 
-        try {
-            tournament = await Tournaments.getTournament(tournamentId);
-        } catch(e) {
-            console.error("Error retrieving tournament: ", e); 
-            return res.status(500).send("Internal server error."); 
-        }
+        let tournament = await Tournaments.getTournament(tournamentId); 
         res.status(200).send(tournament);
     })
 
@@ -33,26 +26,14 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData, sessio
             ){
             return res.status(400).send('malformed reqeust')
         }
-        let result: InsertOneResult; 
-        try {
-            result = await Tournaments.insertTournament(newTournament)
-        } catch(e) {
-            console.error("Error inserting tournament: ", e); 
-            return res.status(500).send("Internal server error."); 
-        }
+        let result = await Tournaments.insertTournament(newTournament) 
         res.status(200).send(result);
     })
 
     router.post('/deleteTournament', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         const tournamentId = (req.body?.tournamentId as unknown as string);
         if(!tournamentId) return res.status(400).send('team id not valid')
-        let result: DeleteResult; 
-        try {
-            result = await Tournaments.deleteTournament(tournamentId); 
-        } catch(e) {
-            console.error("Error deleting tournament:  ", e); 
-            return res.status(500).send("Internal server error."); 
-        }
+        let result = await Tournaments.deleteTournament(tournamentId); 
         res.status(200).send(result);
     })
 
@@ -60,13 +41,7 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData, sessio
         const tournamentId: string = (req.body?.tournamentId as unknown as string); 
         const fieldsToUpdate: {} = (req.body?.fieldsToUpdate as unknown as {}); 
         if(!tournamentId || !fieldsToUpdate) return res.status(400).send('update body not valid'); 
-        let result: UpdateResult; 
-        try {
-            result = await Tournaments.updateTournament(tournamentId, fieldsToUpdate);
-        } catch(e) {
-            console.error("Error updating tournament: ", e); 
-            return res.status(500).send("Internal server error."); 
-        }
+        let result = await Tournaments.updateTournament(tournamentId, fieldsToUpdate); 
         return res.status(200).send(result);
     })
 
@@ -75,36 +50,28 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData, sessio
         years = checkQuery(req, 'years').map(Number); 
         tracks = checkQuery(req, 'tracks'); 
         tournaments = checkQuery(req, 'tournaments'); 
-        let result: Tournament[]; 
-        try {
-            result = await Tournaments.getFilteredTournaments(years, tracks, tournaments); 
-        } catch(e) {
-            console.error("Error getting filtered tournaments: ", e); 
-            return res.status(500).send("Internal server error."); 
-        }
+        let result = await Tournaments.getFilteredTournaments(years, tracks, tournaments); 
         return res.status(200).send(result); 
     })
 
     router.get('/getTournsCtByYear', async( req: Request, res: Response) => {
-        let result: {_id: number, yearCount:number}[]
-        try {
-            result = await Tournaments.getTournsCtByYear();
-        } catch(e) {
-            console.error("Error getting tournament counts: ", e); 
-            return res.status(500).send("Internal server error."); 
-        }
+        let result = await Tournaments.getTournsCtByYear();
         res.status(200).send(result); 
     })
+
     router.get('/getTournamentNames', async( req: Request, res: Response) => {
-        let result: {_id: string, nameCount:number}[]
-        try {
-            result = await Tournaments.getTournamentNames();
-        } catch(e) {
-            console.error("Error getting tournament names: ", e); 
-            return res.status(500).send("Internal server error."); 
-        }
+        let result = await Tournaments.getTournamentNames();
         res.status(200).send(result); 
     })
+
+    router.use((err:Error, req:Request, res:Response, next:NextFunction) => {
+        if (err) {
+            res.status(500);
+            res.json("Internal server error.");
+        }       
+        next(err);
+    });
+
     return router;
 }
 

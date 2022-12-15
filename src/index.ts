@@ -5,6 +5,7 @@ let { PORT, DB_NAME, dbUn, dbPass } = process.env;
 if(!DB_NAME) DB_NAME = 'nysdrillteams'; 
 
 const cors = require("cors")
+require('express-async-errors');
 
 import express from 'express'; 
 import { getDbPromise } from './library/db';
@@ -21,6 +22,7 @@ import { tracksDbFactory } from './services/database/tracksDb';
 import { usersDbFactory } from './services/database/usersDb';
 import { updatesDbFactory } from './services/database/updatesDb';
 import SessionAdmin from './services/dataService/session'; 
+import { announcementRouter } from './services/controllers/announcementsController';
 
 const dbConnectionStr:string =
   `mongodb+srv://${dbUn}:${dbPass}@nysdrillteams.4t9radi.mongodb.net/?retryWrites=true&w=majority`;
@@ -55,6 +57,7 @@ const dbPromise = getDbPromise(dbConnectionStr, DB_NAME);
     if(tracksData) app.use('/tracks', tracksRouter(tracksData, sessionAdmin));  
     if(usersData) app.use('/users', usersRouter(usersData, sessionAdmin))
     if(updatesData) app.use('/updates', updatesRouter(updatesData, sessionAdmin))
+    app.use("/announcements", announcementRouter(sessionAdmin))
 
     app.get('/test', (req, res) => res.status(200).send('hi'))
     
