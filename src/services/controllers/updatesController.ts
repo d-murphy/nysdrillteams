@@ -4,16 +4,18 @@ import { InsertOneResult } from 'mongodb';
 import { Update, UpdatesData } from '../../types/types';
 import UpdatesService from '../dataService/updatesService';
 import SessionAdmin from '../dataService/session'
-import { checkSessionsMdw } from './createSessionAndAuthMdw';
+import { checkSessionsMdw, createAuthMdw } from './createSessionAndAuthMdw';
 
 
 
 export function updatesRouter (updatesDataSource:UpdatesData, sessionAdmin:SessionAdmin){
     const Updates = new UpdatesService(updatesDataSource); 
     const sessionsMdw = checkSessionsMdw(sessionAdmin); 
+    const authMdw = createAuthMdw(['admin', 'scorekeeper']); 
+
 
     const router = express.Router()
-    router.post('/insertUpdate', [sessionsMdw], async (req: Request, res: Response) => {
+    router.post('/insertUpdate', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         let newUpdate = req.body.updateData;
         if(!newUpdate?.user || !newUpdate?.date || !newUpdate?.update){
             return res.status(400).send('malformed reqeust')

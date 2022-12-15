@@ -12,20 +12,20 @@ class UsersService {
     public deleteUser(userId: number): Promise<DeleteResult> {
         return this.dataSource.deleteUser(userId); 
     }
-    public async updateUser(userId: number, roleArr?: string[], password?: string): Promise<UpdateResult> {
+    public async updateUser(userId: number, role?: string, password?: string): Promise<UpdateResult> {
         if(password) {
             password = await bcrypt.hash(password, 10); 
         }
-        return this.dataSource.updateUser(userId, roleArr, password); 
+        return this.dataSource.updateUser(userId, role, password); 
     }
     public getUsers(): Promise<User[]> {
         return this.dataSource.getUsers(); 
     }
-    public async checkPass(username: string, password:string): Promise<{username:string, rolesArr:string[]} | null> {
+    public async checkPass(username: string, password:string): Promise<{username:string, role:string} | null> {
         let user = await this.dataSource.getUser(username); 
         if(!user) return null; 
         if(!bcrypt.compare(password, user.password)) return null;         
-        let userWoPass: {username: string, rolesArr: string[], password?:string} = user; 
+        let userWoPass: {username: string, role: string, password?:string} = user; 
         delete userWoPass.password; 
         return userWoPass; 
     }

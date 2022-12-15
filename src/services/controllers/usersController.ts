@@ -2,9 +2,12 @@ import express, {Request, Response, NextFunction} from 'express';
 import { UsersData, User } from '../../types/types'
 import UsersService from '../dataService/usersService';
 import SessionAdmin from '../dataService/session';
+import { createAuthMdw, checkSessionsMdw } from './createSessionAndAuthMdw'; 
 
 export function usersRouter (usersDataSource:UsersData, sessionAdmin:SessionAdmin){
     const Users = new UsersService(usersDataSource); 
+    const sessionsMdw = checkSessionsMdw(sessionAdmin); 
+    const authMdw = createAuthMdw(['admin']); 
 
     const router = express.Router()
 
@@ -13,26 +16,16 @@ export function usersRouter (usersDataSource:UsersData, sessionAdmin:SessionAdmi
         return res.status(200).send(users); 
     })
 
-    router.post('/insertUser', async(req:Request, res:Response) => {
+    router.post('/insertUser', [sessionsMdw, authMdw], async(req:Request, res:Response) => {
         const username: string = req.body.username; 
         const password: string = req.body.password; 
-        const rolesArr: string[] = req.body.rolesArr
-        console.log('username: ', username, "password: ", password, "roles: ", rolesArr)
-        if(!username || !password || !rolesArr || !rolesArr.length) return res.status(400).send("malformed request.")
-        let result = await Users.insertUser({username:username, password:password, rolesArr: rolesArr}); 
+        const role: string = req.body.role
+        if(!username || !password || !role ) return res.status(400).send("malformed request.")
+        let result = await Users.insertUser({username:username, password:password, role: role}); 
         return res.status(200).send(result); 
     })
 
-    router.post("/updateUser", async(req:Request, res: Response) => {
-        const userId = req.body.userId; 
-        const roleArr = req.body.roleArr; 
-        const password = req.body.password; 
-        if(!userId) return res.status(400).send("malformed request"); 
-        let result = await Users.updateUser(userId, roleArr, password); 
-        return res.status(200).send(result); 
-    })
-
-    router.post("/deleteUser", async(req:Request, res:Response) => {
+    router.post("/deleteUser", [sessionsMdw, authMdw], async(req:Request, res:Response) => {
         const userId = req.body.userId; 
         if(!userId) return res.status(400).send("malfored request"); 
         let result = await Users.deleteUser(userId); 
@@ -46,8 +39,8 @@ export function usersRouter (usersDataSource:UsersData, sessionAdmin:SessionAdmi
         let checkPassResult = await Users.checkPass(username, password); 
         if(!checkPassResult) return res.status(403).send("Username and password not a match.");
         let ip = req.socket.remoteAddress || ''
-        let sessionId = sessionAdmin.createSession(ip, username, checkPassResult.rolesArr)
-        return res.status(200).send({username:username, sessionId:sessionId, rolesArr:checkPassResult.rolesArr}); 
+        let sessionId = sessionAdmin.createSession(ip, username, checkPassResult.role)
+        return res.status(200).send({username:username, sessionId:sessionId, role:checkPassResult.role}); 
     })
 
     router.post("/logout", async(req:Request, res:Response) => {

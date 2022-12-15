@@ -10,7 +10,7 @@ export function teamsRouter (teamsDataSource:TeamData, sessionAdmin: SessionAdmi
     const Teams = new TeamsService(teamsDataSource); 
     const router = express.Router()
     const sessionsMdw = checkSessionsMdw(sessionAdmin); 
-    const authMdw = createAuthMdw(['admin', 'scorekeeper']); 
+    const authMdw = createAuthMdw(['admin']); 
 
     router.get('/getTeam', async (req: Request, res: Response) => {
         const teamId: number = parseInt((req.query?.teamId as unknown as string));

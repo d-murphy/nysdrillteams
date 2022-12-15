@@ -3,13 +3,13 @@ import { v4 as uuidv4 } from 'uuid';
 const SESSION_MAX = 1000 * 60 * 1; 
 
 class SessionAdmin {
-    sessions: {[index:string]: {last: Date, ip: string, username:string, rolesArr:string[]}}
+    sessions: {[index:string]: {last: Date, ip: string, username:string, role:string}}
     checkCt: number
     constructor(){
         this.sessions = {}; 
         this.checkCt = 0; 
     }
-    checkSession(ip:string, sessionId:string): {last: Date, ip:string, username:string, rolesArr:string[]} | null {
+    checkSession(ip:string, sessionId:string): {last: Date, ip:string, username:string, role:string} | null {
         let session = this.sessions[sessionId];  
         if(!session) return null; 
         let sessionCurrent = (
@@ -23,9 +23,9 @@ class SessionAdmin {
         session.last = new Date(); 
         return session;  
     }
-    createSession(ip:string, username:string, rolesArr:string[]):string{
+    createSession(ip:string, username:string, role:string):string{
         let sessionId = uuidv4(); 
-        this.sessions[sessionId] = {last: new Date(), ip: ip, username:username, rolesArr:rolesArr}; 
+        this.sessions[sessionId] = {last: new Date(), ip: ip, username:username, role:role}; 
         this.checkCt++; 
         if(this.checkCt==20) this.cleanSessions(); 
         return sessionId; 

@@ -21,10 +21,10 @@ class UsersDb implements UsersData{
         const query = { _id: new ObjectId(userId) };
         return this._dbCollection.deleteOne(query);
     }
-    async updateUser(userId: number, roleArr?: string[], password?: string): Promise<UpdateResult> {
+    async updateUser(userId: number, role?: string, password?: string): Promise<UpdateResult> {
         const filter = { _id: new ObjectId(userId) };
-        const body:{roleArr?:string [], password?:string} = {}; 
-        if(roleArr) body.roleArr = roleArr; 
+        const body:{role?:string, password?:string} = {}; 
+        if(role) body.role = role; 
         // encryption occurs in logic layer
         if(password) body.password = password; 
         const updateDoc = {

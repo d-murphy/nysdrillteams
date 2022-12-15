@@ -11,6 +11,7 @@ export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin){
     const Runs = new RunsService(runsDataSource); 
     const sessionsMdw = checkSessionsMdw(sessionAdmin); 
     const authMdw = createAuthMdw(['admin', 'scorekeeper']); 
+    const authMdwForEdit = createAuthMdw(['admin', 'scorekeeper', 'video']);
 
     const router = express.Router()
     router.get('/getRun', async (req: Request, res: Response) => {
@@ -39,7 +40,7 @@ export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin){
         res.status(200).send(runResult);
     })
     
-    router.post('/updateRun', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
+    router.post('/updateRun', [sessionsMdw, authMdwForEdit], async (req: Request, res: Response) => {
         let runId = req.body.runId; 
         let fieldsToUpdate = req.body?.fieldsToUpdate; 
         if(!fieldsToUpdate || !runId) return res.status(400).send('update body not valid')

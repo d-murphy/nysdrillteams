@@ -7,7 +7,7 @@ import { createAuthMdw, checkSessionsMdw } from './createSessionAndAuthMdw';
 export function tracksRouter (tracksDataSource:TracksData, sessionAdmin:SessionAdmin){
     const Tracks = new TracksService(tracksDataSource); 
     const sessionsMdw = checkSessionsMdw(sessionAdmin); 
-    const authMdw = createAuthMdw(['admin', 'scorekeeper']); 
+    const authMdw = createAuthMdw(['admin']); 
 
     const router = express.Router()
 

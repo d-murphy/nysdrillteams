@@ -147,13 +147,13 @@ export type TotalPointsFields = "Nassau" | "Suffolk" | "Western" | "Northern" | 
 export interface User {
     username: string, 
     password: string, 
-    rolesArr: string []
+    role: string
 }
 
 export interface UsersData {
     insertUser(user: User): Promise<InsertOneResult>,
     deleteUser(userId: number): Promise<DeleteResult>,
-    updateUser(userId: number, roleArr?: string[], password?: string): Promise<UpdateResult>,
+    updateUser(userId: number, role?: string, password?: string): Promise<UpdateResult>,
     getUsers(): Promise<User[]> 
     getUser(username:string): Promise<User | undefined>
 }

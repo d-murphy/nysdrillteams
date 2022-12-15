@@ -9,17 +9,17 @@ export function checkSessionsMdw(sessionAdmin:SessionAdmin):Handler{
         let sessionInfo = sessionAdmin.checkSession(ip, sessionId); 
         if(!sessionInfo) return res.status(403).send({message: 'Please login again.'}); 
         res.locals['user'] = sessionInfo.username; 
-        res.locals['rolesArr'] = sessionInfo.rolesArr; 
+        res.locals['role'] = sessionInfo.role; 
         next(); 
     }
 }
 
 export function createAuthMdw(rolesAllowed: string[]):Handler{
     return (req,res,next) => {
-        let userRoles = res.locals['rolesArr']
+        let userRole = res.locals['role']
         let roleMatch = false; 
         rolesAllowed.forEach(role => {
-            if(userRoles && userRoles.includes(role)) roleMatch = true; 
+            if(userRole == role) roleMatch = true; 
         })
         if(!roleMatch) return res.status(403).send({message: 'Role not allowed to perform this action.'}); 
         next(); 
