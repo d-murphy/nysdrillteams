@@ -10,7 +10,8 @@ export function teamsRouter (teamsDataSource:TeamData, sessionAdmin: SessionAdmi
     const Teams = new TeamsService(teamsDataSource); 
     const router = express.Router()
     const sessionsMdw = checkSessionsMdw(sessionAdmin); 
-    const authMdw = createAuthMdw(['admin']); 
+    const authAdminMdw = createAuthMdw(['admin']); 
+    const authAdminSkMdw = createAuthMdw(['admin', 'scorekeeper']); 
 
     router.get('/getTeam', async (req: Request, res: Response) => {
         const teamId: number = parseInt((req.query?.teamId as unknown as string));
@@ -20,21 +21,21 @@ export function teamsRouter (teamsDataSource:TeamData, sessionAdmin: SessionAdmi
     })
 
 
-    router.post('/insertTeam', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
+    router.post('/insertTeam', [sessionsMdw, authAdminSkMdw], async (req: Request, res: Response) => {
         let newTeam = req.body;
         if(!newTeam?.fullName || !newTeam?.nickname || !newTeam?.hometown || !newTeam?.circuit ) return res.status(401).send('malformed reqeust')
         let result = await Teams.insertTeam(newTeam) 
         res.status(200).send(result);
     })
 
-    router.post('/deleteTeam', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
+    router.post('/deleteTeam', [sessionsMdw, authAdminMdw], async (req: Request, res: Response) => {
         const teamId: string = (req.body?.teamId as unknown as string);
         if(!teamId) return res.status(400).send('team id not valid')
         let result = await Teams.deleteTeam(teamId); 
         res.status(200).send(result);
     })
 
-    router.post('/updateTeam', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
+    router.post('/updateTeam', [sessionsMdw, authAdminSkMdw], async (req: Request, res: Response) => {
         let teamId = req.body?.teamId; 
         let fieldsToUpdate = req.body?.fieldsToUpdate; 
         if(!teamId || !fieldsToUpdate) return res.status(400).send('update body not valid') 

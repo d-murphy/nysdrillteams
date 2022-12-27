@@ -7,7 +7,8 @@ import { createAuthMdw, checkSessionsMdw } from './createSessionAndAuthMdw';
 export function tracksRouter (tracksDataSource:TracksData, sessionAdmin:SessionAdmin){
     const Tracks = new TracksService(tracksDataSource); 
     const sessionsMdw = checkSessionsMdw(sessionAdmin); 
-    const authMdw = createAuthMdw(['admin']); 
+    const authAdminMdw = createAuthMdw(['admin']); 
+    const authAdminSkMdw = createAuthMdw(['admin', 'scorekeeper']); 
 
     const router = express.Router()
 
@@ -25,21 +26,21 @@ export function tracksRouter (tracksDataSource:TracksData, sessionAdmin:SessionA
         res.status(200).send(track);
     })
 
-    router.post('/insertTrack', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
+    router.post('/insertTrack', [sessionsMdw, authAdminSkMdw], async (req: Request, res: Response) => {
         let newTrack = req.body;
         if( !newTrack?.name || !newTrack?.address || !newTrack?.city  ) return res.status(400).send('malformed reqeust'); 
         let result = await Tracks.insertTrack(newTrack); 
         return res.status(200).send(result); 
     })
 
-    router.post('/deleteTrack', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
+    router.post('/deleteTrack', [sessionsMdw, authAdminMdw], async (req: Request, res: Response) => {
         const trackId: string = (req.body.trackId as unknown as string);
         if(!trackId) return res.status(400).send('team id not valid')
         let result = await Tracks.deleteTrack(trackId); 
         return res.status(200).send(`Delete successful.`);
     })
 
-    router.post('/updateTrack', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
+    router.post('/updateTrack', [sessionsMdw, authAdminSkMdw], async (req: Request, res: Response) => {
         let trackId = req.body.trackId; 
         let fieldsToUpdate = req.body.fieldsToUpdate; 
         if(!trackId || !fieldsToUpdate) return res.status(400).send('update body not valid'); 

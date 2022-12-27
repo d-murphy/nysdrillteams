@@ -6,7 +6,7 @@ import { createAuthMdw, checkSessionsMdw } from './createSessionAndAuthMdw';
 export function announcementRouter (sessionAdmin:SessionAdmin){
     const Announcements = new AnnouncementService();  
     const sessionsMdw = checkSessionsMdw(sessionAdmin); 
-    const authMdw = createAuthMdw(['admin']); 
+    const authMdw = createAuthMdw(['admin', 'scorekeeper']); 
 
     const router = express.Router()
     router.get('/getAnnouncements', (req: Request, res: Response) => {

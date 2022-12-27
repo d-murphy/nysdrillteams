@@ -33,7 +33,7 @@ class UsersDb implements UsersData{
         return this._dbCollection.updateOne(filter, updateDoc);          
     }
     async getUsers() {
-        return (this._dbCollection.find({}).project({ roleArr:1, username: 1 }).toArray() as unknown as User[]); 
+        return (this._dbCollection.find({}).project({ role:1, username: 1 }).toArray() as unknown as User[]); 
     }
     async getUser(username:string): Promise<User | undefined>{
         const query = { username: username };

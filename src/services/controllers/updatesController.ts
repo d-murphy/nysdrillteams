@@ -11,7 +11,7 @@ import { checkSessionsMdw, createAuthMdw } from './createSessionAndAuthMdw';
 export function updatesRouter (updatesDataSource:UpdatesData, sessionAdmin:SessionAdmin){
     const Updates = new UpdatesService(updatesDataSource); 
     const sessionsMdw = checkSessionsMdw(sessionAdmin); 
-    const authMdw = createAuthMdw(['admin', 'scorekeeper']); 
+    const authMdw = createAuthMdw(['admin', 'scorekeeper', 'video']); 
 
 
     const router = express.Router()
