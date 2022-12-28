@@ -75,7 +75,7 @@ class RunsDb implements RunsData{
                     $match: {
                         year: year, 
                         contest: { $in: DEFAULT_CONTESTS }, 
-                        timeNum: { $ne: NaN }
+                        timeNum: {$nin : [null, NaN]}
                     },
                 },
                 { $sort: { "timeNum": 1} }, 
@@ -97,7 +97,7 @@ class RunsDb implements RunsData{
             if(teams && teams.length) filterObj.team =  { $in: teams } 
             if(tracks && tracks.length) filterObj.track =  { $in: tracks } 
             filterObj.contest = contest; 
-            filterObj.timeNum = { $nin: [NaN, 0] }
+            filterObj.timeNum = { $nin: [NaN, 0, null] }
             let dbProm = this._dbCollection.aggregate(
                 [
                     {
