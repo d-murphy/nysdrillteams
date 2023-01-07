@@ -8,7 +8,7 @@ export type Run = {
     contest: string,
     year: number, 
     tournament: string,
-    tournamentId: number,
+    tournamentId: string,
     track: string, 
     time: string, 
     timeNum: number, 
@@ -35,7 +35,7 @@ export interface RunsData {
     _dbCollection: Collection | undefined;  
     insertRun(newRun: Run): Promise<InsertOneResult>;
     deleteRun(runId: number): Promise<DeleteResult>;
-    updateRun(runId: number, pointsUpdate: number, timeUpdate: string, rankUpdate: string): Promise<UpdateResult>; 
+    updateRun(runId: number, fieldsToUpdate: {}): Promise<UpdateResult>; 
     getRun(runId: number): Promise<Run | undefined>;
     getRunsFromTournament(tournamentId:string): Promise<Run[]>
     getFilteredRuns(        
@@ -109,7 +109,7 @@ export interface TournamentW_id extends Tournament {
 
 export interface TournamentsData {
     insertTournament(newTournament: Tournament): Promise<InsertOneResult>;
-    deleteTournament(tournamentId: number): Promise<DeleteResult>;
+    deleteTournament(tournamentId: string): Promise<DeleteResult>;
     updateTournament(tournamentId:string, fieldsToUpdate:{}): Promise<UpdateResult>; 
     getTournament(tournamentId:number): Promise<Tournament | undefined>; 
     getFilteredTournaments(        
@@ -117,7 +117,8 @@ export interface TournamentsData {
         tracks?:string[], 
         tournaments?:string[], 
     ): Promise<Tournament[]>; 
-    getTournsCtByYear():Promise<{_id: number, yearCount: number }[]>
+    getTournsCtByYear():Promise<{_id: number, yearCount: number }[]>; 
+    getTournamentNames(): Promise<{_id: string, nameCount:number}[]>; 
 }
 
 export type Track = {
@@ -127,8 +128,9 @@ export type Track = {
     city: string, 
     notes: string,
     imageUrls: string[], 
-    archHeight: string | null,
-    distanceToHydrant: number | null
+    archHeightFt: number, 
+    archHeightInches: number, 
+    distanceToHydrant: 200 | 225
 }
 
 export interface TracksData {
@@ -142,3 +144,28 @@ export interface TracksData {
 
 export type TotalPointsFields = "Nassau" | "Suffolk" | "Western" | "Northern" | "Junior" | "Suffolk OF" | "Nassau OF" | "LI OF";  
 
+export interface User {
+    username: string, 
+    password: string, 
+    role: string
+}
+
+export interface UsersData {
+    insertUser(user: User): Promise<InsertOneResult>,
+    deleteUser(userId: number): Promise<DeleteResult>,
+    updateUser(userId: number, role?: string, password?: string): Promise<UpdateResult>,
+    getUsers(): Promise<User[]> 
+    getUser(username:string): Promise<User | undefined>
+}
+
+export interface Update {
+    _id?: ObjectId,
+    date: Date, 
+    user: string, 
+    update: string
+}
+
+export interface UpdatesData {
+    insertUpdate(newUpdate: Update): Promise<InsertOneResult>,  
+    getRecent(): Promise<Update[]>
+}
