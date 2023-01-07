@@ -30,13 +30,16 @@ var credentials = {key: privateKey, cert: certificate};
 
 (async function(){
     const app = express();
-
+    app.use((req,res,next) => {
+	    console.log('req here')
+    next(); 
+    })
     app.use(express.urlencoded({
         extended: true
     }));
     app.use(express.json());
     app.use(cors()); 
-    
+    app.options('*', cors());    
     app.use(express.static("static/user"))
     
     
@@ -49,7 +52,10 @@ var credentials = {key: privateKey, cert: certificate};
     if(tournamentsData) app.use('/tournaments', tournamentsRouter(tournamentsData));  
     if(tracksData) app.use('/tracks', tracksRouter(tracksData));  
 
-    app.get('/test', (req, res) => res.status(200).send('hi'))
+    app.get('/test', (req, res) =>  {
+	   console.log('test hit'); 
+	    res.status(200).send('hi')
+    })
     
     let server = (keyLocation && certLocation) ? 
         https.createServer(credentials, app) : 
