@@ -43,7 +43,6 @@ var credentials = {key: privateKey, cert: certificate};
     app.use(express.json());
     app.use(cors()); 
     app.options('*', cors());
-    
     app.use(express.static("static/user"))
     app.use((req,res,next) => {
         next(); 
