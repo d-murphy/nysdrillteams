@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-const SESSION_MAX = 1000 * 60 * 1; 
+const SESSION_MAX = 1000 * 60 * 30; 
 
 class SessionAdmin {
     sessions: {[index:string]: {last: Date, ip: string, username:string, role:string}}
@@ -12,10 +12,7 @@ class SessionAdmin {
     checkSession(ip:string, sessionId:string): {last: Date, ip:string, username:string, role:string} | null {
         let session = this.sessions[sessionId];  
         if(!session) return null; 
-        let sessionCurrent = (
-                +session.last - +(new Date()) > SESSION_MAX ||
-                session.ip != ip  
-            ) ? false : true; 
+        let sessionCurrent = +(new Date()) - +session.last < SESSION_MAX && session.ip === ip   
         if(!sessionCurrent) {
             this.deleteSession(sessionId); 
             return null; 
@@ -24,6 +21,7 @@ class SessionAdmin {
         return session;  
     }
     createSession(ip:string, username:string, role:string):string{
+        console.log('creating session for: ', ip, username, role); 
         let sessionId = uuidv4(); 
         this.sessions[sessionId] = {last: new Date(), ip: ip, username:username, role:role}; 
         this.checkCt++; 
@@ -41,7 +39,7 @@ class SessionAdmin {
     async cleanSessions(){
         let sessionIds = Object.keys(this.sessions); 
         sessionIds.forEach(sessionId => {
-            if(+this.sessions[sessionId].last - +(new Date()) > SESSION_MAX ) delete this.sessions[sessionId]
+            if(+(new Date()) - +this.sessions[sessionId].last > SESSION_MAX ) delete this.sessions[sessionId]
         })
         this.checkCt = 0; 
     }
