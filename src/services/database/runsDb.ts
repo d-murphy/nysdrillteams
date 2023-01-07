@@ -22,16 +22,12 @@ class RunsDb implements RunsData{
         const query = { _id: new ObjectId(runId) };
         return this._dbCollection.deleteOne(query);
     }
-    async updateRun(runId: number, pointsUpdate: number, timeUpdate: string, rankUpdate: string): Promise<UpdateResult> {
+    async updateRun(runId: number, fieldsToUpdate: {}): Promise<UpdateResult> {
         const filter = { _id: new ObjectId(runId) };
         const updateDoc = {
-            $set: {
-                rank: rankUpdate, 
-                points: pointsUpdate, 
-                time: timeUpdate
-            },
-        };
-        return this._dbCollection.updateOne(filter, updateDoc);          
+            $set: fieldsToUpdate,
+        }
+        return this._dbCollection.updateOne(filter, updateDoc);     
     }
     async getRun(runId: number): Promise<Run | undefined> {
         const query = { _id: new ObjectId(runId) };
@@ -79,7 +75,7 @@ class RunsDb implements RunsData{
                     $match: {
                         year: year, 
                         contest: { $in: DEFAULT_CONTESTS }, 
-                        timeNum: { $ne: NaN }
+                        timeNum: { $nin: [NaN, 0, null] }
                     },
                 },
                 { $sort: { "timeNum": 1} }, 
@@ -101,7 +97,7 @@ class RunsDb implements RunsData{
             if(teams && teams.length) filterObj.team =  { $in: teams } 
             if(tracks && tracks.length) filterObj.track =  { $in: tracks } 
             filterObj.contest = contest; 
-            filterObj.timeNum = { $nin: [NaN, 0] }
+            filterObj.timeNum = { $nin: [NaN, 0, null] }
             let dbProm = this._dbCollection.aggregate(
                 [
                     {

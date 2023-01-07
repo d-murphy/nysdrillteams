@@ -4,7 +4,9 @@ import { getCollectionPromise } from '../../library/db';
 
 export async function tournamentsDbFactory(dbPromise: Promise<Db>, collectionName: string):Promise<TournamentsData | undefined> {
     let collection = await getCollectionPromise(dbPromise, collectionName); 
-    let lastIdDoc = await (collection?.find().sort({id:-1}).limit(1).toArray() as unknown as Tournament[])
+    let lastIdDoc = await (collection?.find()
+            .sort({id:-1})
+            .collation( {locale: 'en_US',  numericOrdering: true}).limit(1).toArray() as unknown as Tournament[])
     console.log('Current highest tournament id: ', lastIdDoc[0].id)
     if(collection) return new TournamentsDb(collection, lastIdDoc[0].id); 
     return undefined; 
@@ -22,10 +24,10 @@ class TournamentsDb implements TournamentsData{
         let docToInsert: TournamentW_id = newTournament; 
         docToInsert._id = new ObjectId;  
         this._lastId++; 
-        docToInsert.id = this._lastId;  
+        docToInsert.id = this._lastId;   
         return this._dbCollection.insertOne(docToInsert);
     }
-    async deleteTournament(tournamentId: number): Promise<DeleteResult> {
+    async deleteTournament(tournamentId: string): Promise<DeleteResult> {
         const query = { _id: new ObjectId(tournamentId) };
         return this._dbCollection.deleteOne(query);
     }
@@ -65,5 +67,20 @@ class TournamentsDb implements TournamentsData{
                 { $sort: { _id: -1 } }
             ]
         ).toArray() as unknown as {_id: number, yearCount: number}[]
+    }
+    async getTournamentNames():Promise<{_id: string, nameCount:number}[]>{
+        return this._dbCollection.aggregate(
+            [
+                {
+                    $group: {
+                        _id: "$name",
+                        nameCount: {
+                            $count: {}
+                        }
+                    }
+                }, 
+                { $sort: { _id: 1 } }
+            ]
+        ).toArray() as unknown as {_id: string, nameCount:number}[]
     }
 }
