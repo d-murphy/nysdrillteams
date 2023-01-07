@@ -1,4 +1,11 @@
 import express from 'express'; 
+import dotenv from 'dotenv'; 
+import fs from 'fs'; 
+const cors = require("cors")
+import http from 'http'; 
+import https from 'https'; 
+require('express-async-errors');
+
 import { getDbPromise } from './library/db';
 import { runsRouter } from './services/controllers/runsControllers';
 import { teamsRouter } from './services/controllers/teamsController';
@@ -15,27 +22,27 @@ import { updatesDbFactory } from './services/database/updatesDb';
 import SessionAdmin from './services/dataService/session'; 
 import { announcementRouter } from './services/controllers/announcementsController';
 
-const cors = require("cors")
-require('express-async-errors');
-const dotenv = require('dotenv'); 
 dotenv.config(); 
+let { PORT, DB_NAME, dbUn, dbPass, keyLocation, certLocation } = process.env; 
 
-let { PORT, DB_NAME, dbUn, dbPass } = process.env; 
 if(!DB_NAME) DB_NAME = 'nysdrillteams'; 
-
 const dbConnectionStr:string =
   `mongodb+srv://${dbUn}:${dbPass}@nysdrillteams.4t9radi.mongodb.net/?retryWrites=true&w=majority`;
 const dbPromise = getDbPromise(dbConnectionStr, DB_NAME);
 
+var privateKey, certificate; 
+if(keyLocation) privateKey = fs.readFileSync(keyLocation, 'utf8'); 
+if(certLocation) certificate = fs.readFileSync(certLocation, 'utf8'); 
+var credentials = {key: privateKey, cert: certificate}; 
+
 (async function(){
     const app = express();
-
-    app.options('*', cors());
-    app.use(cors()); 
     app.use(express.urlencoded({
         extended: true
     }));
     app.use(express.json());
+    app.use(cors()); 
+    app.options('*', cors());
     
     app.use(express.static("static/user"))
     app.use((req,res,next) => {
@@ -59,8 +66,12 @@ const dbPromise = getDbPromise(dbConnectionStr, DB_NAME);
     app.use("/announcements", announcementRouter(sessionAdmin))
 
     app.get('/test', (req, res) => res.status(200).send('hi'))
+
+    let server = (keyLocation && certLocation) ? 
+        https.createServer(credentials, app) : 
+        http.createServer(app); 
     
-    app.listen(PORT, () => {
-        console.log(`Server up.`)
+    server.listen(PORT, () => {
+        console.log(`Server up on ${keyLocation && certLocation ? 'https' : 'http'}`)
     })
 })(); 
