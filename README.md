@@ -20,6 +20,14 @@ The frontend is built with React / Bootstrap.  The backend is built with Node / 
 * [Article](https://docs.bitnami.com/ibm/infrastructure/nodejs/administration/enable-cors-nodejs/) Enable cors on apache bitnami
 * [Article](https://docs.bitnami.com/installer/apps/odoo/get-started/understand-config/) Understanding the default Apache config in Bitnami
 * [Video](https://www.youtube.com/watch?v=FVYezFFJnWc) on deploying secure site on S3 / Cloudfront
+* [Starting react app](https://dev.to/ruppysuppy/create-react-app-from-scratch-like-a-pro-de0)
+* [Adding TS to react app](https://blog.logrocket.com/using-typescript-with-react-tutorial-examples/)
+* [React Router Tutorial](https://reactrouter.com/docs/en/v6/getting-started/tutorial)
+* [Fixing 'Cannot Get' Error](https://ui.dev/react-router-cannot-get-url-refresh)
+* [Table with Stick Col and Row](https://css-tricks.com/a-table-with-both-a-sticky-header-and-a-sticky-first-column/)
+* [Resizing Images](https://github.com/lovell/sharp)
+* [useReducer and useContext hooks](https://designcode.io/react-hooks-handbook-usereducer-with-usecontext-1)
+
 
 
 
