@@ -19,7 +19,7 @@ The frontend is built with React / Bootstrap.  The backend is built with Node / 
 * [Video](https://www.youtube.com/watch?v=rtshCulV2hk&list=LL&index=1) on lightsail, apache, ssl
 * [Article](https://docs.bitnami.com/ibm/infrastructure/nodejs/administration/enable-cors-nodejs/) Enable cors on apache bitnami
 * [Article](https://docs.bitnami.com/installer/apps/odoo/get-started/understand-config/) Understanding the default Apache config in Bitnami
-* [Video](https://www.youtube.com/watch?v=FVYezFFJnWc) 
+* [Video](https://www.youtube.com/watch?v=FVYezFFJnWc) on deploying secure site on S3 / Cloudfront
 
 
 
