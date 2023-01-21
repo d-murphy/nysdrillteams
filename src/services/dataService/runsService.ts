@@ -62,7 +62,7 @@ interface totalPointsCache {
     public async getBig8(year:number): Promise<{}[]> {
         this._big8Calls++; 
         year = year*1; 
-        if(!this._big8Cache[year] || ( this._big8Cache[year] && (+new Date() - +this._big8Cache[year].created) > 1000 * 60 * 60 *6 )) {
+        if(!this._big8Cache[year] || ( this._big8Cache[year] && (+new Date() - +this._big8Cache[year].created) > 1000 * 60 * 60 )) {
             let result = await this.dataSource.getBig8(year);
             if(result.length){
                 console.log('Updating the Big 8 cache for year: ', year);
@@ -75,7 +75,7 @@ interface totalPointsCache {
                 console.log('starting big8 cache clean')
                 this._big8Calls = 0; 
                 Object.keys(this._big8Cache).forEach((key) => {
-                    if((+new Date() - +this._big8Cache[parseInt(key)].created) > 1000 * 60 * 60 *6 ){
+                    if((+new Date() - +this._big8Cache[parseInt(key)].created) > 1000 * 60 * 60 ){
                         console.log('delete cache for year: ', key)
                         delete this._big8Cache[parseInt(key)]
                     }
@@ -87,7 +87,7 @@ interface totalPointsCache {
     public async getTopRuns(years?: number[], teams?: string[], tracks?: string[]): Promise<{}[]> {
         this._topRunsCalls++; 
         let key = createTopRunsKey(years, teams, tracks); 
-        if(!this._topRunsCache[key] || ( this._topRunsCache[key] && (+new Date() - +this._topRunsCache[key].created) > 1000 * 60 * 60 * 24 * 7 )) {
+        if(!this._topRunsCache[key] || ( this._topRunsCache[key] && (+new Date() - +this._topRunsCache[key].created) > 1000 * 60 * 60 )) {
             let result = await this.dataSource.getTopRuns(years, teams, tracks); 
             if(result.length){
                 console.log('Updating the Top Runs cache for key: ', key);
@@ -100,7 +100,7 @@ interface totalPointsCache {
                 console.log('starting TopRuns cache clean')
                 this._topRunsCalls = 0; 
                 Object.keys(this._topRunsCache).forEach((key) => {
-                    if((+new Date() - +this._topRunsCache[key].created) > 1000 * 60 * 60 *6 ){
+                    if((+new Date() - +this._topRunsCache[key].created) > 1000 * 60 * 60  ){
                         console.log('delete cache for Top Run key: ', key)
                         delete this._topRunsCache[key]
                     }
@@ -113,7 +113,7 @@ interface totalPointsCache {
         this._totalPointsCalls++; 
         if(!contests) contests = [];
         let key = createTotalPointsCacheKey(year, totalPointsFieldName, contests); 
-        if(!this._totalPointsCache[key] || ( this._totalPointsCache[key] && (+new Date() - +this._totalPointsCache[key].created) > 1000 * 60 * 60 * 6 )){
+        if(!this._totalPointsCache[key] || ( this._totalPointsCache[key] && (+new Date() - +this._totalPointsCache[key].created) > 1000 * 60 * 60  )){
             console.log("Creating total points cache for: ", key); 
             let result: {}[]; 
             if(contests.length){ 
@@ -128,7 +128,7 @@ interface totalPointsCache {
                 console.log('starting Total Points cache clean')
                 this._totalPointsCalls = 0; 
                 Object.keys(this._totalPointsCache).forEach((key) => {
-                    if((+new Date() - +this._totalPointsCache[key].created) > 1000 * 60 * 60 * 6 ){
+                    if((+new Date() - +this._totalPointsCache[key].created) > 1000 * 60 * 60 ){
                         console.log('delete cache for total points key: ', key)
                         delete this._totalPointsCache[key]
                     }
@@ -137,6 +137,9 @@ interface totalPointsCache {
         }
         return this._totalPointsCache[key].result; 
     }
+    public getContestNames(): Promise<{_id: string, nameCount:number}[]> {
+        return this.dataSource.getContestNames(); 
+    } 
 }
     
 export default RunsService; 

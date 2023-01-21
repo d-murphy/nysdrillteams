@@ -51,6 +51,7 @@ export interface RunsData {
     getBig8(year:number): Promise<{}[]>
     getTopRuns(years?: number[], teams?: string[], tracks?: string[]): Promise<{}[][]>
     getTotalPoints(year: number, totalPointsFieldName: TotalPointsFields, contests?: string[]): Promise<{_id: string, points: number}[]>
+    getContestNames(): Promise<{_id: string, nameCount:number}[]>
 }
 
 export type Team = {

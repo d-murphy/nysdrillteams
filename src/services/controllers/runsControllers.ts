@@ -97,6 +97,11 @@ export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin){
         return res.status(200).send(totals); 
     })
 
+    // router.get('/getContestNames', async (req: Request, res: Response) => {
+    //     let contestNames = await Runs.getContestNames(); 
+    //     return res.status(200).send(contestNames); 
+    // })
+
     router.use((err:Error, req:Request, res:Response, next:NextFunction) => {
         if (err) {
             res.status(500);
