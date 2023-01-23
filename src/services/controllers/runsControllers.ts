@@ -26,7 +26,7 @@ export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin){
     
     router.post('/insertRun', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
         let newRun = req.body.runsData;
-        if(!newRun?.contest || !newRun?.time || !newRun?.timeNum || !newRun?.team){
+        if(!newRun?.contest || !newRun?.time || !newRun?.team){
             return res.status(400).send('malformed reqeust')
         }
         let result = await Runs.insertRun(newRun) 
