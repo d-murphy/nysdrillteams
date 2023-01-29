@@ -1,6 +1,6 @@
 const fs = require('fs'); 
 const dotenv = require('dotenv'); 
-const { getDbPromise, getCollectionPromise } = require('../dist/services/database/db')
+const { getDbPromise, getCollectionPromise } = require('../dist/library/db')
 
 dotenv.config(); 
 let { PORT, DB_NAME, dbUn, dbPass } = process.env; 
@@ -20,15 +20,15 @@ let eventResultsLUT = readFileToObject("./dataForMigration/9_event_results.txt",
 
 // print examples
 
-console.log('teams example', teamsLUT["1"])
-console.log('season example', seasonLUT["2020"])
-console.log('division series example', divisionSeriesLUT['1'])
-console.log('division example', divisions["1"])
-console.log('drill name example', drillNamesLUT["1"])
-console.log('event name example', eventNamesLUT["1"])
-console.log('unique drill example', uniqueDrillsLUT["1"])
-console.log('unique event example', uniqueEventsLUT["1"])
-console.log('event example', eventResultsLUT["1"])
+// console.log('teams example', teamsLUT["1"])
+// console.log('season example', seasonLUT["2020"])
+// console.log('division series example', divisionSeriesLUT['1'])
+// console.log('division example', divisions["1"])
+// console.log('drill name example', drillNamesLUT["1"])
+// console.log('event name example', eventNamesLUT["1"])
+// console.log('unique drill example', uniqueDrillsLUT["1"])
+// console.log('unique event example', uniqueEventsLUT["1"])
+// console.log('event example', eventResultsLUT["1"])
 
 // additional data maps
 
@@ -51,14 +51,15 @@ let classLU = {
 
 (async function(){
     console.log('starting the collection buiids'); 
-    let writeDocResults = await loadRuns(); 
-    console.log("Write runs result: ", writeDocResults)
+    // let writeDocResults = await loadRuns(); 
+    // console.log("Write runs result: ", writeDocResults)
     // let loadTeamsResult = await loadTeams(); 
     // console.log('load teams result: ', loadTeamsResult); 
     // let loadTracksResult = await loadTracks(); 
     // console.log('load tracks result: ', loadTracksResult); 
     // let loadDrillsResult = await loadDrills(); 
     // console.log('load teams result: ', loadDrillsResult); 
+    // await updateAllHosts(); 
 })()
 
 
@@ -283,6 +284,52 @@ async function loadDrills(){
         })
     })
     return writeDocs('tournaments', drillsArr)
+}
+
+async function updateAllHosts(){
+    let tournCol = await getCollection(`tournaments`); 
+
+    let requests = []; 
+
+    Object.keys(uniqueDrillsLUT).forEach((el, ind) => {
+        if(ind >= 2000 && ind < 10000) {
+            const tourn = uniqueDrillsLUT[el]; 
+            const tournId = tourn.id; 
+            const host = tourn.host; 
+            if(tournId && host) {
+                requests.push(
+                    updateHostOnDrill(tournCol, tournId, host)
+                )
+            }     
+        }
+    })
+    Promise.all(requests).then(el => {
+        let total = 0; 
+        el.forEach(result => {
+            total += result; 
+        })
+        console.log("Promise ct: ", total); 
+    }).catch(e => {console.log("Promise error: ", e)})
+    
+}
+
+async function updateHostOnDrill(collection, tournId, host){
+    try {
+        const filter = { id: parseInt(tournId) };
+        const options = { upsert: false };
+        const updateDoc = {
+        $set: {
+            host: `${host}`
+        },
+        };
+        const result = await collection.updateOne(filter, updateDoc, options);
+        console.log(
+        `TournID: ${tournId} - ${result.matchedCount} document(s) matched the filter, updated ${result.modifiedCount} document(s)`,
+        );
+    } catch (e) {
+        console.log(e); 
+    }
+    return 1; 
 }
 
 // helper funcs for building collection funcs
