@@ -101,7 +101,8 @@ export type Tournament = {
     contests: {name:string, cfp:boolean, sanction:boolean}[],
     liveStreamPlanned?: boolean
     urls?: string[], 
-    waterTime?: string
+    waterTime?: string, 
+    host: string
 }
 
 export interface TournamentW_id extends Tournament {
@@ -120,6 +121,7 @@ export interface TournamentsData {
     ): Promise<Tournament[]>; 
     getTournsCtByYear():Promise<{_id: number, yearCount: number }[]>; 
     getTournamentNames(): Promise<{_id: string, nameCount:number}[]>; 
+    getHostNames(): Promise<{_id: string, nameCount:number}[]>; 
 }
 
 export type Track = {

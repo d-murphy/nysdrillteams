@@ -64,6 +64,11 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData, sessio
         res.status(200).send(result); 
     })
 
+    router.get('/getHostNames', async( req: Request, res: Response) => {
+        let result = await Tournaments.getHostNames();
+        res.status(200).send(result); 
+    })
+
     router.use((err:Error, req:Request, res:Response, next:NextFunction) => {
         if (err) {
             res.status(500);

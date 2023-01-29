@@ -83,4 +83,20 @@ class TournamentsDb implements TournamentsData{
             ]
         ).toArray() as unknown as {_id: string, nameCount:number}[]
     }
+    async getHostNames():Promise<{_id: string, nameCount:number}[]>{
+        return this._dbCollection.aggregate(
+            [
+                {
+                    $group: {
+                        _id: "$host",
+                        nameCount: {
+                            $count: {}
+                        }
+                    }
+                }, 
+                { $sort: { _id: 1 } }
+            ]
+        ).toArray() as unknown as {_id: string, nameCount:number}[]
+    }
+
 }

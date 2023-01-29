@@ -29,6 +29,9 @@ class TournamentsService {
     public getTournamentNames(): Promise<{_id: string, nameCount:number}[]>{
         return this.dataSource.getTournamentNames(); 
     }
+    public getHostNames(): Promise<{_id: string, nameCount:number}[]>{
+        return this.dataSource.getHostNames(); 
+    }
 }
     
 export default TournamentsService; 
