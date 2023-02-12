@@ -47,7 +47,17 @@ export interface RunsData {
         ranks?:string[], 
         stateRecord?: boolean, 
         currentStateRecord?: boolean,
-    ): Promise<Run[]>; 
+        nassauPoints?: boolean, 
+        suffolkPoints?: boolean, 
+        westernPoints?: boolean, 
+        northernPoints?: boolean, 
+        suffolkOfPoints?: boolean, 
+        nassauOfPoints?: boolean, 
+        liOfPoints?: boolean, 
+        juniorPoints?: boolean,
+        sanctioned?: boolean,     
+        page?: number
+    ): Promise<{}[]>; 
     getBig8(year:number): Promise<{}[]>
     getTopRuns(years?: number[], teams?: string[], tracks?: string[]): Promise<{}[][]>
     getTotalPoints(year: number, totalPointsFieldName: TotalPointsFields, contests?: string[]): Promise<{_id: string, points: number}[]>

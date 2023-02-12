@@ -1,4 +1,4 @@
-import { Collection, Db, DeleteResult, InsertOneResult, ObjectId, UpdateResult, Decimal128 } from 'mongodb';
+import { Collection, Db, DeleteResult, InsertOneResult, ObjectId, UpdateResult } from 'mongodb';
 import { Run, RunsData, TotalPointsFields } from '../../types/types'; 
 import { getCollectionPromise } from '../../library/db';
 
@@ -47,7 +47,17 @@ class RunsDb implements RunsData{
         ranks?:string[], 
         stateRecord?: boolean, 
         currentStateRecord?: boolean,
-        ): Promise<Run[]> {
+        nassauPoints?: boolean, 
+        suffolkPoints?: boolean, 
+        westernPoints?: boolean, 
+        northernPoints?: boolean, 
+        suffolkOfPoints?: boolean, 
+        nassauOfPoints?: boolean, 
+        liOfPoints?: boolean, 
+        juniorPoints?: boolean,  
+        sanctioned?: boolean,  
+        page?: number
+        ): Promise<{}[]> {
         let query: {
             year?:{}, 
             contest?:{}, 
@@ -55,8 +65,17 @@ class RunsDb implements RunsData{
             track?:{}, 
             tournament?:{}, 
             rank?:{}, 
-            stateRecord?: boolean, 
-            currentStateRecord?: boolean
+            stateRecord?: {}, 
+            currentStateRecord?: {}, 
+            nassauPoints?: {}, 
+            suffolkPoints?: {}, 
+            westernPoints?: {}, 
+            northernPoints?: {}, 
+            suffolkOfPoints?: {}, 
+            nassauOfPoints?: {}, 
+            liOfPoints?: {}, 
+            juniorPoints?: {}, 
+            sanctioned?: {}   
         } = {};
         if(years && years.length) query.year = {$in : years};
         if(contests && contests.length) query.contest = {$in : contests};
@@ -64,9 +83,47 @@ class RunsDb implements RunsData{
         if(tracks && tracks.length) query.track = {$in : tracks};
         if(tournaments && tournaments.length) query.tournament = {$in : tournaments};
         if(ranks && ranks.length) query.rank = {$in : ranks};
-        if(stateRecord) query.stateRecord = stateRecord;
-        if(currentStateRecord) query.currentStateRecord = currentStateRecord;
-        return (this._dbCollection.find(query).toArray() as unknown as Run[]); 
+        if(stateRecord) query.stateRecord = {$in: [1, true]}
+        if(currentStateRecord) query.currentStateRecord = {$in: [1, true]}
+        if(nassauPoints) query.nassauPoints = {$in: [1, true]}
+        if(suffolkPoints) query.suffolkPoints = {$in: [1, true]}
+        if(westernPoints) query.westernPoints = {$in: [1, true]}
+        if(northernPoints) query.northernPoints = {$in: [1, true]} 
+        if(suffolkOfPoints) query.suffolkOfPoints = {$in: [1, true]} 
+        if(nassauOfPoints) query.nassauOfPoints = {$in: [1, true]}
+        if(liOfPoints) query.liOfPoints = {$in: [1, true]}
+        if(juniorPoints) query.juniorPoints = {$in: [1, true]} 
+        if(sanctioned) query.sanctioned = {$in: [1, true]}
+        page = page ? page : 1; 
+        const skipCt = page * 20 - 20; 
+        return await this._dbCollection.aggregate(
+            [
+                {
+                    $match: query
+                }, 
+                {   $addFields: { 
+                        customSort: {
+                            $cond: { 
+                                if: {
+                                    $or: [
+                                        { $eq: [ "$timeNum", NaN ] },
+                                        { $eq: [ "$timeNum", 0 ] },
+                                        { $eq: [ "$timeNum", null ] }                                
+                                    ]
+                                }, 
+                                then: 99999,
+                                else: "$timeNum"
+                            }
+                        }
+                    }
+                }, 
+                {   $sort: { "customSort": 1}}, 
+                {   $facet: {
+                    metadata: [ { $count: "total" }, { $addFields: { page: Number(page) } } ],
+                    data: [ { $skip: skipCt }, { $limit: 20 } ] // add projection here wish you re-shape the docs
+                } }
+            ]
+        ).toArray(); 
     }
     async getBig8(year: number): Promise<{}[]> {
         return await this._dbCollection.aggregate(

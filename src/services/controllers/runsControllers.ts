@@ -57,17 +57,27 @@ export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin){
     })
     
     router.get('/getFilteredRuns', async (req: Request, res: Response) => {
-        let years: number[], contests:string[], teams:string[], tracks:string[], tournaments: string[], ranks: string[] 
+        let years: number[], contests:string[], teams:string[], tracks:string[], tournaments: string[], ranks: string[]; 
         years = checkQuery(req, 'years').map(Number); 
         contests = checkQuery(req, 'contests'); 
         teams = checkQuery(req, 'teams'); 
         tracks = checkQuery(req, 'tracks'); 
         tournaments = checkQuery(req, 'tournaments'); 
         ranks = checkQuery(req, 'ranks'); 
-        let stateRecord = req.query?.stateRecord ? true : false
-        let currentStateRecord = req.query?.currentStateRecord ? true : false; 
-
-        let runs = await Runs.getFilteredRuns(years, contests, teams, tracks, tournaments, ranks, stateRecord, currentStateRecord); 
+        let stateRecord = String(req.query?.stateRecord).toLowerCase() == "true" 
+        let currentStateRecord = String(req.query?.currentStateRecord).toLowerCase() == "true" 
+        let suffolkPoints = String(req.query?.suffolkPoints).toLowerCase() == "true" 
+        let nassauPoints = String(req.query?.nassauPoints).toLowerCase() == "true"
+        let northernPoints = String(req.query?.northernPoints).toLowerCase() == "true"
+        let westernPoints = String(req.query?.westernPoints).toLowerCase() == "true"
+        let suffolkOfPoints = String(req.query?.suffolkOfPoints).toLowerCase() == "true"
+        let nassauOfPoints = String(req.query?.nassauOfPoints).toLowerCase() == "true"
+        let liOfPoints = String(req.query?.liOfPoints).toLowerCase() == "true"
+        let juniorPoints = String(req.query?.juniorPoints).toLowerCase() == "true"
+        let sanctioned = String(req.query?.sanctioned).toLowerCase() == "true"
+        let page = Number(req.query?.page); 
+        let runs = await Runs.getFilteredRuns(years, contests, teams, tracks, tournaments, ranks, stateRecord, currentStateRecord, 
+            nassauPoints, suffolkPoints, westernPoints, northernPoints, suffolkOfPoints, nassauOfPoints, liOfPoints, juniorPoints, sanctioned, page); 
         res.status(200).send(runs); 
     })
 
