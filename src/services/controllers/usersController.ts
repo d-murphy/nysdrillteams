@@ -38,7 +38,7 @@ export function usersRouter (usersDataSource:UsersData, sessionAdmin:SessionAdmi
         if(!username || !password) return res.status(400).send("malformed request."); 
         let checkPassResult = await Users.checkPass(username, password); 
         if(!checkPassResult) return res.status(403).send("Username and password not a match.");
-        let ip = req.socket.remoteAddress || ''
+        let ip = req.header('x-forwarded-for') || req.socket.remoteAddress || ''
         let sessionId = sessionAdmin.createSession(ip, username, checkPassResult.role)
         return res.status(200).send({username:username, sessionId:sessionId, role:checkPassResult.role}); 
     })

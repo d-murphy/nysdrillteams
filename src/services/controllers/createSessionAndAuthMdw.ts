@@ -4,7 +4,7 @@ import { Handler } from 'express'
 export function checkSessionsMdw(sessionAdmin:SessionAdmin):Handler{
     return (req,res,next) => {
         const sessionId = (req.body?.sessionId as unknown as string) || (req.query?.sessionId as unknown as string); 
-        let ip = req.socket.remoteAddress; 
+        let ip = req.header('x-forwarded-for') || req.socket.remoteAddress;  
         if(!sessionId || !ip) return res.status(400).send({message: 'Your login timed out.  Please login again.'}); 
         let sessionInfo = sessionAdmin.checkSession(ip, sessionId); 
         if(!sessionInfo) return res.status(403).send({message: 'Please login again.'}); 

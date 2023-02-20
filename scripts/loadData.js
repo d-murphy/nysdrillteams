@@ -8,15 +8,15 @@ let { PORT, DB_NAME, dbUn, dbPass } = process.env;
 
 // reading source files and reshaping. 
 
-let teamsLUT = readFileToObject("./dataForMigration/1_teams.txt", 0);  
-let seasonLUT = readFileToObject("./dataForMigration/2_season.txt", 1);  
-let divisionSeriesLUT = readFileToObject("./dataForMigration/3_division_season.txt", 0); 
-let divisions = readFileToObject("./dataForMigration/4_divisions.txt", 0); 
-let drillNamesLUT = readFileToObject("./dataForMigration/5_drill_names.txt", 0);  
-let eventNamesLUT = readFileToObject("./dataForMigration/6_event_names.txt", 0); 
-let uniqueDrillsLUT = readFileToObject("./dataForMigration/7_unique_drills.txt", 0);  
-let uniqueEventsLUT = readFileToObject("./dataForMigration/8_unique_events.txt", 0);  
-let eventResultsLUT = readFileToObject("./dataForMigration/9_event_results.txt", 0); 
+// let teamsLUT = readFileToObject("./dataForMigration/1_teams.txt", 0);  
+// let seasonLUT = readFileToObject("./dataForMigration/2_season.txt", 1);  
+// let divisionSeriesLUT = readFileToObject("./dataForMigration/3_division_season.txt", 0); 
+// let divisions = readFileToObject("./dataForMigration/4_divisions.txt", 0); 
+// let drillNamesLUT = readFileToObject("./dataForMigration/5_drill_names.txt", 0);  
+// let eventNamesLUT = readFileToObject("./dataForMigration/6_event_names.txt", 0); 
+// let uniqueDrillsLUT = readFileToObject("./dataForMigration/7_unique_drills.txt", 0);  
+// let uniqueEventsLUT = readFileToObject("./dataForMigration/8_unique_events.txt", 0);  
+// let eventResultsLUT = readFileToObject("./dataForMigration/9_event_results.txt", 0); 
 
 // print examples
 
@@ -32,25 +32,25 @@ let eventResultsLUT = readFileToObject("./dataForMigration/9_event_results.txt",
 
 // additional data maps
 
-let trackNameLUT = buildTrackNameLUT(uniqueDrillsLUT)
-let circuitLU = {
-    "1": "Nassau", 
-    "2": "Western", 
-    "3": "Northern", 
-    "4": "Suffolk"
-}; 
-let classLU = {
-    "0": "Uncategorized", 
-    "1": "Nassau", 
-    "2": "Suffolk", 
-    "3": "Old Fashioned", 
-    "4": "Western", 
-    "5": "Northern", 
-    "6": "Juniors"
-}; 
+// let trackNameLUT = buildTrackNameLUT(uniqueDrillsLUT)
+// let circuitLU = {
+//     "1": "Nassau", 
+//     "2": "Western", 
+//     "3": "Northern", 
+//     "4": "Suffolk"
+// }; 
+// let classLU = {
+//     "0": "Uncategorized", 
+//     "1": "Nassau", 
+//     "2": "Suffolk", 
+//     "3": "Old Fashioned", 
+//     "4": "Western", 
+//     "5": "Northern", 
+//     "6": "Juniors"
+// }; 
 
 (async function(){
-    console.log('starting the collection buiids'); 
+    // console.log('starting the collection buiids'); 
     // let writeDocResults = await loadRuns(); 
     // console.log("Write runs result: ", writeDocResults)
     // let loadTeamsResult = await loadTeams(); 
@@ -60,6 +60,9 @@ let classLU = {
     // let loadDrillsResult = await loadDrills(); 
     // console.log('load teams result: ', loadDrillsResult); 
     // await updateAllHosts(); 
+
+    // console.log('about to ask for runs update'); 
+    // await updateRunDate(X, XX/XX/XX); 
 })()
 
 
@@ -284,6 +287,24 @@ async function loadDrills(){
         })
     })
     return writeDocs('tournaments', drillsArr)
+}
+
+async function updateRunDate(tournamentIdStr, mmddyyStr) {
+    let runsCol = await getCollection('runs'); 
+
+    let result = await runsCol.update(
+        {tournamentId: tournamentIdStr}, 
+        {
+            $set: {
+              date: mmddyyStr
+            }
+        },
+        {
+            upsert: false, 
+            multi: true
+        }
+    )
+    console.log("here is the result: ", result); 
 }
 
 async function updateAllHosts(){

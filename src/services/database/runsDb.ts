@@ -75,7 +75,7 @@ class RunsDb implements RunsData{
             nassauOfPoints?: {}, 
             liOfPoints?: {}, 
             juniorPoints?: {}, 
-            sanctioned?: {}   
+            sanctioned?: {}
         } = {};
         if(years && years.length) query.year = {$in : years};
         if(contests && contests.length) query.contest = {$in : contests};
