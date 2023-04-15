@@ -61,6 +61,8 @@ let { PORT, DB_NAME, dbUn, dbPass } = process.env;
     // console.log('load teams result: ', loadDrillsResult); 
     // await updateAllHosts(); 
 
+    console.log('about to ask for name update'); 
+    await updateRunTournNames("1579", "Long Island OF Charity Drill"); 
     // console.log('about to ask for runs update'); 
     // await updateRunDate(X, XX/XX/XX); 
 })()
@@ -306,6 +308,25 @@ async function updateRunDate(tournamentIdStr, mmddyyStr) {
     )
     console.log("here is the result: ", result); 
 }
+
+async function updateRunTournNames(tournamentIdStr, newName, whatt) {
+    let runsCol = await getCollection('runs'); 
+
+    let result = await runsCol.updateMany(
+        {tournamentId: tournamentIdStr}, 
+        {
+            $set: {
+                tournament: newName
+            }
+        },
+        {
+            upsert: false, 
+            multi: true
+        }
+    )
+    console.log("here is the result: ", result); 
+}
+
 
 async function updateAllHosts(){
     let tournCol = await getCollection(`tournaments`); 
