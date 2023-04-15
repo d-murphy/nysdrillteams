@@ -101,9 +101,10 @@ export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin){
     router.get('/getTotalPoints', async (req: Request, res: Response) => {
         let contests = checkQuery(req, 'contests');
         let year = parseInt(req.query.year as unknown as string); 
+        let byContest = (req.query?.byContest as unknown as string || '').toLowerCase() === 'true'; 
         let totalPointsFieldName = req.query.totalPointsFieldName as unknown as TotalPointsFields; 
         if(!year || !["Nassau", "Suffolk", "Western", "Northern", "Junior", "Suffolk OF", "Nassau OF", "LI OF"].includes(totalPointsFieldName)) return res.status(400).send('totalPointsFieldName or year not valid.')
-        let totals = await Runs.getTotalPoints(year, totalPointsFieldName, contests);
+        let totals = await Runs.getTotalPoints(year, totalPointsFieldName, byContest, contests);
         return res.status(200).send(totals); 
     })
 

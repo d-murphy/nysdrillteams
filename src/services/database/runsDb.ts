@@ -172,7 +172,7 @@ class RunsDb implements RunsData{
         })
         return Promise.all(promiseArr); 
     }
-    async getTotalPoints(year: number, totalPointsFieldName: TotalPointsFields, contests: string[] = DEFAULT_CONTESTS): Promise<{_id: string, points: number}[]>  {
+    async getTotalPoints(year: number, totalPointsFieldName: TotalPointsFields, byContest = false, contests: string[] = DEFAULT_CONTESTS): Promise<{_id: string, points: number}[]>  {
         const tpFieldLookup = {
             "Nassau": "nassauPoints", 
             "Suffolk": "suffolkPoints", 
@@ -187,11 +187,12 @@ class RunsDb implements RunsData{
 
         let matchObj: {[index:string]: any} = {
             year: year, 
-            contest: { $in: DEFAULT_CONTESTS }, 
+            contest: { $in: contests }, 
             points: {"$gt" : 0}
         }
         // using a variable for the column name, so set match object dynamically.
         matchObj[tpFieldName] = { $gt: 0 }; 
+        const groupId = !byContest ? "$team" : { team: "$team", contest: "$contest" }; 
         return this._dbCollection.aggregate(
             [
                 {
@@ -199,7 +200,7 @@ class RunsDb implements RunsData{
                 },
                 {
                     $group: {
-                        _id: "$team",
+                        _id: groupId,
                         points: { "$sum": "$points" }
                         }
                 }, 

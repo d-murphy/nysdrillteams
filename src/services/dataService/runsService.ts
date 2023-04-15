@@ -120,7 +120,7 @@ interface totalPointsCache {
         }
         return this._topRunsCache[key]?.result ? this._topRunsCache[key].result : []; 
     }
-    public async getTotalPoints(year: number, totalPointsFieldName:TotalPointsFields, contests?: string[]): Promise<{}[]> {
+    public async getTotalPoints(year: number, totalPointsFieldName:TotalPointsFields, byContest=false, contests?: string[]): Promise<{}[]> {
         this._totalPointsCalls++; 
         if(!contests) contests = [];
         let key = createTotalPointsCacheKey(year, totalPointsFieldName, contests); 
@@ -128,9 +128,9 @@ interface totalPointsCache {
             console.log("Creating total points cache for: ", key); 
             let result: {}[]; 
             if(contests.length){ 
-                result = await this.dataSource.getTotalPoints(year, totalPointsFieldName, contests); 
+                result = await this.dataSource.getTotalPoints(year, totalPointsFieldName, byContest, contests); 
             } else {
-                result = await this.dataSource.getTotalPoints(year, totalPointsFieldName); 
+                result = await this.dataSource.getTotalPoints(year, totalPointsFieldName, byContest); 
             }
             this._totalPointsCache[key] = {result: result, created: new Date()}; 
         } else {
