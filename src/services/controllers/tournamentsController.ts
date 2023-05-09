@@ -9,6 +9,7 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData, sessio
     const Tournaments = new TournamentsService(tournamentsDataSource); 
     const sessionsMdw = checkSessionsMdw(sessionAdmin); 
     const authMdw = createAuthMdw(['admin', 'scorekeeper']); 
+    const authMdwForEdit = createAuthMdw(['admin', 'scorekeeper', 'video']);
 
     const router = express.Router()
 
@@ -37,7 +38,7 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData, sessio
         res.status(200).send(result);
     })
 
-    router.post('/updateTournament', [sessionsMdw, authMdw], async (req: Request, res: Response) => {
+    router.post('/updateTournament', [sessionsMdw, authMdwForEdit], async (req: Request, res: Response) => {
         const tournamentId: string = (req.body?.tournamentId as unknown as string); 
         const fieldsToUpdate: {} = (req.body?.fieldsToUpdate as unknown as {}); 
         if(!tournamentId || !fieldsToUpdate) return res.status(400).send('update body not valid'); 
