@@ -24,7 +24,8 @@ class UsersService {
     public async checkPass(username: string, password:string): Promise<{username:string, role:string} | null> {
         let user = await this.dataSource.getUser(username); 
         if(!user) return null; 
-        if(!bcrypt.compare(password, user.password)) return null;         
+        const compareResult = await bcrypt.compare(password, user.password); 
+        if(!compareResult) return null;         
         let userWoPass: {username: string, role: string, password?:string} = user; 
         delete userWoPass.password; 
         return userWoPass; 
