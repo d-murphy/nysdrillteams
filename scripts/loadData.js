@@ -61,10 +61,8 @@ let { PORT, DB_NAME, dbUn, dbPass } = process.env;
     // console.log('load teams result: ', loadDrillsResult); 
     // await updateAllHosts(); 
 
-    console.log('about to ask for name update'); 
-    await updateRunTournNames("1579", "Long Island OF Charity Drill"); 
-    // console.log('about to ask for runs update'); 
-    // await updateRunDate(X, XX/XX/XX); 
+    // other scripts here
+
 })()
 
 
@@ -309,7 +307,7 @@ async function updateRunDate(tournamentIdStr, mmddyyStr) {
     console.log("here is the result: ", result); 
 }
 
-async function updateRunTournNames(tournamentIdStr, newName, whatt) {
+async function updateRunTournNames(tournamentIdStr, newName) {
     let runsCol = await getCollection('runs'); 
 
     let result = await runsCol.updateMany(
@@ -325,6 +323,34 @@ async function updateRunTournNames(tournamentIdStr, newName, whatt) {
         }
     )
     console.log("here is the result: ", result); 
+}
+
+async function updateRoslynTotalPoints(){
+    let tournsCol = await getCollection('tournaments'); 
+    const cursor = await tournsCol.find({nassauPoints: true})
+    const nassauTourns = []; 
+
+    for await (const doc of cursor) {
+        nassauTourns.push(String(doc.id)); 
+    }
+    console.log("nassauTourns Len: ", nassauTourns.length); 
+    const runsCol = await getCollection('runs'); 
+
+    for await (tournIdStr of nassauTourns) {
+        let result = await runsCol.updateMany(
+            {tournamentId: tournIdStr, team: "Roslyn Highlanders"}, 
+            {
+                $set: {
+                    nassauPoints: 1
+                }
+            },
+            {
+                upsert: false, 
+                multi: true
+            }
+        )
+        console.log(tournIdStr, result.acknowledged, result.modifiedCount, " of ", result.matchedCount); 
+    }
 }
 
 
