@@ -289,14 +289,15 @@ async function loadDrills(){
     return writeDocs('tournaments', drillsArr)
 }
 
-async function updateRunDate(tournamentIdStr, mmddyyStr) {
+async function updateRunDate(tournamentIdStr, mmddyyStr, yearNum) {
     let runsCol = await getCollection('runs'); 
 
     let result = await runsCol.update(
         {tournamentId: tournamentIdStr}, 
         {
             $set: {
-              date: mmddyyStr
+              date: mmddyyStr, 
+              year: yearNum
             }
         },
         {
