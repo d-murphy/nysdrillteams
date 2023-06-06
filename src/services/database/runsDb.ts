@@ -188,10 +188,11 @@ class RunsDb implements RunsData{
         let matchObj: {[index:string]: any} = {
             year: year, 
             contest: { $in: contests }, 
-            points: {"$gt" : 0}
+            points: {"$gt" : 0},
         }
         // using a variable for the column name, so set match object dynamically.
-        matchObj[tpFieldName] = { $gt: 0 }; 
+        matchObj[tpFieldName] = {$in: [1, true]}
+
         const groupId = !byContest ? "$team" : { team: "$team", contest: "$contest" }; 
         return this._dbCollection.aggregate(
             [

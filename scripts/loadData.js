@@ -62,6 +62,7 @@ let { PORT, DB_NAME, dbUn, dbPass } = process.env;
     // await updateAllHosts(); 
 
     // other scripts here
+    updateRunTrack("2089", "Medford")
 
 })()
 
@@ -308,14 +309,14 @@ async function updateRunDate(tournamentIdStr, mmddyyStr, yearNum) {
     console.log("here is the result: ", result); 
 }
 
-async function updateRunTournNames(tournamentIdStr, newName) {
+async function updateRunTrack(tournamentIdStr, newName) {
     let runsCol = await getCollection('runs'); 
 
     let result = await runsCol.updateMany(
         {tournamentId: tournamentIdStr}, 
         {
             $set: {
-                tournament: newName
+                track: newName
             }
         },
         {
