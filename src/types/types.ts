@@ -28,7 +28,8 @@ export type Run = {
     rank?: string, 
     notes?: string,
     stateRecord?: number,
-    currentStateRecord?: number
+    currentStateRecord?: number, 
+    totalPointsOverride?: number
 }
 
 export interface RunsData {

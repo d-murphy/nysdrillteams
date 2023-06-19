@@ -188,7 +188,10 @@ class RunsDb implements RunsData{
         let matchObj: {[index:string]: any} = {
             year: year, 
             contest: { $in: contests }, 
-            points: {"$gt" : 0},
+            $or: [
+                { points: {"$gt" : 0}},
+                { totalPointsOverride: {"$gt": 0}}
+            ]
         }
         // using a variable for the column name, so set match object dynamically.
         matchObj[tpFieldName] = {$in: [1, true]}
@@ -200,9 +203,22 @@ class RunsDb implements RunsData{
                     $match: matchObj,
                 },
                 {
+                    $project:
+                      {
+                        team: 1, 
+                        contest: 1, 
+                        points: 1, 
+                        totalPointsOverride: 1, 
+                        overidePoints:
+                          {
+                            $cond: { if: { $gte: [ "$totalPointsOverride", 0 ] }, then: "$totalPointsOverride", else: "$points" }
+                          }
+                      }
+                },
+                {
                     $group: {
                         _id: groupId,
-                        points: { "$sum": "$points" }
+                        points: { "$sum": "$overidePoints" }
                         }
                 }, 
                 {
