@@ -38,6 +38,10 @@ class RunsDb implements RunsData{
         const query = { tournamentId: tournamentId };
         return (this._dbCollection.find(query).toArray() as unknown as Run[]); 
     }
+    async getTeamSummary(year: number, team: string): Promise<Run[]> {
+        const query = { year: year, team: team}; 
+        return (this._dbCollection.find(query).toArray() as unknown as Run[])
+    }
     async getFilteredRuns(
         years?: number[], 
         contests?: string[], 

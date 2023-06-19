@@ -56,6 +56,13 @@ export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin){
         return res.status(200).send(runs); 
     })
     
+    router.get('/getTeamSummary', async (req: Request, res: Response) => {
+        const year:number = parseInt(req.query.year as unknown as string) 
+        const team:string = req.query.team as unknown as string; 
+        let runs = await Runs.getTeamSummary(year, team); 
+        return res.status(200).send(runs); 
+    })
+
     router.get('/getFilteredRuns', async (req: Request, res: Response) => {
         let years: number[], contests:string[], teams:string[], tracks:string[], tournaments: string[], ranks: string[]; 
         years = checkQuery(req, 'years').map(Number); 
