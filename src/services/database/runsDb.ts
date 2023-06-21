@@ -42,6 +42,25 @@ class RunsDb implements RunsData{
         const query = { year: year, team: team}; 
         return (this._dbCollection.find(query).toArray() as unknown as Run[])
     }
+    async getYearRunCounts(team:string):Promise<{_id: string, yearRunCount:number}[]>{
+        const query = { team: team}; 
+        return this._dbCollection.aggregate(
+            [
+                {
+                    $match: query
+                }, 
+                {
+                    $group: {
+                        _id: "$year",
+                        yearRunCount: {
+                            $count: {}
+                        }
+                    }
+                }, 
+                { $sort: { _id: 1 } }
+            ]
+        ).toArray() as unknown as {_id: string, yearRunCount:number}[]
+    }
     async getFilteredRuns(
         years?: number[], 
         contests?: string[], 

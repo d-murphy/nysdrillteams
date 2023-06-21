@@ -62,6 +62,11 @@ export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin){
         let runs = await Runs.getTeamSummary(year, team); 
         return res.status(200).send(runs); 
     })
+    router.get('/getYearRunCounts', async (req: Request, res: Response) => {
+        const team: string = req.query.team as string; 
+        let yearRunCounts = await Runs.getYearRunCounts(team); 
+        return res.status(200).send(yearRunCounts); 
+    })
 
     router.get('/getFilteredRuns', async (req: Request, res: Response) => {
         let years: number[], contests:string[], teams:string[], tracks:string[], tournaments: string[], ranks: string[]; 

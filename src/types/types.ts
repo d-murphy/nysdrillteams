@@ -40,6 +40,7 @@ export interface RunsData {
     getRun(runId: number): Promise<Run | undefined>;
     getRunsFromTournament(tournamentId:string): Promise<Run[]>
     getTeamSummary(year: number, team:string): Promise<Run[]>
+    getYearRunCounts(team:string):Promise<{_id: string, yearRunCount:number}[]>
     getFilteredRuns(        
         years?: number[], 
         contests?: string[], 

@@ -50,6 +50,9 @@ interface totalPointsCache {
     public getTeamSummary(year: number, team: string): Promise<Run[]> {
         return this.dataSource.getTeamSummary(year, team); 
     }
+    public getYearRunCounts(team:string):Promise<{_id: string, yearRunCount:number}[]>{
+        return this.dataSource.getYearRunCounts(team); 
+    }
     public getFilteredRuns(
         years?: number[], 
         contests?: string[], 
