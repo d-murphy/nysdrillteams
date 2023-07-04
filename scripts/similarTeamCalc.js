@@ -4,9 +4,10 @@ const { getDbPromise, getCollectionPromise } = require('../dist/library/db')
 dotenv.config(); 
 let { DB_NAME, dbUn, dbPass } = process.env; 
 
+const INCLUDE_UP_TO = 2022; 
 
 const contests = ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]; 
-const years = Array(75).fill().map((x,i)=>i + 1950)
+const years = Array(300).fill().map((x,i)=>i + 1950).filter(el => el <= INCLUDE_UP_TO); 
 
 const greatRunCutoffs = {
     "Three Man Ladder": 6.30, 
@@ -34,8 +35,8 @@ const goodRunCutoffs = {
 let results = []; 
 
 (async function(){
-    // await calculateMtxScores(); 
-   await findNeighbors(); 
+    await calculateMtxScores(); 
+    await findNeighbors(); 
 })()
 
 
@@ -44,7 +45,7 @@ async function findNeighbors(){
     const similarTeamsMtx = await similarTeamsMtxCol.find({}).toArray(); 
     console.log('len of similarTeamsMtx: ', similarTeamsMtx.length); 
 
-    const forSorting = []; 
+    let forSorting = []; 
 
     for(let i=0; i<similarTeamsMtx.length; i++){
         for(let j=0; j<similarTeamsMtx.length; j++){
@@ -60,7 +61,19 @@ async function findNeighbors(){
         }
         i % 20 === 0 ? console.log('finished i: ', i) : null; 
     }
-   console.log('forSorting: ', forSorting.sort((a,b) => a.distance < b.distance ? -1 : 1).filter(el => el.team === "East Islip Guzzlers" && el.year===2012)); 
+    forSorting.sort((a,b) => {
+        return a.team === b.team ? a.distance < b.distance ? -1 : 1 : 
+            a.team < b.team ? -1 : 1; 
+    })
+    const counter = {}; 
+    forSorting = forSorting.filter(el => {
+        const key = `${el.team}-${el.year}`
+        if(!counter[key]) counter[key] = 0; 
+        counter[key] ++
+        return counter[key] <= 15
+    })
+   console.log('forSorting len: ', forSorting.length); 
+   writeDocs('similarTeamsDist', forSorting)
 
 }
 
@@ -132,7 +145,8 @@ async function getTeams(teamsCol){
 async function getRuns(runsCol, team, year){
     return await runsCol.find({
         team: team, 
-        year: year
+        year: year, 
+        time: { $nin: ['NA', 'NULL'] }
     })
     .project({timeNum: 1, points: 1, contest: 1}).toArray(); 
 }

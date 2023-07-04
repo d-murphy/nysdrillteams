@@ -48,6 +48,14 @@ export function teamsRouter (teamsDataSource:TeamData, sessionAdmin: SessionAdmi
         res.status(200).send(teams); 
     })
 
+    router.get('/getSimilarTeams', async (req: Request, res: Response) => {
+        const team = req.query?.team as string;
+        const year = parseInt(req.query?.year as string); 
+        if(!team || !year) return res.status(400).send('missing team or year in query'); 
+        let teams = await Teams.getSimilarTeams(team, year); 
+        res.status(200).send(teams); 
+    })
+
     router.use((err:Error, req:Request, res:Response, next:NextFunction) => {
         if (err) {
             res.status(500);

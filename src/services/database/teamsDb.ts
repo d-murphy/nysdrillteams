@@ -1,18 +1,21 @@
 import { Collection, Db, DeleteResult, InsertOneResult, UpdateResult, ObjectId } from 'mongodb';
-import { TeamData, Team } from '../../types/types'; 
+import { TeamData, Team, SimilarTeam } from '../../types/types'; 
 import { getCollectionPromise } from '../../library/db';
 
-export async function teamsDbFactory(dbPromise: Promise<Db>, collectionName: string):Promise<TeamData | undefined> {
+export async function teamsDbFactory(dbPromise: Promise<Db>, collectionName: string, similarTeamsCollectionName: string):Promise<TeamData | undefined> {
     let collection = await getCollectionPromise(dbPromise, collectionName); 
-    if(collection) return new TeamsDb(collection); 
+    let similarTeamsCollection = await getCollectionPromise(dbPromise, similarTeamsCollectionName); 
+    if(collection && similarTeamsCollection) return new TeamsDb(collection, similarTeamsCollection); 
     return undefined; 
 }
 
 
 class TeamsDb implements TeamData{
     _dbCollection: Collection; 
-    constructor(collection: Collection) {
+    _similarTeamsCollection: Collection; 
+    constructor(collection: Collection, similarTeamsCollection: Collection) {
         this._dbCollection = collection; 
+        this._similarTeamsCollection = similarTeamsCollection; 
     }
     async insertTeam(newTeam:Team): Promise<InsertOneResult> {
         return this._dbCollection.insertOne(newTeam); 
@@ -34,5 +37,9 @@ class TeamsDb implements TeamData{
     } 
     async getTeams():Promise<Team[]> {
         return (this._dbCollection.find().toArray()) as unknown as Team[]
+    }
+    async getSimilarTeams(team: string, year: number): Promise<SimilarTeam[]> {
+        const query = {team: team, year: year}; 
+        return (this._similarTeamsCollection.find(query)).toArray() as unknown as SimilarTeam[]; 
     }
 }

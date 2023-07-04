@@ -51,7 +51,7 @@ var credentials = {key: privateKey, cert: certificate};
     const sessionAdmin = new SessionAdmin(); 
     
     let runsData = await runsDbFactory(dbPromise, 'runs');  
-    let teamsData = await teamsDbFactory(dbPromise, 'teams'); 
+    let teamsData = await teamsDbFactory(dbPromise, 'teams', 'similarTeamsDist'); 
     let tournamentsData = await tournamentsDbFactory(dbPromise, 'tournaments'); 
     let tracksData = await tracksDbFactory(dbPromise, 'tracks'); 
     let usersData = await usersDbFactory(dbPromise, 'users'); 

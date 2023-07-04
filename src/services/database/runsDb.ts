@@ -39,11 +39,11 @@ class RunsDb implements RunsData{
         return (this._dbCollection.find(query).toArray() as unknown as Run[]); 
     }
     async getTeamSummary(year: number, team: string): Promise<Run[]> {
-        const query = { year: year, team: team}; 
+        const query = { year: year, team: team, time: { $nin: ['NA', 'NULL'] }}; 
         return (this._dbCollection.find(query).toArray() as unknown as Run[])
     }
     async getYearRunCounts(team:string):Promise<{_id: string, yearRunCount:number}[]>{
-        const query = { team: team}; 
+        const query = { team: team, time: { $nin: ['NA', 'NULL'] }}; 
         return this._dbCollection.aggregate(
             [
                 {

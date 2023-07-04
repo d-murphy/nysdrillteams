@@ -78,12 +78,21 @@ export type Team = {
     region: string
 }
 
+export type SimilarTeam = {
+    team: string, 
+    year: number, 
+    otherTeam: string, 
+    otheryear: number, 
+    distance: number
+}
+
 export interface TeamData {
     insertTeam(newTeam: Team): Promise<InsertOneResult>;
     deleteTeam(teamId: string): Promise<DeleteResult>;
     updateTeam(teamId:string, fieldsToUpdate: {}): Promise<UpdateResult>; 
     getTeam(teamId:number): Promise<Team | undefined>;
     getTeams(): Promise<Team[]>;
+    getSimilarTeams(team:string, year:number): Promise<SimilarTeam[]>; 
 }
 
 export type Tournament = {

@@ -1,5 +1,5 @@
 import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
-import { TeamData, Team } from '../../types/types'
+import { TeamData, Team, SimilarTeam } from '../../types/types'
 
 class TeamsService {
 
@@ -19,6 +19,9 @@ class TeamsService {
     }
     public getTeams(): Promise<Team[]> {
         return this.dataSource.getTeams(); 
+    }
+    public getSimilarTeams(team:string, year: number): Promise<SimilarTeam[]> {
+        return this.dataSource.getSimilarTeams(team, year); 
     }
 }
     
