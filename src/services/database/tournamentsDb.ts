@@ -1,5 +1,5 @@
 import { Collection, Db, DeleteResult, InsertOneResult, ObjectId, UpdateResult } from 'mongodb';
-import { TournamentsData, Tournament, TournamentW_id } from '../../types/types'; 
+import { TournamentsData, Tournament, TournamentW_id, FinishesReturn } from '../../types/types'; 
 import { getCollectionPromise } from '../../library/db';
 
 export async function tournamentsDbFactory(dbPromise: Promise<Db>, collectionName: string):Promise<TournamentsData | undefined> {
@@ -97,6 +97,45 @@ class TournamentsDb implements TournamentsData{
                 { $sort: { _id: 1 } }
             ]
         ).toArray() as unknown as {_id: string, nameCount:number}[]
+    }
+
+    async getFinishes(team: string, years?: number[]){
+        let query: {
+            year?:{}, 
+        } = {};
+        if(years && years.length) query.year = {$in : years};
+
+        return this._dbCollection.aggregate(
+            [
+                {
+                    $match: query
+                }, 
+                {
+                    $unwind:
+                    {
+                      path: "$top5",
+                      includeArrayIndex: "tournamentFinishArrInd",
+                      preserveNullAndEmptyArrays: false
+                    }
+                },
+                {
+                    $match: {"top5.teamName": team}
+                }, 
+                {
+                    $project: {
+                        _id: 1, 
+                        id: 1, 
+                        name: 1, 
+                        year: 1, 
+                        date: 1, 
+                        track: 1, 
+                        top5: 1, 
+                        host: 1
+                    }
+                }
+
+            ]
+        ).toArray() as unknown as FinishesReturn[]
     }
 
 }

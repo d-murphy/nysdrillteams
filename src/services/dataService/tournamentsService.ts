@@ -1,5 +1,5 @@
 import { DeleteResult, InsertOneResult, UpdateResult } from 'mongodb';
-import { TournamentsData, Tournament } from '../../types/types'
+import { TournamentsData, Tournament, FinishesReturn } from '../../types/types'
 
 
 class TournamentsService {
@@ -31,6 +31,9 @@ class TournamentsService {
     }
     public getHostNames(): Promise<{_id: string, nameCount:number}[]>{
         return this.dataSource.getHostNames(); 
+    }
+    public getFinishes(team: string, years?: number[]): Promise<FinishesReturn[]>{
+        return this.dataSource.getFinishes(team, years); 
     }
 }
     

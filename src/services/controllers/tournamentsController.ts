@@ -70,6 +70,16 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData, sessio
         res.status(200).send(result); 
     })
 
+    router.get('/getFinishes', async (req: Request, res: Response) => {
+        let years: number[], team:string;  
+        years = checkQuery(req, 'years').map(Number); 
+        team = req.query['team'] as string; 
+        if(!team) return res.status(400).send("Please include query team.")
+        let result = await Tournaments.getFinishes(team, years.length ? years : undefined); 
+        return res.status(200).send(result); 
+    })
+
+
     router.use((err:Error, req:Request, res:Response, next:NextFunction) => {
         if (err) {
             res.status(500);

@@ -144,6 +144,22 @@ export interface TournamentsData {
     getTournsCtByYear():Promise<{_id: number, yearCount: number }[]>; 
     getTournamentNames(): Promise<{_id: string, nameCount:number}[]>; 
     getHostNames(): Promise<{_id: string, nameCount:number}[]>; 
+    getFinishes(team: string, years?: number[]): Promise<FinishesReturn[]>; 
+}
+
+export type FinishesReturn = {
+    _id: string,
+    id: number, 
+    name: string, 
+    year: number, 
+    date: string, 
+    track: string, 
+    top5: {
+        teamName: string,
+        points: number,
+        finishingPosition: string
+    }, 
+    host: string
 }
 
 export type Track = {
