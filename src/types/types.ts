@@ -65,6 +65,7 @@ export interface RunsData {
     getTopRuns(years?: number[], teams?: string[], tracks?: string[]): Promise<{}[][]>
     getTotalPoints(year: number, totalPointsFieldName: TotalPointsFields, byContest: boolean, contests?: string[]): Promise<{_id: string, points: number}[]>
     getContestNames(): Promise<{_id: string, nameCount:number}[]>
+    getYearTournRunPointCounts(team: string): Promise<{_id: {tournament: string, tournamentId: string, date: Date}, tournamentRunCount:number, pointsCount: number, stateRecordCount: number}[]>
 }
 
 export type Team = {

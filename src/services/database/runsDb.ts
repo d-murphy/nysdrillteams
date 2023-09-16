@@ -268,5 +268,40 @@ class RunsDb implements RunsData{
         ).toArray() as unknown as {_id: string, nameCount:number}[]
 
     }
+    async getYearTournRunPointCounts(team:string):Promise<{
+            _id: {tournament: string, tournamentId: string, date: Date}, 
+            tournamentRunCount:number, 
+            pointsCount: number, 
+            stateRecordCount: number
+        }[]>
+        {
+        const query = { team: team, time: { $nin: ['NA', 'NULL'] }}; 
+        return this._dbCollection.aggregate(
+            [
+                {
+                    $match: query
+                }, 
+                {
+                    $group: {
+                        "_id": {
+                            tournament: "$tournament", 
+                            tournamentId: "$tournamentId", 
+                            date: "$date"
+                        },
+                        tournamentRunCount: {
+                            $count: {}
+                        },
+                        pointsCount: {
+                            $sum: "$points"
+                        },
+                        stateRecordCount: {
+                            $sum: "$stateRecord"
+                        }
+                    }
+                }, 
+            ]
+        ).toArray() as unknown as {_id: {tournament: string, tournamentId: string, date: Date}, tournamentRunCount:number, pointsCount: number, stateRecordCount: number}[]
+    }
+
 }
 

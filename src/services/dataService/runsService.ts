@@ -157,6 +157,9 @@ interface totalPointsCache {
     public getContestNames(): Promise<{_id: string, nameCount:number}[]> {
         return this.dataSource.getContestNames(); 
     } 
+    public getYearTournRunPointCounts(team:string): Promise<{_id: {tournament: string, tournamentId: string, date: Date}, tournamentRunCount:number, pointsCount: number, stateRecordCount: number}[]>{
+        return this.dataSource.getYearTournRunPointCounts(team); 
+    }
 }
     
 export default RunsService; 
