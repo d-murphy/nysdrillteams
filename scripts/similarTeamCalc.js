@@ -5,6 +5,7 @@ dotenv.config();
 let { DB_NAME, dbUn, dbPass } = process.env; 
 
 const INCLUDE_UP_TO = 2022; 
+const YEAR_DIF_DENOM = INCLUDE_UP_TO - 1960
 
 const contests = ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]; 
 const years = Array(300).fill().map((x,i)=>i + 1950).filter(el => el <= INCLUDE_UP_TO); 
@@ -31,11 +32,21 @@ const goodRunCutoffs = {
     "Buckets": 23
 }
 
+const okayRunCutoffs = {
+    "Three Man Ladder": 7.2, 
+    "B Ladder": 6.2, 
+    "C Ladder": 10.2, 
+    "C Hose": 15, 
+    "B Hose": 10, 
+    "Efficiency": 10.5, 
+    "Motor Pump": 9, 
+    "Buckets": 28
+}
 
 let results = []; 
 
 (async function(){
-    await calculateMtxScores(); 
+//    await calculateMtxScores(); 
     await findNeighbors(); 
 })()
 
@@ -74,16 +85,16 @@ async function findNeighbors(){
     })
    console.log('forSorting len: ', forSorting.length); 
    writeDocs('similarTeamsDist', forSorting)
-
 }
 
 function calcDistance(year1, year2){
     let sumBeforeSqRt = 0; 
-    sumBeforeSqRt += (year1.numRuns - year2.numRuns) ** 2; 
+    sumBeforeSqRt += ((year1.year - year2.year) * 2 / YEAR_DIF_DENOM) ** 2; 
     contests.forEach(contest => {
-        sumBeforeSqRt += (year1[`${contest}-PtsPct`] - year2[`${contest}-PtsPct`]) ** 2; 
+//        sumBeforeSqRt += (year1[`${contest}-PtsPct`] - year2[`${contest}-PtsPct`]) ** 2; 
         sumBeforeSqRt += (year1[`${contest}-GreatPct`] - year2[`${contest}-GreatPct`]) ** 2; 
         sumBeforeSqRt += (year1[`${contest}-GoodPct`] - year2[`${contest}-GoodPct`]) ** 2; 
+        sumBeforeSqRt += (year1[`${contest}-OkayPct`] - year2[`${contest}-OkayPct`]) ** 2; 
     })
     return Math.sqrt(sumBeforeSqRt); 
 }
@@ -122,13 +133,15 @@ async function calculateMtxScores(){
                 entry[`${contest}-GreatPct`] = !contestRuns.length ? 0 : greatRuns.length / contestRuns.length; 
                 const goodRuns = contestRuns.filter(el => parseFloat(el.timeNum) <= goodRunCutoffs[contest]); 
                 entry[`${contest}-GoodPct`] = !contestRuns.length ? 0 : goodRuns.length / contestRuns.length; 
+                const okayRuns = contestRuns.filter(el => parseFloat(el.timeNum) <= okayRunCutoffs[contest]); 
+                entry[`${contest}-OkayPct`] = !contestRuns.length ? 0 : okayRuns.length / contestRuns.length; 
             })
             results.push(entry); 
 
         }
     }
 
-    results = results.filter(el => el.numRuns > .2); 
+    results = results.filter(el => el.numRuns >= .4); 
     console.log('results len: ',  results); 
     const writeResult = await writeDocs('similarTeamsMtx', results)
     console.log('write result: ', writeResult); 
