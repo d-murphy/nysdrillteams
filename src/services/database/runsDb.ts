@@ -31,7 +31,6 @@ class RunsDb implements RunsData{
     }
     async getRun(runId: number): Promise<Run | undefined> {
         const query = { _id: new ObjectId(runId) };
-        let result:Run | undefined = undefined; 
         return (this._dbCollection.findOne(query)) as unknown as Run; 
     }
     async getRunsFromTournament(tournamentId: string): Promise<Run[]> {
@@ -168,6 +167,26 @@ class RunsDb implements RunsData{
             ]
         ).toArray() 
     }
+    async getTeamRecord(team: string): Promise<{}[]> {
+        return await this._dbCollection.aggregate(
+            [
+                {
+                    $match: {
+                        team: team, 
+                        timeNum: { $nin: [NaN, 0, null] }
+                    },
+                },
+                { $sort: { "timeNum": 1} }, 
+                {
+                    $group: {
+                        _id: "$contest",
+                        "matched_doc": { "$first": "$$ROOT" }                     
+                        }
+                }
+            ]
+        ).toArray() 
+    }
+
     async getTopRuns(years?: number[], teams?: string[], tracks?: string[]): Promise<{}[][]> {
         let contests = DEFAULT_CONTESTS; 
         let promiseArr: Promise<{}[]>[] = []; 
@@ -268,11 +287,11 @@ class RunsDb implements RunsData{
         ).toArray() as unknown as {_id: string, nameCount:number}[]
 
     }
-    async getYearTournRunPointCounts(team:string):Promise<{
-            _id: {tournament: string, tournamentId: string, date: Date}, 
+    async getTournRunCounts(team:string):Promise<{
+            _id: {tournament: string, tournamentId: string, date: Date, track: string}, 
             tournamentRunCount:number, 
-            pointsCount: number, 
-            stateRecordCount: number
+            stateRecordCount: number, 
+            videoCount: number
         }[]>
         {
         const query = { team: team, time: { $nin: ['NA', 'NULL'] }}; 
@@ -286,22 +305,50 @@ class RunsDb implements RunsData{
                         "_id": {
                             tournament: "$tournament", 
                             tournamentId: "$tournamentId", 
-                            date: "$date"
+                            date: "$date", 
+                            track: "$track",
                         },
                         tournamentRunCount: {
                             $count: {}
                         },
-                        pointsCount: {
-                            $sum: "$points"
-                        },
                         stateRecordCount: {
-                            $sum: "$stateRecord"
+                            $sum: { $cond: ["$stateRecord", 1, 0] }
+                        }, 
+                        videoCount: {
+                            $sum: { $cond: [{ $gt: [ { $size: "$urls"} , 0 ] }, 1, 0]}
                         }
                     }
                 }, 
             ]
-        ).toArray() as unknown as {_id: {tournament: string, tournamentId: string, date: Date}, tournamentRunCount:number, pointsCount: number, stateRecordCount: number}[]
+        ).toArray() as unknown as {_id: {tournament: string, tournamentId: string, date: Date, track: string}, tournamentRunCount:number, stateRecordCount: number, videoCount: number}[]
     }
+    async getTournPoints(team:string):Promise<{
+        _id: {tournament: string, tournamentId: string, date: Date, track: string}, 
+        points: number, 
+    }[]>
+    {
+    const query = { team: team, points: { $nin: ['NA', 'NULL', NaN] }}; 
+    return this._dbCollection.aggregate(
+        [
+            {
+                $match: query
+            }, 
+            {
+                $group: {
+                    "_id": {
+                        tournament: "$tournament", 
+                        tournamentId: "$tournamentId", 
+                        date: "$date", 
+                        track: "$track",
+                    },
+                    points: {
+                        $sum: "$points"
+                    },
+                }
+            }, 
+        ]
+    ).toArray() as unknown as {_id: {tournament: string, tournamentId: string, date: Date, track: string}, points:number}[]
+}
 
 }
 

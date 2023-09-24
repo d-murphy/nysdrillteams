@@ -35,6 +35,14 @@ class TournamentsService {
     public getFinishes(team: string, years?: number[]): Promise<FinishesReturn[]>{
         return this.dataSource.getFinishes(team, years); 
     }
+    public getTournsTop5(team:string):Promise<{name: string, id: number, date: Date, track: string, top5: {teamName: string, finishingPosition: string, points: number}}[]> {
+        return this.dataSource.getTournsTop5(team); 
+    }
+    public getTournsAppearing(team:string): Promise<{name: string, id: number, date: Date, track: string, runningOrder: { k:string,  v: string }}[]> {
+        return this.dataSource.getTournsAppearing(team); 
+    }
+
+
 }
     
 export default TournamentsService; 

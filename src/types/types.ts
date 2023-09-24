@@ -1,4 +1,4 @@
-import { Collection, ObjectId, InsertOneResult, DeleteResult, UpdateResult } from "mongodb"
+import { Collection, ObjectId, InsertOneResult, DeleteResult, UpdateResult, InsertManyResult } from "mongodb"
 
 export type Run = {
     id?: number, 
@@ -62,10 +62,14 @@ export interface RunsData {
         page?: number
     ): Promise<{}[]>; 
     getBig8(year:number): Promise<{}[]>
+    getTeamRecord(team: string): Promise<{}[]>
     getTopRuns(years?: number[], teams?: string[], tracks?: string[]): Promise<{}[][]>
     getTotalPoints(year: number, totalPointsFieldName: TotalPointsFields, byContest: boolean, contests?: string[]): Promise<{_id: string, points: number}[]>
     getContestNames(): Promise<{_id: string, nameCount:number}[]>
-    getYearTournRunPointCounts(team: string): Promise<{_id: {tournament: string, tournamentId: string, date: Date}, tournamentRunCount:number, pointsCount: number, stateRecordCount: number}[]>
+    getTournRunCounts(team: string): Promise<{_id: {tournament: string, tournamentId: string, date: Date, track: string}, tournamentRunCount:number, stateRecordCount: number, videoCount: number}[]>
+    getTournPoints(team:string): Promise<{_id: {tournament: string, tournamentId: string, date: Date, track: string}, points: number}[]> 
+
+
 }
 
 export type Team = {
@@ -146,6 +150,9 @@ export interface TournamentsData {
     getTournamentNames(): Promise<{_id: string, nameCount:number}[]>; 
     getHostNames(): Promise<{_id: string, nameCount:number}[]>; 
     getFinishes(team: string, years?: number[]): Promise<FinishesReturn[]>; 
+    // this type is wrong
+    getTournsTop5(team:string):Promise<{name: string, id: number, date: Date, track: string, top5: { teamName: string, finishingPosition: string, points: number }}[]>
+    getTournsAppearing(team: string): Promise<{name: string, id: number, date: Date, track: string, runningOrder: { k:string, v: string }}[]>
 }
 
 export type FinishesReturn = {
@@ -210,4 +217,25 @@ export interface Update {
 export interface UpdatesData {
     insertUpdate(newUpdate: Update): Promise<InsertOneResult>,  
     getRecent(): Promise<Update[]>
+}
+
+export interface TeamTournHistory {
+    name: string, 
+    id: number, 
+    date: Date, 
+    track: string, 
+    runningOrderPos?: number, 
+    finishingPosition?: string, 
+    points?: number
+    stateRecordCount?: number, 
+    runCount?: number
+    videoCount?: number
+}
+
+export interface HistoryData {
+    _dbCollection: Collection | undefined;  
+    _tempDbCollection: Collection | undefined; 
+    _collectionName: string; 
+    insertHistories(teamHistories: {team: string, histories: TeamTournHistory[]}[]): Promise<boolean>; 
+    getHistory(team:string): Promise<{team: string, histories: TeamTournHistory[]}>; 
 }

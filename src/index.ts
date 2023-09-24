@@ -21,6 +21,10 @@ import { usersDbFactory } from './services/database/usersDb';
 import { updatesDbFactory } from './services/database/updatesDb';
 import SessionAdmin from './services/dataService/session'; 
 import { announcementRouter } from './services/controllers/announcementsController';
+import { historyDbFactory } from './services/database/historyDb';
+import { historiesRouter } from './services/controllers/historiesController'; 
+import RunsService from './services/dataService/runsService';
+import HistoryService from './services/dataService/historyService';
 
 dotenv.config(); 
 let { PORT, DB_NAME, dbUn, dbPass, keyLocation, certLocation } = process.env; 
@@ -52,16 +56,18 @@ var credentials = {key: privateKey, cert: certificate};
     
     let runsData = await runsDbFactory(dbPromise, 'runs');  
     let teamsData = await teamsDbFactory(dbPromise, 'teams', 'similarTeamsDist'); 
-    let tournamentsData = await tournamentsDbFactory(dbPromise, 'tournaments'); 
+    let tournamentsData = await tournamentsDbFactory(dbPromise, 'tournaments', 'idTracker'); 
     let tracksData = await tracksDbFactory(dbPromise, 'tracks'); 
     let usersData = await usersDbFactory(dbPromise, 'users'); 
     let updatesData = await updatesDbFactory(dbPromise, 'updates'); 
+    let historyData = await historyDbFactory(dbPromise, 'team-histories'); 
     if(runsData) app.use('/runs', runsRouter(runsData, sessionAdmin)); 
     if(teamsData) app.use('/teams', teamsRouter(teamsData, sessionAdmin));
     if(tournamentsData) app.use('/tournaments', tournamentsRouter(tournamentsData, sessionAdmin));  
     if(tracksData) app.use('/tracks', tracksRouter(tracksData, sessionAdmin));  
     if(usersData) app.use('/users', usersRouter(usersData, sessionAdmin))
     if(updatesData) app.use('/updates', updatesRouter(updatesData, sessionAdmin))
+    if(historyData && runsData && teamsData && tournamentsData) app.use('/histories', historiesRouter(historyData, runsData, tournamentsData, teamsData, sessionAdmin)); 
     app.use("/announcements", announcementRouter(sessionAdmin))
 
     app.get('/test', (req, res) => res.status(200).send('hi'))

@@ -2,29 +2,32 @@ import { Collection, Db, DeleteResult, InsertOneResult, ObjectId, UpdateResult }
 import { TournamentsData, Tournament, TournamentW_id, FinishesReturn } from '../../types/types'; 
 import { getCollectionPromise } from '../../library/db';
 
-export async function tournamentsDbFactory(dbPromise: Promise<Db>, collectionName: string):Promise<TournamentsData | undefined> {
+export async function tournamentsDbFactory(dbPromise: Promise<Db>, collectionName: string, idTrackerCollectionName: string):Promise<TournamentsData | undefined> {
     let collection = await getCollectionPromise(dbPromise, collectionName); 
-    let lastIdDoc = await (collection?.find()
-            .sort({id:-1})
-            .collation( {locale: 'en_US',  numericOrdering: true}).limit(1).toArray() as unknown as Tournament[])
-    console.log('Current highest tournament id: ', lastIdDoc[0].id)
-    if(collection) return new TournamentsDb(collection, lastIdDoc[0].id); 
+    let idTrackerCollection = await getCollectionPromise(dbPromise, idTrackerCollectionName); 
+    if(collection && idTrackerCollection) return new TournamentsDb(collection, idTrackerCollection); 
     return undefined; 
 }
 
 
 class TournamentsDb implements TournamentsData{
     _dbCollection: Collection; 
-    _lastId: number; 
-    constructor(collection: Collection, lastId: number) {
+    _idTrackerCollection: Collection; 
+    constructor(collection: Collection, idTrackerCollection: Collection) {
         this._dbCollection = collection;
-        this._lastId = lastId; 
+        this._idTrackerCollection = idTrackerCollection; 
     }
     async insertTournament(newTournament: Tournament): Promise<InsertOneResult> {        
         let docToInsert: TournamentW_id = newTournament; 
         docToInsert._id = new ObjectId;  
-        this._lastId++; 
-        docToInsert.id = this._lastId;   
+
+        const result = await this._idTrackerCollection.findOneAndUpdate(
+            {name: 'tournament id'}, 
+            { $inc: { idCounter: 1 }}, 
+            {returnDocument: 'after'}
+        ); 
+        const document = result.value as unknown as {idCounter: number}; 
+        docToInsert.id = document.idCounter;   
         return this._dbCollection.insertOne(docToInsert);
     }
     async deleteTournament(tournamentId: string): Promise<DeleteResult> {
@@ -137,5 +140,56 @@ class TournamentsDb implements TournamentsData{
             ]
         ).toArray() as unknown as FinishesReturn[]
     }
+    // this type is wrong
+
+    async getTournsTop5(team:string):Promise<{name: string, id: number, date: Date, track: string, top5: {teamName: string, finishingPosition: string, points: number}}[]>
+    {
+    const query = {  "top5.teamName" : team }; 
+    return this._dbCollection.aggregate(
+        [
+            {
+                $unwind: "$top5"
+            }, 
+            {
+                $match: query
+            }, 
+            {
+                $project: {
+                    name: 1, 
+                    id: 1, 
+                    date: 1, 
+                    track: 1, 
+                    top5: 1
+                }
+            }
+        ]
+    ).toArray() as unknown as {name: string, id: number, date: Date, track: string, top5: {teamName: string, finishingPosition: string, points: number}}[]
+}
+    async getTournsAppearing(team: string): Promise<{name: string, id: number, date: Date, track: string, runningOrder: { k:string, v: string }}[]> {
+        const query = { "runningOrder.v": team }; 
+        return this._dbCollection.aggregate(
+            [
+                {
+                    $project: {
+                        name: 1, 
+                        id: 1, 
+                        date: 1, 
+                        track: 1, 
+                        runningOrder: { $objectToArray: "$runningOrder" }     
+                    }
+                }, 
+                {
+                    $unwind: {
+                        path: "$runningOrder",
+                    }
+                }, 
+                {
+                    $match: query
+                }, 
+            ]
+        ).toArray() as unknown as {name: string, id: number, date: Date, track: string, runningOrder: { k:string, v: string }}[]
+    }
+
+
 
 }

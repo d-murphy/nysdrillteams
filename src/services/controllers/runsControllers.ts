@@ -120,6 +120,13 @@ export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin){
         return res.status(200).send(totals); 
     })
 
+    router.get('/getTeamRecords', async (req: Request, res: Response) => {
+        let team = req.query?.team as string; 
+        if(!team) return res.status(400).send('Team needed'); 
+        let teamRecords = await Runs.getTeamRecord(team); 
+        return res.status(200).send(teamRecords);         
+    })
+
     // router.get('/getContestNames', async (req: Request, res: Response) => {
     //     let contestNames = await Runs.getContestNames(); 
     //     return res.status(200).send(contestNames); 
