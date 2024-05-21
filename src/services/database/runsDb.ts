@@ -146,7 +146,10 @@ class RunsDb implements RunsData{
                     metadata: [ { $count: "total" }, { $addFields: { page: Number(page) } } ],
                     data: [ { $skip: skipCt }, { $limit: limit } ] // add projection here wish you re-shape the docs
                 } }
-            ]
+            ], 
+            { 
+                allowDiskUse: true
+            },
         ).toArray(); 
     }
     async getBig8(year: number): Promise<{}[]> {
