@@ -4,11 +4,12 @@ const { getDbPromise, getCollectionPromise } = require('../dist/library/db')
 dotenv.config(); 
 let { DB_NAME, dbUn, dbPass } = process.env; 
 
-const INCLUDE_UP_TO = 2022; 
+const INCLUDE_UP_TO = 2023; 
 const YEAR_DIF_DENOM = INCLUDE_UP_TO - 1960
+const YEAR_START = 1950;
 
 const contests = ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]; 
-const years = Array(300).fill().map((x,i)=>i + 1950).filter(el => el <= INCLUDE_UP_TO); 
+const years = Array(300).fill().map((x,i)=>i + YEAR_START).filter(el => el <= INCLUDE_UP_TO); 
 
 const greatRunCutoffs = {
     "Three Man Ladder": 6.30, 
@@ -46,7 +47,7 @@ const okayRunCutoffs = {
 let results = []; 
 
 (async function(){
-//    await calculateMtxScores(); 
+    // await calculateMtxScores(); 
     await findNeighbors(); 
 })()
 
@@ -84,7 +85,7 @@ async function findNeighbors(){
         return counter[key] <= 15
     })
    console.log('forSorting len: ', forSorting.length); 
-   writeDocs('similarTeamsDist', forSorting)
+   writeFullCollection('similarTeamsDist', forSorting)
 }
 
 function calcDistance(year1, year2){
@@ -143,7 +144,7 @@ async function calculateMtxScores(){
 
     results = results.filter(el => el.numRuns >= .4); 
     console.log('results len: ',  results); 
-    const writeResult = await writeDocs('similarTeamsMtx', results)
+    const writeResult = await addDocsToCollection('similarTeamsMtx', results)
     console.log('write result: ', writeResult); 
 }
 
@@ -175,8 +176,22 @@ async function getCollection(collectionName){
     return collection; 
 }
 
+async function addDocsToCollection(collectionName, documents){
+    let collection = await getCollection(collectionName); 
+    let result; 
+    try {
+        console.log('starting write to db: '); 
+        result = await collection.insertMany(documents)
+        console.log('write to db finished: ', result);
+    } catch(e) {
+        console.log('error during db write: ', e); 
+    }
+    return result; 
+}
 
-async function writeDocs(collectionName, documents){
+
+
+async function writeFullCollection(collectionName, documents){
     let tempCollection = await getCollection(`temp-${collectionName}`); 
     let result, renameResult; 
     try {

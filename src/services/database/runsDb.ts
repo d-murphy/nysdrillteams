@@ -78,7 +78,8 @@ class RunsDb implements RunsData{
         liOfPoints?: boolean, 
         juniorPoints?: boolean,  
         sanctioned?: boolean,  
-        page?: number
+        page?: number, 
+        limit?: number
         ): Promise<{}[]> {
         let query: {
             year?:{}, 
@@ -118,6 +119,7 @@ class RunsDb implements RunsData{
         if(sanctioned) query.sanctioned = {$in: [1, true]}
         page = page ? page : 1; 
         const skipCt = page * 20 - 20; 
+        limit = limit ? limit : 20;
         return await this._dbCollection.aggregate(
             [
                 {
@@ -142,7 +144,7 @@ class RunsDb implements RunsData{
                 {   $sort: { "customSort": 1}}, 
                 {   $facet: {
                     metadata: [ { $count: "total" }, { $addFields: { page: Number(page) } } ],
-                    data: [ { $skip: skipCt }, { $limit: 20 } ] // add projection here wish you re-shape the docs
+                    data: [ { $skip: skipCt }, { $limit: limit } ] // add projection here wish you re-shape the docs
                 } }
             ]
         ).toArray(); 

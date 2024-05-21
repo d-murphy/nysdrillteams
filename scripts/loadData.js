@@ -62,7 +62,9 @@ let { PORT, DB_NAME, dbUn, dbPass } = process.env;
     // await updateAllHosts(); 
 
     // other scripts here
-    updateRunTrack("2459", "Albany-Warehouse Row")
+//    updateRunTrack("2459", "Albany-Warehouse Row")
+//    deleteRuns("2542")
+    // updateRuns("2443")
 
 })()
 
@@ -295,7 +297,7 @@ async function deleteRuns(tournamentIdStr) {
     let result = await runsCol.remove(
         {tournamentId: tournamentIdStr}, 
     )
-    console.log("here is the result: ", result); 
+    console.log("here is the result for ", tournamentIdStr, ": ", result); 
 }
 
 
@@ -306,7 +308,7 @@ async function updateRunDate(tournamentIdStr, mmddyyStr, yearNum) {
         {tournamentId: tournamentIdStr}, 
         {
             $set: {
-//              date: mmddyyStr, 
+              date: mmddyyStr, 
               year: yearNum
             }
         },
@@ -317,6 +319,25 @@ async function updateRunDate(tournamentIdStr, mmddyyStr, yearNum) {
     )
     console.log("here is the result: ", result); 
 }
+
+async function updateRuns(tournamentIdStr) {
+    let runsCol = await getCollection('runs'); 
+
+    let result = await runsCol.update(
+        {tournamentId: tournamentIdStr}, 
+        {
+            $set: {
+                date: '08/07/65', 
+            }
+        },
+        {
+            upsert: false, 
+            multi: true
+        }
+    )
+    console.log("here is the result for ", tournamentIdStr, ": ", result); 
+}
+
 
 async function updateRunTrack(tournamentIdStr, newTrackName) {
     console.log('starting: ', tournamentIdStr); 

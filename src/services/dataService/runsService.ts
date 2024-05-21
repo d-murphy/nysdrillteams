@@ -71,10 +71,11 @@ interface totalPointsCache {
         liOfPoints?: boolean, 
         juniorPoints?: boolean, 
         sanctioned?: boolean,    
-        page?: number
+        page?: number, 
+        limit?: number
         ): Promise<{}[]> {
         return this.dataSource.getFilteredRuns(years, contests, teams, tracks, tournaments, ranks, stateRecord, currentStateRecord, 
-                nassauPoints, suffolkPoints, westernPoints, northernPoints, suffolkOfPoints, nassauOfPoints, liOfPoints, juniorPoints, sanctioned, page); 
+                nassauPoints, suffolkPoints, westernPoints, northernPoints, suffolkOfPoints, nassauOfPoints, liOfPoints, juniorPoints, sanctioned, page, limit); 
     }
     public async getBig8(year:number): Promise<{}[]> {
         this._big8Calls++; 

@@ -59,7 +59,8 @@ export interface RunsData {
         liOfPoints?: boolean, 
         juniorPoints?: boolean,
         sanctioned?: boolean,     
-        page?: number
+        page?: number, 
+        limit?: number
     ): Promise<{}[]>; 
     getBig8(year:number): Promise<{}[]>
     getTeamRecord(team: string): Promise<{}[]>

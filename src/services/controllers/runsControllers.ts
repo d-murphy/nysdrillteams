@@ -88,8 +88,9 @@ export function runsRouter (runsDataSource:RunsData, sessionAdmin:SessionAdmin){
         let juniorPoints = String(req.query?.juniorPoints).toLowerCase() == "true"
         let sanctioned = String(req.query?.sanctioned).toLowerCase() == "true"
         let page = Number(req.query?.page); 
+        let limit = req.query?.limit ? Number(req.query?.limit) : undefined; 
         let runs = await Runs.getFilteredRuns(years, contests, teams, tracks, tournaments, ranks, stateRecord, currentStateRecord, 
-            nassauPoints, suffolkPoints, westernPoints, northernPoints, suffolkOfPoints, nassauOfPoints, liOfPoints, juniorPoints, sanctioned, page); 
+            nassauPoints, suffolkPoints, westernPoints, northernPoints, suffolkOfPoints, nassauOfPoints, liOfPoints, juniorPoints, sanctioned, page, limit); 
         res.status(200).send(runs); 
     })
 
