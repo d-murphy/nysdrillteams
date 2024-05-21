@@ -144,7 +144,7 @@ class RunsDb implements RunsData{
                 {   $sort: { "customSort": 1}}, 
                 {   $facet: {
                     metadata: [ { $count: "total" }, { $addFields: { page: Number(page) } } ],
-                    data: [ { $skip: skipCt }, { $limit: 20 } ] // add projection here wish you re-shape the docs
+                    data: [ { $skip: skipCt }, { $limit: limit } ] // add projection here wish you re-shape the docs
                 } }
             ]
         ).toArray(); 
