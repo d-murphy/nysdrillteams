@@ -23,8 +23,11 @@ import SessionAdmin from './services/dataService/session';
 import { announcementRouter } from './services/controllers/announcementsController';
 import { historyDbFactory } from './services/database/historyDb';
 import { historiesRouter } from './services/controllers/historiesController'; 
-import RunsService from './services/dataService/runsService';
-import HistoryService from './services/dataService/historyService';
+import { makeImageMethods, makeImageS3Methods } from './services/database/imageDb';
+import { makeImagesRouter } from './services/controllers/imageController';
+
+import { s3Client } from '../src/components/images'; 
+import { s3BucketName } from '../src/components/importedEnv'; 
 
 dotenv.config(); 
 let { PORT, DB_NAME, dbUn, dbPass, keyLocation, certLocation } = process.env; 
@@ -53,6 +56,9 @@ var credentials = {key: privateKey, cert: certificate};
     })
     
     const sessionAdmin = new SessionAdmin(); 
+
+    let s3Methods = await makeImageS3Methods(s3Client, s3BucketName);
+    let imageMethods = await makeImageMethods(dbPromise, 'track-images', s3Methods, s3BucketName);
     
     let runsData = await runsDbFactory(dbPromise, 'runs');  
     let teamsData = await teamsDbFactory(dbPromise, 'teams', 'similarTeamsDist'); 
@@ -68,6 +74,8 @@ var credentials = {key: privateKey, cert: certificate};
     if(usersData) app.use('/users', usersRouter(usersData, sessionAdmin))
     if(updatesData) app.use('/updates', updatesRouter(updatesData, sessionAdmin))
     if(historyData && runsData && teamsData && tournamentsData) app.use('/histories', historiesRouter(historyData, runsData, tournamentsData, teamsData, sessionAdmin)); 
+    if(imageMethods) app.use('/images', makeImagesRouter(imageMethods, sessionAdmin))
+
     app.use("/announcements", announcementRouter(sessionAdmin))
 
     app.get('/test', (req, res) => res.status(200).send('hi'))

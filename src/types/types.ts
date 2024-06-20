@@ -1,4 +1,6 @@
 import { Collection, ObjectId, InsertOneResult, DeleteResult, UpdateResult, InsertManyResult } from "mongodb"
+import { DeleteObjectCommandOutput, PutObjectCommandOutput } from "@aws-sdk/client-s3"
+
 
 export type Run = {
     id?: number, 
@@ -130,7 +132,8 @@ export type Tournament = {
     liveStreamPlanned?: boolean
     urls?: string[], 
     waterTime?: string, 
-    host: string
+    host: string, 
+    cancelled?: boolean,
 }
 
 export interface TournamentW_id extends Tournament {
@@ -239,4 +242,26 @@ export interface HistoryData {
     _collectionName: string; 
     insertHistories(teamHistories: {team: string, histories: TeamTournHistory[]}[]): Promise<boolean>; 
     getHistory(team:string): Promise<{team: string, histories: TeamTournHistory[]}>; 
+}
+
+
+export type ImageS3Methods = {
+    uploadImage: (buffer: Buffer, fileName: string) => Promise<PutObjectCommandOutput>;
+    deleteImage: (fileName: string) => Promise<DeleteObjectCommandOutput>;
+}
+
+
+export type ImageDbEntry = {
+    fileName: string, 
+    url: string, 
+    thumbnailUrl: string,
+    track: string
+}
+
+export type ImageMethods = {
+    getImageList(track: string, page?: number, pageSize?: number): Promise<{results: ImageDbEntry[], resultCount: number}>;
+    uniqueImageName(fileName: string): Promise<boolean>;
+    uploadImage: (buffer: Buffer, thumbnail: Buffer, fileName: string, track: string) => Promise<boolean>;
+    deleteImage: (fileName: string) => Promise<boolean>;
+    compressImage: (file: Express.Multer.File ) => Promise<[Buffer, Buffer]>;
 }

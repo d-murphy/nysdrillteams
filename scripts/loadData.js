@@ -64,8 +64,9 @@ let { PORT, DB_NAME, dbUn, dbPass } = process.env;
     // other scripts here
 //    updateRunTrack("2459", "Albany-Warehouse Row")
 //    deleteRuns("2542")
-    // updateRuns("2443")
+        // updateRuns("3007")
 
+    //   updateTeams(); 
 })()
 
 
@@ -321,13 +322,18 @@ async function updateRunDate(tournamentIdStr, mmddyyStr, yearNum) {
 }
 
 async function updateRuns(tournamentIdStr) {
+    // let teamsCol = await getCollection('teams');
+    // let nassauTeams = await teamsCol.find({circuit: 'Nassau'}).toArray();
+    // let suffolkTeams = await teamsCol.find({circuit: 'Suffolk'}).toArray();
+
+
     let runsCol = await getCollection('runs'); 
 
     let result = await runsCol.update(
         {tournamentId: tournamentIdStr}, 
         {
             $set: {
-                date: '08/07/65', 
+                track: "East Meadow" 
             }
         },
         {
@@ -337,6 +343,26 @@ async function updateRuns(tournamentIdStr) {
     )
     console.log("here is the result for ", tournamentIdStr, ": ", result); 
 }
+
+
+async function updateTeams() {
+    let teamsCol = await getCollection('teams');
+
+    let result = await teamsCol.update(
+        {}, 
+        {
+            $set: {
+                display: true 
+            }
+        },
+        {
+            upsert: false, 
+            multi: true
+        }
+    )
+    console.log("here is the result for ", result); 
+}
+
 
 
 async function updateRunTrack(tournamentIdStr, newTrackName) {
