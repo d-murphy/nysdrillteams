@@ -255,13 +255,15 @@ export type ImageDbEntry = {
     fileName: string, 
     url: string, 
     thumbnailUrl: string,
-    track: string
+    track?: string, 
+    sortOrder?: number
 }
 
 export type ImageMethods = {
     getImageList(track: string, page?: number, pageSize?: number): Promise<{results: ImageDbEntry[], resultCount: number}>;
     uniqueImageName(fileName: string): Promise<boolean>;
-    uploadImage: (buffer: Buffer, thumbnail: Buffer, fileName: string, track: string) => Promise<boolean>;
+    uploadImage: (buffer: Buffer, thumbnail: Buffer, fileName: string, track: string, sortOrder: number) => Promise<boolean>;
     deleteImage: (fileName: string) => Promise<boolean>;
     compressImage: (file: Express.Multer.File ) => Promise<[Buffer, Buffer]>;
+    updateSortOrder: (fileName: string, sortOrder: number) => Promise<boolean>;
 }

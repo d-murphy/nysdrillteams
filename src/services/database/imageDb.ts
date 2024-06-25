@@ -48,14 +48,18 @@ export async function makeImageMethods(dbPromise: Promise<Db>, collectionName: s
             const result = await imagesCollection?.findOne({ fileName });
             return !result;
         },
-        uploadImage: async function(file: Buffer, thumbnail: Buffer, fileName: string, track: string) {
+        uploadImage: async function(file: Buffer, thumbnail: Buffer, fileName: string, track: string, sortOrder: number) {
             await imageS3Methods.uploadImage(file, fileName);
             await imageS3Methods.uploadImage(thumbnail, fileName+'-thumbnail');
             const url = `https://${bucketName}.s3.amazonaws.com/${fileName}`;
             const thumbnailUrl = `https://${bucketName}.s3.amazonaws.com/${fileName}-thumbnail`;
-            const imageDbEntry = { fileName, url, thumbnailUrl, track };
+            const imageDbEntry = { fileName, url, thumbnailUrl, track, sortOrder };
             await imagesCollection?.insertOne(imageDbEntry);
             return true;
+        },
+        updateSortOrder: async function(fileName: string, sortOrder: number) {
+            const result = await imagesCollection?.updateOne({ fileName }, { $set: { sortOrder } });
+            return result?.modifiedCount === 1;
         },
         compressImage: async function(file: Express.Multer.File) {
             const firstResize = sharp(file.buffer); 

@@ -12,7 +12,7 @@ class SessionAdmin {
     checkSession(ip:string, sessionId:string): {last: Date, ip:string, username:string, role:string} | null {
         let session = this.sessions[sessionId];  
         if(!session) return null; 
-        let sessionCurrent = +(new Date()) - +session.last < SESSION_MAX && session.ip === ip   
+        let sessionCurrent = +(new Date()) - +session.last < SESSION_MAX && session.ip === ip  
         if(!sessionCurrent) {
             this.deleteSession(sessionId); 
             return null; 

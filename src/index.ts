@@ -26,8 +26,8 @@ import { historiesRouter } from './services/controllers/historiesController';
 import { makeImageMethods, makeImageS3Methods } from './services/database/imageDb';
 import { makeImagesRouter } from './services/controllers/imageController';
 
-import { s3Client } from '../src/components/images'; 
-import { s3BucketName } from '../src/components/importedEnv'; 
+import { s3Client } from './components/images'; 
+import { s3BucketName } from './components/importedEnv'; 
 
 dotenv.config(); 
 let { PORT, DB_NAME, dbUn, dbPass, keyLocation, certLocation } = process.env; 
