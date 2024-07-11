@@ -13,30 +13,32 @@ export function makeImagesRouter(imageMethods: ImageMethods, sessionAdmin:Sessio
     imageRouter.get('/test', (req: Request, res: Response) => {res.status(200).send('test')})
 
     imageRouter.post('/uploadImage', upload.single('file'), [sessionsMdw, authMdw], async (req: Request, res: Response): Promise<any> => {
-        const { track, imageName, sortOrder } = req.body; 
+        const { track, fileName, imageName, imageCaption, sortOrder } = req.body; 
 
         if(!req.file) return res.status(400).send('No file provided'); 
+        if(!fileName) return res.status(400).send('No fileName provided'); 
         if(!imageName) return res.status(400).send('No imageName provided');
         if(!track) return res.status(400).send('No track provided');
         if(!sortOrder) return res.status(400).send('No sortOrder provided');
 
-        const fileName = track + '-' + imageName;
-        const imageNameUnique = await imageMethods.uniqueImageName(fileName);
+        const updatedFileName = track + '-' + fileName;
+        const imageNameUnique = await imageMethods.uniqueImageName(updatedFileName);
         if(!imageNameUnique) return res.status(400).send('Image name already exists')
 
         const [compressedImage, thumbnail] = await imageMethods.compressImage(req.file);
-        const result = await imageMethods.uploadImage(compressedImage, thumbnail, fileName, track, sortOrder);
+        const result = await imageMethods.uploadImage(compressedImage, thumbnail, updatedFileName, track, sortOrder, imageName, imageCaption || "");
 
         res.status(200).send(result);
     })
-    imageRouter.post('/updateSortOrder', [sessionsMdw, authMdw], async (req: Request, res: Response): Promise<any> => {
-        const { fileName, sortOrder } = req.body; 
+    imageRouter.post('/updateImage', [sessionsMdw, authMdw], async (req: Request, res: Response): Promise<any> => {
+        const { fileName, sortOrder, imageName, imageCaption } = req.body; 
         if(!fileName) return res.status(400).send('No fileName provided');
         if(!sortOrder) return res.status(400).send('No sortOrder provided');
-        const result = await imageMethods.updateSortOrder(fileName, sortOrder);
+        if(!imageName) return res.status(400).send('No imageName provided');        
+        const result = await imageMethods.updateImage(fileName, sortOrder, imageName, imageCaption || "");
         res.status(200).send(result);
     })
-    imageRouter.get('/getImages', [sessionsMdw, authMdw], async (req: Request, res: Response): Promise<any> => {
+    imageRouter.get('/getImages', async (req: Request, res: Response): Promise<any> => {
         const track = req.query.track as string;
         const page = req.query.page as string | undefined;
         const pageSize = req.query.pageSize as string | undefined;

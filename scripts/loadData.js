@@ -5,7 +5,6 @@ const { getDbPromise, getCollectionPromise } = require('../dist/library/db')
 dotenv.config(); 
 let { PORT, DB_NAME, dbUn, dbPass } = process.env; 
 
-
 // reading source files and reshaping. 
 
 // let teamsLUT = readFileToObject("./dataForMigration/1_teams.txt", 0);  
@@ -64,8 +63,7 @@ let { PORT, DB_NAME, dbUn, dbPass } = process.env;
     // other scripts here
 //    updateRunTrack("2459", "Albany-Warehouse Row")
 //    deleteRuns("2542")
-        // updateRuns("3007")
-
+//    updateRuns("366")
     //   updateTeams(); 
 })()
 
@@ -333,7 +331,7 @@ async function updateRuns(tournamentIdStr) {
         {tournamentId: tournamentIdStr}, 
         {
             $set: {
-                track: "East Meadow" 
+                suffolkPoints: 0 
             }
         },
         {

@@ -262,8 +262,9 @@ export type ImageDbEntry = {
 export type ImageMethods = {
     getImageList(track: string, page?: number, pageSize?: number): Promise<{results: ImageDbEntry[], resultCount: number}>;
     uniqueImageName(fileName: string): Promise<boolean>;
-    uploadImage: (buffer: Buffer, thumbnail: Buffer, fileName: string, track: string, sortOrder: number) => Promise<boolean>;
+    uploadImage: (buffer: Buffer, thumbnail: Buffer, fileName: string, track: string, 
+        sortOrder: number, imageName: string, imageCaption: string) => Promise<boolean>;
     deleteImage: (fileName: string) => Promise<boolean>;
     compressImage: (file: Express.Multer.File ) => Promise<[Buffer, Buffer]>;
-    updateSortOrder: (fileName: string, sortOrder: number) => Promise<boolean>;
+    updateImage: (fileName: string, sortOrder: number, imageName: string, imageCaption: string) => Promise<boolean>;
 }

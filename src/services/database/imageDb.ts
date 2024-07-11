@@ -48,17 +48,18 @@ export async function makeImageMethods(dbPromise: Promise<Db>, collectionName: s
             const result = await imagesCollection?.findOne({ fileName });
             return !result;
         },
-        uploadImage: async function(file: Buffer, thumbnail: Buffer, fileName: string, track: string, sortOrder: number) {
+        uploadImage: async function(file: Buffer, thumbnail: Buffer, fileName: string, track: string, 
+                sortOrder: number, imageName: string, imageCaption: string) {
             await imageS3Methods.uploadImage(file, fileName);
             await imageS3Methods.uploadImage(thumbnail, fileName+'-thumbnail');
             const url = `https://${bucketName}.s3.amazonaws.com/${fileName}`;
             const thumbnailUrl = `https://${bucketName}.s3.amazonaws.com/${fileName}-thumbnail`;
-            const imageDbEntry = { fileName, url, thumbnailUrl, track, sortOrder };
+            const imageDbEntry = { fileName, url, thumbnailUrl, track, sortOrder, imageName, imageCaption };
             await imagesCollection?.insertOne(imageDbEntry);
             return true;
         },
-        updateSortOrder: async function(fileName: string, sortOrder: number) {
-            const result = await imagesCollection?.updateOne({ fileName }, { $set: { sortOrder } });
+        updateImage: async function(fileName: string, sortOrder: number, imageName: string, imageCaption: string) {
+            const result = await imagesCollection?.updateOne({ fileName }, { $set: { sortOrder, imageName, imageCaption } });
             return result?.modifiedCount === 1;
         },
         compressImage: async function(file: Express.Multer.File) {
