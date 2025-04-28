@@ -65,6 +65,24 @@ let { PORT, DB_NAME, dbUn, dbPass } = process.env;
 //    deleteRuns("2542")
 //    updateRuns("366")
     //   updateTeams(); 
+
+
+    updateRuns("2888"); 
+
+    // let result = await findPointsWithoutRank();
+    // let result = await findRankWithoutPoints();
+
+
+    // result = result.sort((a,b) => parseInt(a.tournamentId) < parseInt(b.tournamentId) ? -1 : 1);
+    // console.log('result length: ', result.length); 
+    // console.log('writing csv'); 
+    // let csvStr = "team, points, rank, tournamentId, contest\n";
+    // result.forEach(el => {
+    //     csvStr += `${el.team}, ${el.points}, ${el.rank}, ${el.tournamentId}, ${el.contest}\n`
+    // }); 
+    // fs.writeFileSync('rankWithoutPoints.csv', csvStr)
+    // console.log('done writing csv');
+
 })()
 
 
@@ -291,6 +309,36 @@ async function loadDrills(){
     return writeDocs('tournaments', drillsArr)
 }
 
+async function findPointsWithoutRank(){
+    let runsCol = await getCollection('runs'); 
+    let cursor = await runsCol.aggregate([
+        {$match: {rank: "", points: {$gt: 0}}}, 
+        {$project: {team: 1, points: 1, rank: 1, tournamentId: 1, contest: 1}}
+    ]); 
+
+    // let cursor = await runsCol.find({rank: "", points: {$gt: 0}}); 
+    let arr = []; 
+    for await (const doc of cursor) {
+        arr.push(doc); 
+    }
+    return arr; 
+}
+
+async function findRankWithoutPoints(){
+    let runsCol = await getCollection('runs'); 
+    let cursor = await runsCol.aggregate([
+        {$match: {rank: { $ne: "" }, points: 0}}, 
+        {$project: {team: 1, points: 1, rank: 1, tournamentId: 1, contest: 1}}
+    ]); 
+
+    // let cursor = await runsCol.find({rank: "", points: {$gt: 0}}); 
+    let arr = []; 
+    for await (const doc of cursor) {
+        arr.push(doc); 
+    }
+    return arr; 
+}
+
 async function deleteRuns(tournamentIdStr) {
     let runsCol = await getCollection('runs'); 
     let result = await runsCol.remove(
@@ -320,18 +368,13 @@ async function updateRunDate(tournamentIdStr, mmddyyStr, yearNum) {
 }
 
 async function updateRuns(tournamentIdStr) {
-    // let teamsCol = await getCollection('teams');
-    // let nassauTeams = await teamsCol.find({circuit: 'Nassau'}).toArray();
-    // let suffolkTeams = await teamsCol.find({circuit: 'Suffolk'}).toArray();
-
-
     let runsCol = await getCollection('runs'); 
 
     let result = await runsCol.update(
         {tournamentId: tournamentIdStr}, 
         {
             $set: {
-                suffolkPoints: 0 
+                track: "Syracuse - W Washington St", 
             }
         },
         {
