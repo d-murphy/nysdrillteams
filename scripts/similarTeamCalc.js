@@ -4,9 +4,9 @@ const { getDbPromise, getCollectionPromise } = require('../dist/library/db')
 dotenv.config(); 
 let { DB_NAME, dbUn, dbPass } = process.env; 
 
-const INCLUDE_UP_TO = 2023; 
+const INCLUDE_UP_TO = 2024; 
 const YEAR_DIF_DENOM = INCLUDE_UP_TO - 1960
-const YEAR_START = 1950;
+const YEAR_START = 2024;
 
 const contests = ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]; 
 const years = Array(300).fill().map((x,i)=>i + YEAR_START).filter(el => el <= INCLUDE_UP_TO); 
@@ -47,7 +47,7 @@ const okayRunCutoffs = {
 let results = []; 
 
 (async function(){
-    // await calculateMtxScores(); 
+    await calculateMtxScores(); 
     await findNeighbors(); 
 })()
 

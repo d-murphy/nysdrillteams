@@ -67,7 +67,7 @@ let { PORT, DB_NAME, dbUn, dbPass } = process.env;
     //   updateTeams(); 
 
 
-    updateRuns("2888"); 
+    // updateRuns("track name change"); 
 
     // let result = await findPointsWithoutRank();
     // let result = await findRankWithoutPoints();
@@ -374,7 +374,9 @@ async function updateRuns(tournamentIdStr) {
         {tournamentId: tournamentIdStr}, 
         {
             $set: {
-                track: "Syracuse - W Washington St", 
+                // track: "Hicksville - Mid-Island Mall Parking Lot"
+                // team: "Baldwin FD",
+                // nickname: "FD"
             }
         },
         {
