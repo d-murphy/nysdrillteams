@@ -268,3 +268,49 @@ export type ImageMethods = {
     compressImage: (file: Express.Multer.File ) => Promise<[Buffer, Buffer]>;
     updateImage: (fileName: string, sortOrder: number, imageName: string, imageCaption: string) => Promise<boolean>;
 }
+
+
+export type Projection = {
+    team: string, 
+    year: number, 
+    'Three Man Ladder Wins': number, 
+    'Three Man Ladder Top5': number, 
+    'B Ladder Wins': number, 
+    'B Ladder Top5': number, 
+    'C Ladder Wins': number, 
+    'C Ladder Top5': number, 
+    'C Hose Wins': number, 
+    'C Hose Top5': number, 
+    'B Hose Wins': number, 
+    'B Hose Top5': number, 
+    'Efficiency Wins': number, 
+    'Efficiency Top5': number, 
+    'Motor Pump Wins': number, 
+    'Motor Pump Top5': number, 
+    'Buckets Wins': number, 
+    'Buckets Top5': number, 
+    'Overall Wins': number, 
+    'Overall Top5': number
+}
+
+export type ProjectionMethods = {
+    getProjections(year: number): Promise<Projection[]>
+}
+
+export type SimulationContestSummary = {
+    _id: ObjectId,
+    team: string,
+    year: number,
+    contest: string,
+    ct: number,
+    goodCt: number,
+    goodAvg: number,
+    goodSd: number | null,
+    consistency: number,
+    speedRating: number | null, 
+    goodRunTimes: number[]
+}
+
+export type SimulationContestSummaryMethods = {
+    getSimulationContestSummary(team: string, year: number): Promise<SimulationContestSummary[]>
+}
