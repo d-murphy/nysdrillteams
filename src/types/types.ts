@@ -312,5 +312,5 @@ export type SimulationContestSummary = {
 }
 
 export type SimulationContestSummaryMethods = {
-    getSimulationContestSummary(team: string, year: number): Promise<SimulationContestSummary[]>
+    getTopSimulationContestSummaries(contestArr: string[], sortBy: string, limit: number, offset: number, teamArr?: string[], yearArr?: number[]): Promise<SimulationContestSummary[]>
 }

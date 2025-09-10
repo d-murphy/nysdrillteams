@@ -208,7 +208,7 @@ class RunsDb implements RunsData{
                         $sort: { "timeNum" : 1 }
                     },
                     {
-                        $limit: 10
+                        $limit: 100
                     }
                 ]
             ).toArray() 

@@ -6,31 +6,115 @@ dotenv.config();
 let { PORT, DB_NAME, dbUn, dbPass } = process.env; 
 
 
-const INCLUDE_UP_TO = 2024; 
-const YEAR_START = 1945;
+const INCLUDE_UP_TO = 2025; 
+const YEAR_START = 1970;
 
 const contests = ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]; 
 const years = Array(300).fill().map((x,i)=>i + YEAR_START).filter(el => el <= INCLUDE_UP_TO); 
 
-const goodRunCutoffs = {
-    "Three Man Ladder": 6.75, 
-    "B Ladder": 5.55, 
-    "C Ladder": 9.4, 
-    "C Hose": 13.1, 
-    "B Hose": 8.4, 
-    "Efficiency": 9.6, 
-    "Motor Pump": 6.5, 
-    "Buckets": 23.5
+const originalGoodRunCutoffs = {
+    "Three Man Ladder": 6.9, 
+    "B Ladder": 5.8, 
+    "C Ladder": 9.8, 
+    "C Hose": 13.7, 
+    "B Hose": 8.7, 
+    "Efficiency": 10, 
+    "Motor Pump": 7, 
+    "Buckets": 25
 };
 
+const goodRunCutoffsByDecade = {
+    1970: {
+        "Three Man Ladder": 8, 
+        "B Ladder": 6.8, 
+        "C Ladder": 12, 
+        "C Hose": 17, 
+        "B Hose": 11, 
+        "Efficiency": 11.2, 
+        "Motor Pump": 9, 
+        "Buckets": 30
+    }, 
+
+    1974: {
+        "Three Man Ladder": 7,
+        "B Ladder": 6.7,
+        "C Ladder": 11.5,
+        "C Hose": 16.5,
+        "B Hose": 10,
+        "Efficiency": 10.3,
+        "Motor Pump": 8.2,
+        "Buckets": 29
+    }, 
+    1978: {
+        "Three Man Ladder": originalGoodRunCutoffs["Three Man Ladder"],
+        "B Ladder": 6.2,
+        "C Ladder": 11.3,
+        "C Hose": 16,
+        "B Hose": 9.8,
+        "Efficiency": originalGoodRunCutoffs["Efficiency"],
+        "Motor Pump": 8.2,
+        "Buckets": 27
+    }, 
+    1984: {
+        "Three Man Ladder": originalGoodRunCutoffs["Three Man Ladder"],
+        "B Ladder": 6,
+        "C Ladder": 10.6,
+        "C Hose": 15,
+        "B Hose": 9.1,
+        "Efficiency": originalGoodRunCutoffs["Efficiency"],
+        "Motor Pump": 7.7,
+        "Buckets": originalGoodRunCutoffs["Buckets"]
+    },
+    1988: {
+        "Three Man Ladder": originalGoodRunCutoffs["Three Man Ladder"],
+        "B Ladder": 5.8,
+        "C Ladder": 10.2,
+        "C Hose": 14.2,
+        "B Hose": 9.1,
+        "Efficiency": originalGoodRunCutoffs["Efficiency"],
+        "Motor Pump": 7.4,
+        "Buckets": originalGoodRunCutoffs["Buckets"]
+    },
+    1992: {
+        "Three Man Ladder": originalGoodRunCutoffs["Three Man Ladder"],
+        "B Ladder": originalGoodRunCutoffs["B Ladder"],
+        "C Ladder": 10,
+        "C Hose": 14,
+        "B Hose": originalGoodRunCutoffs["B Hose"],
+        "Efficiency": originalGoodRunCutoffs["Efficiency"],
+        "Motor Pump": 7.3,
+        "Buckets": originalGoodRunCutoffs["Buckets"]
+    }, 
+    2000: {
+        "Three Man Ladder": originalGoodRunCutoffs["Three Man Ladder"],
+        "B Ladder": originalGoodRunCutoffs["B Ladder"],
+        "C Ladder": originalGoodRunCutoffs["C Ladder"],
+        "C Hose": originalGoodRunCutoffs["C Hose"],
+        "B Hose": originalGoodRunCutoffs["B Hose"],
+        "Efficiency": originalGoodRunCutoffs["Efficiency"],
+        "Motor Pump": originalGoodRunCutoffs["Motor Pump"],
+        "Buckets": originalGoodRunCutoffs["Buckets"]
+    }
+} 
+
+function getGoodRunCutoffs(year){
+    if(year < 1974) return goodRunCutoffsByDecade[1970]; 
+    if(year < 1978) return goodRunCutoffsByDecade[1974]; 
+    if(year < 1984) return goodRunCutoffsByDecade[1978]; 
+    if(year < 1988) return goodRunCutoffsByDecade[1984]; 
+    if(year < 1992) return goodRunCutoffsByDecade[1988]; 
+    if(year < 2000) return goodRunCutoffsByDecade[1992]; 
+    return goodRunCutoffsByDecade[2000]; 
+}
+
 const badRunMean = {
-    "Three Man Ladder": 8.2, 
-    "B Ladder": 6.8, 
+    "Three Man Ladder": 8.6, 
+    "B Ladder": 7.2, 
     "C Ladder": 13.2, 
-    "C Hose": 17, 
+    "C Hose": 18, 
     "B Hose": 12, 
     "Efficiency": 12.5, 
-    "Motor Pump": 8.2, 
+    "Motor Pump": 9, 
     "Buckets": 31
 };
 
@@ -73,19 +157,8 @@ const numOfSimulations = 500;
 
 ( async function () {
     // await createContestSummaries(); 
-    // await createSimulations(true); 
-
-    await calculateNysChampionshipProjections(); 
-
-
-    // const simulationTeamsCol = await getCollection("simulation-teams"); 
-    // const simulationTeams = await simulationTeamsCol.find({}).toArray(); 
-    // let mlIndex; 
-    // simulationTeams.forEach((el, ind) => {
-    //     if(!mlIndex && el.team === "Westbury FD") mlIndex = ind; 
-    // })
-    // console.log("the ml index: ", mlIndex); 
-    // console.log("total len: ", simulationTeams.length); 
+    // await createSimulations(false); 
+    // await calculateNysChampionshipProjections(); 
 
 })()
 
@@ -94,6 +167,7 @@ async function calculateNysChampionshipProjections(){
     const tournamentCol = await getCollection("tournaments"); 
     const simulationRunsCol = await getCollection("simulation-runs"); 
     const tournaments = await tournamentCol.find({name: "New York State Championship"}).toArray(); 
+    tournaments.sort((a,b) => a.year - b.year); 
 
 
     const resultArr = []; 
@@ -105,6 +179,9 @@ async function calculateNysChampionshipProjections(){
     for(let i=0; i<tournaments.length; i++){
         const tournament = tournaments[i]; 
         const year = tournament.year; 
+
+        console.log("Starting year", year); 
+        if(year < 1970) continue; 
 
         const runningOrder = tournament.runningOrder; 
         const runningOrderArray = Object.values(runningOrder); 
@@ -127,17 +204,21 @@ async function calculateNysChampionshipProjections(){
 
         // for(let j=3; j<5; j++){
         for(let j=0; j<numOfSimulations; j++){
+            if(j % 100 === 0) console.log("Starting iteration", j); 
             let tournResult = {}; 
             const simulatedRuns = await simulationRunsCol.find({
                 team: {$in: runningOrderArray}, year: year, iteration: j
             }).toArray(); 
 
-            console.log("starting year / iteration: ",  year, " - ", j); 
-
 
             for(let k=0; k<contests.length; k++){
                 const contest = contests[k]; 
                 let contestSimulatedRuns = simulatedRuns.filter(el => el.contest === contest); 
+                if(j === 0 && k === 0){
+                    console.log("contest sim runs count: ", contestSimulatedRuns.length, " with requested teams count: ", runningOrderArray.length); 
+                    const teamsNotInSimulatedRuns = runningOrderArray.filter(el => !contestSimulatedRuns.some(el2 => el2.team === el)); 
+                    console.log("teams not in simulated runs: ", teamsNotInSimulatedRuns.join(", ")); 
+                }
 
                 contestSimulatedRuns = contestSimulatedRuns.sort((a,b) => {
                     let aNum = a.finalRun == "NT" ? 98 : a.finalRun == "OT" ? 97 : a.finalRun;  
@@ -285,24 +366,24 @@ async function createSimulations(deleteExisting = false){
     const contestSummaryCol = await getCollection("simulation-contest-summary"); 
     const simulationRunsCol = await getCollection("simulation-runs"); 
 
-    const simulationTeams = await simulationTeamsCol.find({}).toArray(); 
+    const simulationTeams = await simulationTeamsCol.find({}).sort({key: 1}).toArray(); 
+    const numOfTeamsToSimulation = simulationTeams.length; 
 
-    console.log("creating simulation data for team / seasons: ", simulationTeams.length); 
 
-    // for(let i=0; i<simulationTeams.length; i++){
+    // for(let i=540; i<760; i++){
     for(let i=0; i<simulationTeams.length; i++){
-        console.log("starting simulation for team / season: ", i); 
+        console.log("starting simulation for team / season: ", i, " of ", numOfTeamsToSimulation); 
         const simulationTeam = simulationTeams[i]; 
         const team = simulationTeam.team; 
         const year = simulationTeam.year; 
 
-        console.log("starting simulations for team / season: ", team, year); 
+        console.log("The team / season: ", team, year); 
         const contestSummaryInfo = await contestSummaryCol.find({team: team, year: year}).toArray(); 
 
         if(!contestSummaryInfo.length) {
             console.log("ALERT - no contest summary info found for team / season: ", team, year); 
             continue; 
-        } 
+        }
 
         if(deleteExisting) {
             const deleteResult = await simulationRunsCol.deleteMany({team: team, year: year}); 
@@ -327,40 +408,7 @@ async function createSimulations(deleteExisting = false){
             //     console.log("delete result: ", deleteResult); 
             // }
 
-            const goodCt = contestSummary.goodCt; 
-            let goodAvg = contestSummary.goodAvg; 
-            let goodSd = contestSummary.goodSd; 
-
-            goodAvg = !goodAvg ? badRunMean[contest] : goodAvg; 
-            goodSd = goodSd === null ? badRunSd[contest] : Math.max(goodSd, minRunSd[contest]); 
-
-            const badAvg = badRunMean[contest]; 
-            const badSd = badRunSd[contest]; 
-
-            let completionPct = goodCt / ct; 
-            completionPct = completionPct === 1 ? (ct / ct + 1) : 
-                Math.max(completionPct, .15); 
-
-            // decided the long tails weren't helpful for simulation. 
-
-            // const dist = generateDistrubtion(goodAvg, goodSd, contest); 
-            // const randomRuns = aThousandRandomNumbers.map(el => Math.floor( dist.ppf(el) * 100 ) / 100); 
-
-
-            const hitOrMissRandomNumbers = Array(numOfSimulations).fill().map(() => Math.random()); 
-            const isHit = hitOrMissRandomNumbers.map(el => el < completionPct ? true : false); 
-
-            const runRandomNumbers = Array(numOfSimulations).fill().map(() => Math.random()); 
-            const hits = runRandomNumbers.map(el => generateRunFromTriangleDist(el, goodAvg, goodSd));
-            const missRandomNumbers = Array(numOfSimulations).fill().map(() => Math.random()); 
-            const misses = missRandomNumbers.map((el, ind) => {
-                if(el < .2) return "OT"; 
-                if(el < .4) return "NT"; 
-                const runRandomNumber = runRandomNumbers[ind]; 
-                return generateRunFromTriangleDist(runRandomNumber, badAvg, badSd);
-            })
-
-            const finalRuns = isHit.map((el, ind) => el ? hits[ind] : misses[ind]);
+            const finalRuns = generateSimulatedRuns(contestSummary, contest, ct); 
 
             const documents = finalRuns.map((el, ind) => {
 
@@ -385,7 +433,47 @@ async function createSimulations(deleteExisting = false){
             addDocsToCollection(simulationRunsCol, documents); 
         }
     }
+    console.log("finished creating simulations"); 
 }
+
+function generateSimulatedRuns(contestSummary, contest, ct) {
+
+    const goodCt = contestSummary.goodCt; 
+    let goodAvg = contestSummary.goodAvg; 
+    let goodSd = contestSummary.goodSd; 
+
+    goodAvg = !goodAvg ? badRunMean[contest] : goodAvg; 
+    goodSd = goodSd === null ? badRunSd[contest] : Math.max(goodSd, minRunSd[contest]); 
+
+    const badAvg = badRunMean[contest]; 
+    const badSd = badRunSd[contest]; 
+
+    let completionPct = goodCt / ct; 
+    completionPct = completionPct === 1 ? (ct / ct + 1) : 
+        Math.max(completionPct, .15); 
+
+    // decided the long tails weren't helpful for simulation. 
+
+    // const dist = generateDistrubtion(goodAvg, goodSd, contest); 
+    // const randomRuns = aThousandRandomNumbers.map(el => Math.floor( dist.ppf(el) * 100 ) / 100); 
+
+
+    const finalRuns = []; 
+
+    for(let i=0; i<numOfSimulations; i++){
+        const hitOrMissRandomNumber = Math.random(); 
+        const isHit = hitOrMissRandomNumber < completionPct; 
+        const runRandomNumber = Math.random(); 
+        const run = isHit ? generateRunFromTriangleDist(runRandomNumber, goodAvg, goodSd) : 
+            runRandomNumber < .2 ? "OT" : 
+            runRandomNumber < .4 ? "NT" : 
+            generateRunFromTriangleDist(runRandomNumber, badAvg, badSd); 
+        finalRuns.push(run); 
+    }
+    
+    return finalRuns; 
+}
+
 
 function generateDistrubtion(goodAvg, goodSd, contest) {
     const avg = !goodAvg ? badRunMean[contest] : goodAvg; 
@@ -428,21 +516,28 @@ async function createContestSummaries() {
     const simulationTeams = []; 
 
     for(let i=0; i<teams.length; i++){
+    // for(let i=0; i<3; i++){
         const team = teams[i]; 
-        console.log("starting team loop for team : ", team); 
-        const rnCt = await runsCol.countDocuments({team: team}); 
-        if(rnCt <=40) continue; 
+        console.log("starting team loop for team : ", i, " - ", team); 
+        const rnCt = await runsCol.countDocuments({team: team, contest: {$in: contests}}); 
+        if(rnCt <=40) {
+            console.log("skipping team because of low run count: ", team); 
+            continue; 
+        }
         for(let j=0; j<years.length; j++){
             const year = years[j]; 
-            const runs = await getRunsNoNA(runsCol, team, year); 
+            const runsWithNA = await getRuns(runsCol, team, year); 
+            const runs = runsWithNA.filter(el => el.time !== "NA" && el.time !== "NULL" && el.time !== null && el.time !== undefined && el.time !== ""); 
             if(!runs.length) continue; 
+
             simulationTeams.push({
                 team: team, 
                 year: year, 
                 key: `${team}-${year}`
             })
 
-            // console.log("runs: ", runs); 
+            const goodRunCutoffs = getGoodRunCutoffs(year);
+
             contests.forEach(contest => {
                 try {
                     const contestRuns = runs.filter(run => run.contest === contest ); 
@@ -493,7 +588,6 @@ async function createContestSummaries() {
         }
     }
 
-
     console.log("runSummary length: ", runSummary.length); 
     const writeResult = await writeFullCollection('simulation-contest-summary', runSummary); 
     console.log("write result: ", writeResult); 
@@ -520,16 +614,16 @@ async function getCollection(collectionName){
 }
 
 async function getTeams(teamsCol){
-    let teams = await teamsCol.find({$or: [{circuit: 'Northern'}, {circuit: 'Suffolk'}, {circuit: 'Nassau'}, {circuit: 'Western'}]}).project({ fullName: 1, _id: 0 }).toArray(); 
+    let teams = await teamsCol.find({}).project({ fullName: 1, _id: 0 }).toArray(); 
     teams = teams.map(el => el.fullName); 
     return teams; 
 }
 
-async function getRunsNoNA(runsCol, team, year){
+async function getRuns(runsCol, team, year){
     return await runsCol.find({
         team: team, 
         year: year, 
-        time: { $nin: ['NA', 'NULL'] }
+        // time: { $nin: ['NA', 'NULL'] }
     })
     .project({timeNum: 1, points: 1, contest: 1, time:1, team:1, year:1}).toArray(); 
 }
@@ -545,6 +639,7 @@ function getStandardDeviation (array) {
 
 async function writeFullCollection(collectionName, documents){
     let tempCollection = await getCollection(`temp-${collectionName}`); 
+    // tempCollection.createIndex({team: 1, year: 1, contest: 1}); 
     let result, renameResult; 
     try {
         console.log('starting write to db: '); 

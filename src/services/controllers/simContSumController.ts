@@ -8,14 +8,28 @@ export function simContSumRouter (simContSumDataSource:SimulationContestSummaryM
 
     const router = express.Router()
 
-    router.get('/getSimulationContestSummary', async (req: Request, res: Response) => {
-        const team: string = req.query.team as string; 
-        const year: number = parseInt(req.query.year as string); 
-        if(!team || !year) {
-            return res.status(400).send('Team and year parameters are required');
+    router.get('/getTopSimulationContestSummaries', async (req: Request, res: Response) => {
+        const contests: string = req.query.contests as string; 
+        const sortBy: string = req.query.sortBy as string; 
+        const limit: number = parseInt(req.query.limit as string) || 20; 
+        const offset: number = parseInt(req.query.offset as string) || 0; 
+        const teams: string = req.query.teams as string; 
+        const years: string = req.query.years as string; 
+
+        
+        if(!contests || !sortBy) {
+            return res.status(400).send('contests and sortBy parameters are required');
         }
-        let contestSummary = await SimContSum.getSimulationContestSummary(team, year); 
-        res.status(200).send(contestSummary);
+        
+        let topSummaries = await SimContSum.getTopSimulationContestSummaries(
+            contests, 
+            sortBy, 
+            limit, 
+            offset, 
+            teams || undefined, 
+            years || undefined
+        ); 
+        res.status(200).send(topSummaries);
     })
 
     router.use((err:Error, req:Request, res:Response, next:NextFunction) => {

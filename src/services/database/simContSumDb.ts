@@ -1,4 +1,4 @@
-import { Collection, Db } from 'mongodb';
+import { Collection, Db, Sort } from 'mongodb';
 import { SimulationContestSummary, SimulationContestSummaryMethods } from '../../types/types'; 
 import { getCollectionPromise } from '../../library/db';
 
@@ -15,8 +15,21 @@ class SimContSumDb implements SimulationContestSummaryMethods {
         this._dbCollection = collection; 
     }
     
-    async getSimulationContestSummary(team: string, year: number): Promise<SimulationContestSummary[]> {
-        const query = { team: team, year: year };
-        return (this._dbCollection.find(query).toArray() as unknown as SimulationContestSummary[]);
+    async getTopSimulationContestSummaries(contestArr: string[], sortBy: string, limit: number, offset: number, teamArr: string[], yearArr: number[]): Promise<SimulationContestSummary[]> {
+        const query: {team?: string, year?: number, contest?: string} = {}; 
+        if(teamArr.length) query.team = { $in: teamArr } as unknown as string; 
+        if(yearArr.length) query.year = { $in: yearArr } as unknown as number; 
+        query.contest = { $in: contestArr } as unknown as string; 
+
+        let sortObj: Sort = {}; 
+        if(sortBy === "consistency") {
+            sortObj.consistency = -1; 
+            sortObj.speedRating = -1; 
+        } else {
+            sortObj.speedRating = -1; 
+            sortObj.consistency = -1; 
+        }
+
+        return (this._dbCollection.find(query).skip(offset).limit(limit).sort(sortObj).toArray() as unknown as SimulationContestSummary[]);
     }
 }
