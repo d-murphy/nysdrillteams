@@ -7,6 +7,10 @@ class ProjectionService {
     public getProjections(year: number): Promise<Projection[]> {
         return this.dataSource.getProjections(year); 
     }
+
+    public getAvailableYears(): Promise<number[]> {
+        return this.dataSource.getAvailableYears(); 
+    }
 }
     
 export default ProjectionService;

@@ -17,6 +17,11 @@ export function projectionRouter (projectionDataSource:ProjectionMethods){
         res.status(200).send(projections);
     })
 
+    router.get('/getAvailableYears', async (req: Request, res: Response) => {
+        let availableYears = await Projection.getAvailableYears(); 
+        res.status(200).send(availableYears);
+    })
+
     router.use((err:Error, req:Request, res:Response, next:NextFunction) => {
         if (err) {
             res.status(500);

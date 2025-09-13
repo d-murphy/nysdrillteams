@@ -32,6 +32,10 @@ import { s3Client } from './components/images';
 import { s3BucketName } from './components/importedEnv'; 
 import { projectionRouter } from './services/controllers/projectionController';
 import { simContSumRouter } from './services/controllers/simContSumController';
+import { fantasyRouter } from './services/controllers/fantasyController';
+import { fantasyGameDbFactory } from './services/database/fantasyGameDb';
+import { fantasyDraftPickDbFactory } from './services/database/fantasyDraftPickDb';
+import { fantasyGameHistoryDbFactory } from './services/database/fantasyGameHistoryDb';
 
 dotenv.config(); 
 let { PORT, DB_NAME, dbUn, dbPass, keyLocation, certLocation } = process.env; 
@@ -73,6 +77,9 @@ var credentials = {key: privateKey, cert: certificate};
     let historyData = await historyDbFactory(dbPromise, 'team-histories'); 
     let projectionData = await projectionDbFactory(dbPromise, 'simulation-projections'); 
     let simContSumData = await simContSumDbFactory(dbPromise, 'simulation-contest-summary'); 
+    let fantasyGameData = await fantasyGameDbFactory(dbPromise, 'simulation-fantasy-games'); 
+    let fantasyPickData = await fantasyDraftPickDbFactory(dbPromise, 'simulation-fantasy-draft-picks'); 
+    let fantasyGameHistoryData = await fantasyGameHistoryDbFactory(dbPromise, 'simulation-fantasy-game-history'); 
     if(runsData) app.use('/runs', runsRouter(runsData, sessionAdmin)); 
     if(teamsData) app.use('/teams', teamsRouter(teamsData, sessionAdmin));
     if(tournamentsData) app.use('/tournaments', tournamentsRouter(tournamentsData, sessionAdmin));  
@@ -83,6 +90,7 @@ var credentials = {key: privateKey, cert: certificate};
     if(imageMethods) app.use('/images', makeImagesRouter(imageMethods, sessionAdmin))
     if(projectionData) app.use('/projections', projectionRouter(projectionData))
     if(simContSumData) app.use('/simContSum', simContSumRouter(simContSumData))
+    if(fantasyGameData && fantasyPickData && fantasyGameHistoryData) app.use('/fantasy', fantasyRouter(fantasyGameData, fantasyPickData, fantasyGameHistoryData))
 
     app.use("/announcements", announcementRouter(sessionAdmin))
 

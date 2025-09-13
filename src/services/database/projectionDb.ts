@@ -19,6 +19,10 @@ class ProjectionDb implements ProjectionMethods {
         const query = { year: year };
         return (this._dbCollection.find(query).toArray() as unknown as Projection[]);
     }
+
+    async getAvailableYears(): Promise<number[]> {
+        return this._dbCollection.distinct('year') as unknown as number[];
+    }
 }
 
 

@@ -295,6 +295,7 @@ export type Projection = {
 
 export type ProjectionMethods = {
     getProjections(year: number): Promise<Projection[]>
+    getAvailableYears(): Promise<number[]>
 }
 
 export type SimulationContestSummary = {
@@ -313,4 +314,68 @@ export type SimulationContestSummary = {
 
 export type SimulationContestSummaryMethods = {
     getTopSimulationContestSummaries(contestArr: string[], sortBy: string, limit: number, offset: number, teamArr?: string[], yearArr?: number[]): Promise<SimulationContestSummary[]>
+}
+
+export type FantasyGame = {
+    // _id: ObjectId,
+    gameId: string, 
+    status: 'stage' | 'draft' | 'complete', 
+    gameType: 'one-team' | '8-team' | '8-team-no-repeat'
+    countAgainstRecord: boolean, 
+    users: string[], 
+    simulationIndex: number[], 
+    secondsPerPick: number
+}
+
+export type FantasyGameMethods = {
+    createFantasyGame(gameId: string, user: string, gameType: 'one-team' | '8-team' | '8-team-no-repeat', countAgainstRecord: boolean, secondsPerPick: number): Promise<FantasyGame>
+    deleteFantasyGame(gameId: string): Promise<DeleteResult>
+    addUsersToFantasyGame(gameId: string, user: string[]): Promise<UpdateResult>
+    getFantasyGame(gameId: string): Promise<FantasyGame>
+    getFantasyGames(user: string, limit: number, offset: number): Promise<FantasyGame[]>
+}
+
+export type FantasyDraftPickMethods = {
+    getFantasyDraftPicks(gameId: string): Promise<FantasyDraftPick[]>
+    insertDraftPick(draftPick: FantasyDraftPick): Promise<InsertOneResult>
+    deleteFantasyGame(gameId: string): Promise<DeleteResult>
+}
+
+export type FantasyGameHistoryMethods = {
+    getFantasyGameHistory(user: string, limit: number, offset: number): Promise<FantasyGameHistory[]>
+    insertGameHistory(gameHistory: FantasyGameHistory): Promise<InsertOneResult>
+    getGameHistoryByGameId(gameId: string): Promise<FantasyGameHistory[]>
+    deleteFantasyGame(gameId: string): Promise<DeleteResult>
+}
+
+export type FantasyDraftPick = {
+    // _id: ObjectId,
+    gameId: string, 
+    user: string, 
+    contestSummaryKey: string,
+    draftPick: number, 
+}
+
+// you should create a composite key in the simulation collection to allow for the lookup
+// and the contest summary
+
+// if status is stage, need 2 way communication to show number of players and close
+// if status is draft, need 2 way communication to show picks.  
+// if time is up (check every second?), backend needs to auto pick. 
+
+
+// if count against record, create a FantasyGameParticipant document. Otherwise, maybe you can do game from only the draft. 
+// don't save draft unless it countsa against record
+
+export type FantasyGameHistory = {
+    // _id: ObjectId,
+    gameId: string, 
+    user: string, 
+    teamName: string, 
+    contestSummaryKeys: string[]
+    gameType: 'one-team' | '8-team' | '8-team-no-repeat'
+    win: boolean, 
+    top5: boolean, 
+    finish: number, 
+    participantCount: number, 
 }
