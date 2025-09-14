@@ -1,4 +1,4 @@
-import express, {Request, Response, NextFunction} from 'express'; 
+import express, {Request, Response, NextFunction, response} from 'express'; 
 
 import { FantasyGameMethods, FantasyDraftPickMethods, FantasyGameHistoryMethods, FantasyGame, FantasyDraftPick, FantasyGameHistory } from '../../types/types';
 import FantasyService from '../dataService/fantasyService';
@@ -35,24 +35,41 @@ export function fantasyRouter(
         }
     };
 
+    // Helper function to clean up connections
+    const cleanupConnection = (gameId: string, res: Response, keepAlive?: NodeJS.Timeout) => {
+        if (keepAlive) {
+            clearInterval(keepAlive);
+        }
+        
+        const connections = activeConnections.get(gameId);
+        if (connections) {
+            connections.delete(res);
+            if (connections.size === 0) {
+                activeConnections.delete(gameId);
+            }
+        }
+    };
+
     // Fantasy Game endpoints
     router.post('/createGame', async (req: Request, res: Response) => {
 
         console.log("createGame", req.body);
-        const { user, gameType, countAgainstRecord, secondsPerPick } = req.body;
+        const { user, gameType, countAgainstRecord, secondsPerPick, tournamentCt, isSeason, tournamentSize } = req.body;
 
 
-        if (!user || !gameType || typeof countAgainstRecord !== 'boolean') {
-            return res.status(400).send('Missing required fields: user, gameType, countAgainstRecord');
+        if (!user || !gameType || typeof countAgainstRecord !== 'boolean' || typeof isSeason !== 'boolean') {
+            return res.status(400).send('Missing required fields: user, gameType, countAgainstRecord, isSeason');
         }
 
         if (!['one-team', '8-team', '8-team-no-repeat'].includes(gameType)) {
             return res.status(400).send('Invalid gameType. Must be one of: one-team, 8-team, 8-team-no-repeat');
         }
 
-        let finalSecondsPerPick = secondsPerPick || 60;
+        let finalSecondsPerPick = secondsPerPick || 30;
+        let finalTournamentCt = tournamentCt || 12;
+        let finalTournamentSize = tournamentSize || 50;
 
-        const game = await fantasyService.createFantasyGame(user, gameType, countAgainstRecord, finalSecondsPerPick);
+        const game = await fantasyService.createFantasyGame(user, gameType, countAgainstRecord, finalSecondsPerPick, finalTournamentCt, isSeason, finalTournamentSize);
         res.status(201).send(game);
     });
 
@@ -89,26 +106,56 @@ export function fantasyRouter(
             res.write(`data: ${JSON.stringify({ type: 'error', message: 'Failed to fetch game data' })}\n\n`);
         }
 
-        // Handle client disconnect
-        req.on('close', () => {
-            const connections = activeConnections.get(gameId);
-            if (connections) {
-                connections.delete(res);
-                if (connections.size === 0) {
-                    activeConnections.delete(gameId);
-                }
-            }
-        });
-
         // Keep connection alive
         const keepAlive = setInterval(() => {
-            res.write(': keepalive\n\n');
+            try {
+                res.write(': keepalive\n\n');
+            } catch (error) {
+                // Connection is dead, clean up
+                cleanupConnection(gameId, res, keepAlive);
+            }
         }, 30000);
 
+        // Handle client disconnect
         req.on('close', () => {
-            clearInterval(keepAlive);
+            cleanupConnection(gameId, res, keepAlive);
+        });
+
+        // Handle connection errors
+        req.on('error', () => {
+            cleanupConnection(gameId, res, keepAlive);
         });
     });
+
+    router.put('/updateGameState/:gameId', async (req: Request, res: Response) => {
+        const { gameId } = req.params;
+        const { state } = req.body;
+
+        if (!state || typeof state !== 'string' || !['draft', 'complete'].includes(state)) {
+            return res.status(400).send('Invalid state. Must be one of: draft, complete');
+        }
+
+        const result = await fantasyService.updateFantasyGameState(gameId, state as 'draft' | 'complete');
+        const updatedGame = await fantasyService.getFantasyGame(gameId);
+
+        const connections = activeConnections.get(gameId);
+        try {
+            if (connections) {
+                connections.forEach(res => {
+                    res.write(`data: ${JSON.stringify({ type: 'gameUpdate', data: updatedGame })}\n\n`);
+                    res.end();
+                });
+                setTimeout(() => {
+                    activeConnections.delete(gameId);
+                }, 5000)
+            }
+        } catch (error) {
+            console.error('Failed to broadcast game update:', error);
+        }
+
+        res.status(200).send(result);
+    });
+
 
     router.get('/getGames/:user', async (req: Request, res: Response) => {
         const { user } = req.params;
@@ -122,6 +169,8 @@ export function fantasyRouter(
     router.put('/addUsers/:gameId', async (req: Request, res: Response) => {
         const { gameId } = req.params;
         const { users } = req.body;
+
+        console.log("addUsers", req.body);
         
         if (!Array.isArray(users)) {
             return res.status(400).send('Users must be an array');
@@ -180,24 +229,24 @@ export function fantasyRouter(
             res.write(`data: ${JSON.stringify({ type: 'error', message: 'Failed to fetch draft picks' })}\n\n`);
         }
 
-        // Handle client disconnect
-        req.on('close', () => {
-            const connections = activeConnections.get(gameId);
-            if (connections) {
-                connections.delete(res);
-                if (connections.size === 0) {
-                    activeConnections.delete(gameId);
-                }
-            }
-        });
-
         // Keep connection alive
         const keepAlive = setInterval(() => {
-            res.write(': keepalive\n\n');
+            try {
+                res.write(': keepalive\n\n');
+            } catch (error) {
+                // Connection is dead, clean up
+                cleanupConnection(gameId, res, keepAlive);
+            }
         }, 30000);
 
+        // Handle client disconnect
         req.on('close', () => {
-            clearInterval(keepAlive);
+            cleanupConnection(gameId, res, keepAlive);
+        });
+
+        // Handle connection errors
+        req.on('error', () => {
+            cleanupConnection(gameId, res, keepAlive);
         });
     });
 

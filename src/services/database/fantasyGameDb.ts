@@ -15,15 +15,24 @@ class FantasyGameDb implements FantasyGameMethods {
         this._dbCollection = collection; 
     }
     
-    async createFantasyGame(gameId: string, user: string, gameType: 'one-team' | '8-team' | '8-team-no-repeat', countAgainstRecord: boolean, secondsPerPick: number): Promise<FantasyGame> {
+    async createFantasyGame(
+        gameId: string, user: string, 
+        gameType: 'one-team' | '8-team' | '8-team-no-repeat', 
+        countAgainstRecord: boolean, 
+        secondsPerPick: number,
+        tournamentCt: number, 
+        users: string[],
+        simulationIndex: number[],
+    ): Promise<FantasyGame> {
         const newGame: FantasyGame = {
             gameId: gameId,
             status: 'stage',
             gameType: gameType,
             countAgainstRecord: countAgainstRecord,
-            users: [user],
-            simulationIndex: [],
-            secondsPerPick: secondsPerPick
+            users: users,
+            simulationIndex: simulationIndex,
+            secondsPerPick: secondsPerPick,
+            tournamentCt: tournamentCt
         };
         
         await this._dbCollection.insertOne(newGame);
@@ -33,6 +42,14 @@ class FantasyGameDb implements FantasyGameMethods {
     async deleteFantasyGame(gameId: string): Promise<DeleteResult> {
         const query = { gameId: gameId };
         return this._dbCollection.deleteOne(query);
+    }
+
+    async updateFantasyGameState(gameId: string, state: 'draft' | 'complete'): Promise<UpdateResult> {
+        const filter = { gameId: gameId };
+        const updateDoc = {
+            $set: { status: state }
+        };
+        return this._dbCollection.updateOne(filter, updateDoc);
     }
 
     async addUsersToFantasyGame(gameId: string, users: string[]): Promise<UpdateResult> {
