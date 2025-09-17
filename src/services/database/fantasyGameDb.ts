@@ -44,18 +44,19 @@ class FantasyGameDb implements FantasyGameMethods {
         return this._dbCollection.deleteOne(query);
     }
 
-    async updateFantasyGameState(gameId: string, state: 'draft' | 'complete'): Promise<UpdateResult> {
+    async updateFantasyGameState(gameId: string, state: 'draft' | 'complete', users?: string[]): Promise<UpdateResult> {
         const filter = { gameId: gameId };
-        const updateDoc = {
+        const updateDoc: { $set: { status: string, users?: string[] } } = {
             $set: { status: state }
         };
+        if(users) updateDoc.$set.users = users;
         return this._dbCollection.updateOne(filter, updateDoc);
     }
 
     async addUsersToFantasyGame(gameId: string, users: string[]): Promise<UpdateResult> {
         const filter = { gameId: gameId };
         const updateDoc = {
-            $addToSet: { users: { $each: users } }
+            $set: { users: users }
         };
         return this._dbCollection.updateOne(filter, updateDoc);
     }

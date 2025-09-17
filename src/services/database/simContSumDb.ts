@@ -17,7 +17,10 @@ class SimContSumDb implements SimulationContestSummaryMethods {
     
     async getTopSimulationContestSummaries(contestArr: string[], sortBy: string, limit: number, offset: number, teamArr: string[], yearArr: number[]): Promise<SimulationContestSummary[]> {
         const query: {team?: string, year?: number, contest?: string} = {}; 
-        if(teamArr.length) query.team = { $in: teamArr } as unknown as string; 
+        if(teamArr.length) {            
+            const teamRegexArr = teamArr.map(str => new RegExp(str, 'i'));
+            query.team = { $in: teamRegexArr } as unknown as string; 
+        }
         if(yearArr.length) query.year = { $in: yearArr } as unknown as number; 
         query.contest = { $in: contestArr } as unknown as string; 
 

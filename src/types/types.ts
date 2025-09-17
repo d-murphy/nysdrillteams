@@ -309,7 +309,8 @@ export type SimulationContestSummary = {
     goodSd: number | null,
     consistency: number,
     speedRating: number | null, 
-    goodRunTimes: number[]
+    goodRunTimes: number[], 
+    key: string
 }
 
 export type SimulationContestSummaryMethods = {
@@ -338,7 +339,7 @@ export type FantasyGameMethods = {
     ): Promise<FantasyGame>
     deleteFantasyGame(gameId: string): Promise<DeleteResult>
     addUsersToFantasyGame(gameId: string, user: string[]): Promise<UpdateResult>
-    updateFantasyGameState(gameId: string, state: 'draft' | 'complete'): Promise<UpdateResult>
+    updateFantasyGameState(gameId: string, state: 'draft' | 'complete', users?: string[]): Promise<UpdateResult>
     getFantasyGame(gameId: string): Promise<FantasyGame>
     getFantasyGames(user: string, limit: number, offset: number): Promise<FantasyGame[]>
 }

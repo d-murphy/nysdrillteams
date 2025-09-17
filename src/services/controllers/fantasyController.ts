@@ -129,13 +129,17 @@ export function fantasyRouter(
 
     router.put('/updateGameState/:gameId', async (req: Request, res: Response) => {
         const { gameId } = req.params;
-        const { state } = req.body;
+        const { state, users } = req.body;
 
         if (!state || typeof state !== 'string' || !['draft', 'complete'].includes(state)) {
             return res.status(400).send('Invalid state. Must be one of: draft, complete');
         }
 
-        const result = await fantasyService.updateFantasyGameState(gameId, state as 'draft' | 'complete');
+        if(state === 'draft' && !users) {
+            return res.status(400).send('Users are required when state is draft');
+        }
+
+        const result = await fantasyService.updateFantasyGameState(gameId, state as 'draft' | 'complete', users);
         const updatedGame = await fantasyService.getFantasyGame(gameId);
 
         const connections = activeConnections.get(gameId);
@@ -169,8 +173,6 @@ export function fantasyRouter(
     router.put('/addUsers/:gameId', async (req: Request, res: Response) => {
         const { gameId } = req.params;
         const { users } = req.body;
-
-        console.log("addUsers", req.body);
         
         if (!Array.isArray(users)) {
             return res.status(400).send('Users must be an array');

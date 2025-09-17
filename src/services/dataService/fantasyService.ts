@@ -28,12 +28,24 @@ class FantasyService {
         return this.fantasyGameDataSource.deleteFantasyGame(gameId); 
     }
 
-    public updateFantasyGameState(gameId: string, state: 'draft' | 'complete'): Promise<UpdateResult> {
-        return this.fantasyGameDataSource.updateFantasyGameState(gameId, state); 
+    public updateFantasyGameState(gameId: string, state: 'draft' | 'complete', users?: string[]): Promise<UpdateResult> {
+
+        if(state === 'draft' && !users) {
+            return Promise.reject(new Error('Users are required when state is draft'));
+        }
+
+        if(state === 'draft' && users){
+            users.sort(() => Math.random() - 0.5);
+        }
+        return this.fantasyGameDataSource.updateFantasyGameState(gameId, state, users); 
     }
 
-    public addUsersToFantasyGame(gameId: string, users: string[]): Promise<UpdateResult> {
-        return this.fantasyGameDataSource.addUsersToFantasyGame(gameId, users); 
+    public async addUsersToFantasyGame(gameId: string, users: string[]): Promise<UpdateResult> {
+        const game = await this.fantasyGameDataSource.getFantasyGame(gameId);
+        const currentUsers = game.users;
+        const firstAutoDraftIndex = currentUsers.indexOf("autodraft");
+        const newUsers = [...currentUsers.slice(0, firstAutoDraftIndex), ...users, ...currentUsers.slice(firstAutoDraftIndex + users.length)];
+        return this.fantasyGameDataSource.addUsersToFantasyGame(gameId, newUsers); 
     }
 
     public getFantasyGame(gameId: string): Promise<FantasyGame> {

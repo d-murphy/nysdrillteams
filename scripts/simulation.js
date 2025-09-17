@@ -156,11 +156,95 @@ const numOfSimulations = 500;
 
 
 ( async function () {
-    // await createContestSummaries(); 
+    await createContestSummaries(); 
     // await createSimulations(false); 
     // await calculateNysChampionshipProjections(); 
 
+
+    
 })()
+
+async function addKeyToSimulationContestSummaries() {
+    const simulationRunsCol = await getCollection("simulation-runs"); 
+
+    console.log("starting update");
+    
+    // First, check how many documents need updating
+    const totalDocs = await simulationRunsCol.countDocuments({});
+    const docsWithKey = await simulationRunsCol.countDocuments({ key: { $exists: true } });
+    const docsToUpdate = totalDocs - docsWithKey;
+    
+    console.log(`Total documents: ${totalDocs}`);
+    console.log(`Documents with key: ${docsWithKey}`);
+    console.log(`Documents to update: ${docsToUpdate}`);
+    
+    if (docsToUpdate === 0) {
+        console.log("All documents already have keys. Exiting.");
+        return;
+    }
+    
+    // Process in batches using cursor (no memory loading)
+    const batchSize = 1000;
+    let processedCount = 0;
+    let batchNumber = 1;
+    
+    console.log("Starting cursor-based batch processing...");
+    
+    // Use cursor to stream documents - only get docs without keys
+    const cursor = simulationRunsCol.find({ key: { $exists: false } }).batchSize(batchSize);
+    
+    while (await cursor.hasNext()) {
+        const batch = [];
+        
+        // Collect a batch of documents
+        for (let i = 0; i < batchSize && await cursor.hasNext(); i++) {
+            const doc = await cursor.next();
+            batch.push({
+                updateOne: {
+                    filter: { _id: doc._id },
+                    update: {
+                        $set: {
+                            key: `${doc.team}|${doc.year}|${doc.contest}|${doc.iteration}`
+                        }
+                    }
+                }
+            });
+        }
+
+        console.log("before write"); 
+        
+        if (batch.length > 0) {
+            // Execute the batch
+            const result = await simulationRunsCol.bulkWrite(batch, { ordered: false });
+            processedCount += result.modifiedCount;
+            
+            console.log(`Batch ${batchNumber}: Processed ${batch.length} documents, ${result.modifiedCount} updated`);
+            console.log(`Total processed: ${processedCount}/${docsToUpdate} (${((processedCount/docsToUpdate)*100).toFixed(1)}%)`);
+            
+            batchNumber++;
+        }
+    }
+    
+    await cursor.close();
+    console.log(`Update complete! Processed ${processedCount} documents.`);
+
+
+
+    // console.log("starting update");
+    // for(let i=0; i<500; i++) {
+    //     const result = await simulationRunsCol.updateMany(
+    //         {iteration: i},
+    //         [
+    //             {
+    //                 $set: {
+    //                     key: { $concat: ["$team", "|", { $toString: "$year" }, "|", { $toString: "$contest" }, "|", { $toString: "$iteration" }] }
+    //                 }
+    //             }
+    //         ]
+    //     )
+    //     console.log("result: ", i, " - ", result);     
+    // }
+}
 
 async function calculateNysChampionshipProjections(){
 
@@ -448,9 +532,8 @@ function generateSimulatedRuns(contestSummary, contest, ct) {
     const badAvg = badRunMean[contest]; 
     const badSd = badRunSd[contest]; 
 
-    let completionPct = goodCt / ct; 
-    completionPct = completionPct === 1 ? (ct / ct + 1) : 
-        Math.max(completionPct, .15); 
+    let completionPct = goodCt / (ct + 1 ); 
+    completionPct = Math.max(completionPct, .15); 
 
     // decided the long tails weren't helpful for simulation. 
 
@@ -550,6 +633,7 @@ async function createContestSummaries() {
                     let goodAvg; 
                     let goodSd; 
                     let speedRating; 
+                    const smallGoodRunCt = goodCt < 4; 
                     if(!goodRuns.length) {
                         goodAvg = null
                         goodSd = null
@@ -558,7 +642,8 @@ async function createContestSummaries() {
                         goodAvg = goodRuns.reduce((accum, el) => accum += parseFloat(el.timeNum), 0); 
                         goodAvg = goodAvg / goodCt; 
                         goodSd = getStandardDeviation(goodRuns.map(el => el.timeNum)); 
-                        speedRating = bestRuns[contest] - goodAvg; 
+                        const smallGoodRunCtPenalty = smallGoodRunCt ? bestRuns[contest] * .1 : 0; 
+                        speedRating = Math.floor((bestRuns[contest] / (goodAvg + smallGoodRunCtPenalty)) * 100) / 100; 
                     }
 
                     runSummary.push({
@@ -569,9 +654,10 @@ async function createContestSummaries() {
                         goodCt: goodCt, 
                         goodAvg: Math.floor(goodAvg * 100) / 100, 
                         goodSd: goodSd, 
-                        consistency: Math.floor((goodCt / ct) * 100) / 100, 
+                        consistency: Math.floor((goodCt / (ct + 1)) * 100) / 100, 
                         speedRating: speedRating, 
-                        goodRunTimes: goodRuns.map(el => el.timeNum)
+                        goodRunTimes: goodRuns.map(el => el.timeNum), 
+                        key: `${team}|${year}|${contest}`
                     })
 
                 
