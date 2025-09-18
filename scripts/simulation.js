@@ -633,6 +633,7 @@ async function createContestSummaries() {
                     let goodAvg; 
                     let goodSd; 
                     let speedRating; 
+                    let consistencyScore = Math.floor((goodCt / (ct + 1)) * 100) / 100
                     const smallGoodRunCt = goodCt < 4; 
                     if(!goodRuns.length) {
                         goodAvg = null
@@ -645,6 +646,7 @@ async function createContestSummaries() {
                         const smallGoodRunCtPenalty = smallGoodRunCt ? bestRuns[contest] * .1 : 0; 
                         speedRating = Math.floor((bestRuns[contest] / (goodAvg + smallGoodRunCtPenalty)) * 100) / 100; 
                     }
+                    let overallScore = (speedRating || 0) * (consistencyScore || 0); 
 
                     runSummary.push({
                         team: team, 
@@ -654,10 +656,12 @@ async function createContestSummaries() {
                         goodCt: goodCt, 
                         goodAvg: Math.floor(goodAvg * 100) / 100, 
                         goodSd: goodSd, 
-                        consistency: Math.floor((goodCt / (ct + 1)) * 100) / 100, 
+                        consistency: consistencyScore, 
                         speedRating: speedRating, 
+                        overallScore: overallScore, 
                         goodRunTimes: goodRuns.map(el => el.timeNum), 
-                        key: `${team}|${year}|${contest}`
+                        key: `${team}|${year}|${contest}`, 
+                        teamContestKey: `${team}|${contest}`
                     })
 
                 

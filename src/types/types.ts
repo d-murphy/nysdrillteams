@@ -309,12 +309,19 @@ export type SimulationContestSummary = {
     goodSd: number | null,
     consistency: number,
     speedRating: number | null, 
+    overallScore: number, 
     goodRunTimes: number[], 
-    key: string
+    key: string, 
+    teamContestKey: string
 }
 
 export type SimulationContestSummaryMethods = {
-    getTopSimulationContestSummaries(contestArr: string[], sortBy: string, limit: number, offset: number, teamArr?: string[], yearArr?: number[]): Promise<SimulationContestSummary[]>
+    getTopSimulationContestSummaries(
+        contestArr: string[], sortBy: string, limit: number,
+        offset: number, teamArr?: string[], yearArr?: number[], 
+        teamContestKeyArrToExclude?: string[], 
+        teamYearContestKeyArrToExclude?: string[]
+    ): Promise<SimulationContestSummary[]>
 }
 
 export type FantasyGame = {

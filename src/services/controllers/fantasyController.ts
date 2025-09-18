@@ -1,6 +1,6 @@
 import express, {Request, Response, NextFunction, response} from 'express'; 
 
-import { FantasyGameMethods, FantasyDraftPickMethods, FantasyGameHistoryMethods, FantasyGame, FantasyDraftPick, FantasyGameHistory } from '../../types/types';
+import { FantasyGameMethods, FantasyDraftPickMethods, FantasyGameHistoryMethods, FantasyGame, FantasyDraftPick, FantasyGameHistory, SimulationContestSummaryMethods } from '../../types/types';
 import FantasyService from '../dataService/fantasyService';
 import FantasyDraftPickService from '../dataService/fantasyDraftPickService';
 import FantasyGameHistoryService from '../dataService/fantasyGameHistoryService';
@@ -8,10 +8,11 @@ import FantasyGameHistoryService from '../dataService/fantasyGameHistoryService'
 export function fantasyRouter(
     fantasyGameDataSource: FantasyGameMethods,
     fantasyDraftPickDataSource: FantasyDraftPickMethods,
-    fantasyGameHistoryDataSource: FantasyGameHistoryMethods
+    fantasyGameHistoryDataSource: FantasyGameHistoryMethods,
+    contestSummaryDataSource: SimulationContestSummaryMethods
 ) {
     const fantasyService = new FantasyService(fantasyGameDataSource);
-    const draftPickService = new FantasyDraftPickService(fantasyDraftPickDataSource);
+    const draftPickService = new FantasyDraftPickService(fantasyDraftPickDataSource, fantasyGameDataSource, contestSummaryDataSource);
     const historyService = new FantasyGameHistoryService(fantasyGameHistoryDataSource);
 
     const router = express.Router();
@@ -140,6 +141,9 @@ export function fantasyRouter(
         }
 
         const result = await fantasyService.updateFantasyGameState(gameId, state as 'draft' | 'complete', users);
+        if(state === 'draft') {
+            const result2 = await draftPickService.runAutoDraftPicks(gameId, -1);
+        }
         const updatedGame = await fantasyService.getFantasyGame(gameId);
 
         const connections = activeConnections.get(gameId);
@@ -260,6 +264,8 @@ export function fantasyRouter(
         }
 
         const result = await draftPickService.insertDraftPick(draftPick);
+
+        const result2 = await draftPickService.runAutoDraftPicks(draftPick.gameId, draftPick.draftPick); 
         
         // Broadcast draft picks update to all connected clients
         try {
@@ -269,7 +275,7 @@ export function fantasyRouter(
             console.error('Failed to broadcast draft picks update:', error);
         }
         
-        res.status(201).send(result);
+        res.status(201).send({result, result2});
     });
 
     router.delete('/deleteDraftPicks/:gameId', async (req: Request, res: Response) => {

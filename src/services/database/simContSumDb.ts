@@ -15,22 +15,42 @@ class SimContSumDb implements SimulationContestSummaryMethods {
         this._dbCollection = collection; 
     }
     
-    async getTopSimulationContestSummaries(contestArr: string[], sortBy: string, limit: number, offset: number, teamArr: string[], yearArr: number[]): Promise<SimulationContestSummary[]> {
-        const query: {team?: string, year?: number, contest?: string} = {}; 
-        if(teamArr.length) {            
+    async getTopSimulationContestSummaries(
+            contestArr: string[], 
+            sortBy: string, 
+            limit: number, 
+            offset: number, 
+            teamArr: string[], 
+            yearArr: number[], 
+            teamContestKeyArrToExclude: string[],
+            teamYearContestKeyArrToExclude: string[]
+        ): Promise<SimulationContestSummary[]> {
+        const query: {team?: string, year?: number, contest?: string, teamContestKey?: string, key?: string} = {}; 
+
+        if(teamArr &&teamArr.length) {            
             const teamRegexArr = teamArr.map(str => new RegExp(str, 'i'));
             query.team = { $in: teamRegexArr } as unknown as string; 
         }
-        if(yearArr.length) query.year = { $in: yearArr } as unknown as number; 
+        if(yearArr && yearArr.length) query.year = { $in: yearArr } as unknown as number; 
         query.contest = { $in: contestArr } as unknown as string; 
+        if(teamContestKeyArrToExclude && teamContestKeyArrToExclude.length) {
+            const teamRegexArr = teamContestKeyArrToExclude.map(str => new RegExp(str, 'i'));
+            query.teamContestKey = { $nin: teamRegexArr } as unknown as string; 
+        }
+        if(teamYearContestKeyArrToExclude && teamYearContestKeyArrToExclude.length) {
+            const teamRegexArr = teamYearContestKeyArrToExclude.map(str => new RegExp(str, 'i'));
+            query.key = { $nin: teamRegexArr } as unknown as string; 
+        }
 
         let sortObj: Sort = {}; 
         if(sortBy === "consistency") {
             sortObj.consistency = -1; 
             sortObj.speedRating = -1; 
-        } else {
+        } else if (sortBy === "speedRating" ) {
             sortObj.speedRating = -1; 
             sortObj.consistency = -1; 
+        } else {
+            sortObj.overallScore = -1; 
         }
 
         return (this._dbCollection.find(query).skip(offset).limit(limit).sort(sortObj).toArray() as unknown as SimulationContestSummary[]);

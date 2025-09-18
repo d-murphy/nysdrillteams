@@ -36,6 +36,7 @@ class FantasyService {
 
         if(state === 'draft' && users){
             users.sort(() => Math.random() - 0.5);
+            users = users?.map((el, index) => el === "autodraft" ? `autodraft-${index}` : el);
         }
         return this.fantasyGameDataSource.updateFantasyGameState(gameId, state, users); 
     }
@@ -43,7 +44,7 @@ class FantasyService {
     public async addUsersToFantasyGame(gameId: string, users: string[]): Promise<UpdateResult> {
         const game = await this.fantasyGameDataSource.getFantasyGame(gameId);
         const currentUsers = game.users;
-        const firstAutoDraftIndex = currentUsers.indexOf("autodraft");
+        const firstAutoDraftIndex = currentUsers.map(el => el.split("-")[0]).indexOf("autodraft");
         const newUsers = [...currentUsers.slice(0, firstAutoDraftIndex), ...users, ...currentUsers.slice(firstAutoDraftIndex + users.length)];
         return this.fantasyGameDataSource.addUsersToFantasyGame(gameId, newUsers); 
     }

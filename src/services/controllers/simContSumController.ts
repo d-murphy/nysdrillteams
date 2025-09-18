@@ -15,7 +15,8 @@ export function simContSumRouter (simContSumDataSource:SimulationContestSummaryM
         const offset: number = parseInt(req.query.offset as string) || 0; 
         const teams: string = req.query.teams as string; 
         const years: string = req.query.years as string; 
-
+        const teamContestKeyArrToExclude: string = req.query.teamContestKeyArrToExclude as string; 
+        const teamYearContestKeyArrToExclude: string = req.query.teamYearContestKeyArrToExclude as string; 
         
         if(!contests || !sortBy) {
             return res.status(400).send('contests and sortBy parameters are required');
@@ -27,7 +28,9 @@ export function simContSumRouter (simContSumDataSource:SimulationContestSummaryM
             limit, 
             offset, 
             teams || undefined, 
-            years || undefined
+            years || undefined, 
+            teamContestKeyArrToExclude || undefined,
+            teamYearContestKeyArrToExclude || undefined
         ); 
         res.status(200).send(topSummaries);
     })
