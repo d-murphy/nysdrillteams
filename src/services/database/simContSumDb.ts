@@ -34,12 +34,12 @@ class SimContSumDb implements SimulationContestSummaryMethods {
         if(yearArr && yearArr.length) query.year = { $in: yearArr } as unknown as number; 
         query.contest = { $in: contestArr } as unknown as string; 
         if(teamContestKeyArrToExclude && teamContestKeyArrToExclude.length) {
-            const teamRegexArr = teamContestKeyArrToExclude.map(str => new RegExp(str, 'i'));
+            const teamRegexArr = teamContestKeyArrToExclude.map(str => new RegExp(str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&'), 'i'));
             query.teamContestKey = { $nin: teamRegexArr } as unknown as string; 
         }
         if(teamYearContestKeyArrToExclude && teamYearContestKeyArrToExclude.length) {
-            const teamRegexArr = teamYearContestKeyArrToExclude.map(str => new RegExp(str, 'i'));
-            query.key = { $nin: teamRegexArr } as unknown as string; 
+            // Use exact string matching instead of regex for keys
+            query.key = { $nin: teamYearContestKeyArrToExclude } as unknown as string; 
         }
 
         let sortObj: Sort = {}; 
@@ -53,6 +53,11 @@ class SimContSumDb implements SimulationContestSummaryMethods {
             sortObj.overallScore = -1; 
         }
 
-        return (this._dbCollection.find(query).skip(offset).limit(limit).sort(sortObj).toArray() as unknown as SimulationContestSummary[]);
+        // Debug: Check how many documents match before exclusions
+        const totalMatchingContest = await this._dbCollection.countDocuments({ contest: { $in: contestArr } });
+
+        const result = await (this._dbCollection.find(query).skip(offset).limit(limit).sort(sortObj).toArray() as unknown as SimulationContestSummary[]);
+        
+        return result;
     }
 }

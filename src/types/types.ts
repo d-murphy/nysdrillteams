@@ -327,7 +327,7 @@ export type SimulationContestSummaryMethods = {
 export type FantasyGame = {
     // _id: ObjectId,
     gameId: string, 
-    status: 'stage' | 'draft' | 'complete', 
+    status: 'stage' | 'stage-draft' | 'draft' | 'complete', 
     gameType: 'one-team' | '8-team' | '8-team-no-repeat'
     tournamentCt: number,
     countAgainstRecord: boolean, 
@@ -346,7 +346,7 @@ export type FantasyGameMethods = {
     ): Promise<FantasyGame>
     deleteFantasyGame(gameId: string): Promise<DeleteResult>
     addUsersToFantasyGame(gameId: string, user: string[]): Promise<UpdateResult>
-    updateFantasyGameState(gameId: string, state: 'draft' | 'complete', users?: string[]): Promise<UpdateResult>
+    updateFantasyGameState(gameId: string, state: 'stage-draft' | 'draft' | 'complete', users?: string[]): Promise<UpdateResult>
     getFantasyGame(gameId: string): Promise<FantasyGame>
     getFantasyGames(user: string, limit: number, offset: number): Promise<FantasyGame[]>
 }

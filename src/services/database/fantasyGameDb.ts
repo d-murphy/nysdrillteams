@@ -63,7 +63,8 @@ class FantasyGameDb implements FantasyGameMethods {
 
     async getFantasyGame(gameId: string): Promise<FantasyGame> {
         const query = { gameId: gameId };
-        return (this._dbCollection.findOne(query) as unknown as FantasyGame);
+        const result = ( await this._dbCollection.findOne(query) as unknown as FantasyGame);
+        return result;
     }
 
     async getFantasyGames(user: string, limit: number, offset: number): Promise<FantasyGame[]> {

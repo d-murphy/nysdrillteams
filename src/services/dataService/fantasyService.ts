@@ -28,13 +28,13 @@ class FantasyService {
         return this.fantasyGameDataSource.deleteFantasyGame(gameId); 
     }
 
-    public updateFantasyGameState(gameId: string, state: 'draft' | 'complete', users?: string[]): Promise<UpdateResult> {
+    public updateFantasyGameState(gameId: string, state: 'stage-draft' | 'draft' | 'complete', users?: string[]): Promise<UpdateResult> {
 
-        if(state === 'draft' && !users) {
-            return Promise.reject(new Error('Users are required when state is draft'));
+        if(state === 'stage-draft' && !users) {
+            return Promise.reject(new Error('Users are required when state is stage-draft'));
         }
 
-        if(state === 'draft' && users){
+        if(state === 'stage-draft' && users){
             users.sort(() => Math.random() - 0.5);
             users = users?.map((el, index) => el === "autodraft" ? `autodraft-${index}` : el);
         }

@@ -13,16 +13,26 @@ class FantasyDraftPickService {
         return this.fantasyDraftPickDataSource.getFantasyDraftPicks(gameId); 
     }
 
-    public insertDraftPick(draftPick: FantasyDraftPick): Promise<InsertOneResult> {
+    public async insertDraftPick(draftPick: FantasyDraftPick): Promise<InsertOneResult> {
+        const isValid = await this.validateDraftPick(draftPick);
+        if(!isValid) {
+            throw new Error("Invalid draft pick");
+        }
         return this.fantasyDraftPickDataSource.insertDraftPick(draftPick); 
     }
 
+    private async validateDraftPick(draftPick: FantasyDraftPick): Promise<boolean> {
+        const picks = await this.getFantasyDraftPicks(draftPick.gameId);
+        const highestPick = picks.reduce((max, pick) => Math.max(max, pick.draftPick), -1);
+
+        return draftPick.draftPick -1 === highestPick;
+    }
 
     public deleteFantasyGame(gameId: string): Promise<DeleteResult> {
         return this.fantasyDraftPickDataSource.deleteFantasyGame(gameId); 
     }
 
-    public async runAutoDraftPicks(gameId: string, lastPickIndex: number): Promise<void> {
+    public async runAutoDraftPicks(gameId: string, lastPickIndex: number): Promise<{autoDraftPicks: FantasyDraftPick[]}> {
 
         const contests = ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]
         const sortCols = ["consistency", "speedRating", "overallScore"];
@@ -46,12 +56,13 @@ class FantasyDraftPickService {
         const picksToMake = firstNonAutoDraftPickIndex === 0 ? [] : 
             firstNonAutoDraftPickIndex === -1 ? listFromNextPick :
             listFromNextPick.slice(0, firstNonAutoDraftPickIndex);
+        console.log("autodraft - picksToMake", picksToMake);
 
-        if(picksToMake.length === 0) return; 
+        if(picksToMake.length === 0) return {autoDraftPicks: []}; 
 
         const currentPicks = await this.fantasyDraftPickDataSource.getFantasyDraftPicks(gameId);
 
-        const picksToCheck = []; 
+        const autoDraftPicks = []; 
 
         for(let i = 0; i < picksToMake.length; i++) {
             const nextPick = picksToMake[i];
@@ -60,7 +71,6 @@ class FantasyDraftPickService {
             const contestsComplete = picksForUser.map(pick => pick.contestSummaryKey.split("|")[2]);
             const remainingContests = contests.filter(contest => !contestsComplete.includes(contest));
             const randomContest = remainingContests[Math.floor(Math.random() * remainingContests.length)];
-
             const autoDraftNumber = nextPick.split("-")[1];
             const draftStrategyType = parseInt(autoDraftNumber) % 4;
             const draftStrategy = draftStrategyType === 3 ? 
@@ -70,26 +80,29 @@ class FantasyDraftPickService {
                 const [team, year, contest] = pick.contestSummaryKey.split("|");
                 return `${team}|${contest}`;
             }) : [];
-            const keysToExclude = picksForUser.map(pick => pick.contestSummaryKey);
 
+
+            const keysToExclude = currentPicks.map(pick => pick.contestSummaryKey);
             const options = await this.contestSummaryDataSource.getTopSimulationContestSummaries(
-                [randomContest], draftStrategy, 3, 0, undefined, undefined, 
+                [randomContest], draftStrategy, 2, 0, undefined, undefined, 
                 teamContestKeyArrToExclude, keysToExclude
             );
             const draftChoice = options[Math.floor(Math.random() * options.length)];
+            // console.log("autodraft - draftChoice", draftChoice);
             const draftPick = {
                 gameId: gameId,
                 user: nextPick,
-                contestSummaryKey: draftChoice.key,
+                contestSummaryKey: draftChoice?.key || '',
                 draftPick: loopPickIndex
             }
-            picksToCheck.push(draftPick);
+            autoDraftPicks.push(draftPick);
             currentPicks.push(draftPick);
             await this.fantasyDraftPickDataSource.insertDraftPick(draftPick);
         }
 
+        console.log("autodraft - autoDraftPicks length", autoDraftPicks.length);
         //@ts-ignore
-        return {picksToCheck}; 
+        return {autoDraftPicks}; 
 
 
 

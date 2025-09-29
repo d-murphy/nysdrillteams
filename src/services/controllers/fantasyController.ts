@@ -4,6 +4,7 @@ import { FantasyGameMethods, FantasyDraftPickMethods, FantasyGameHistoryMethods,
 import FantasyService from '../dataService/fantasyService';
 import FantasyDraftPickService from '../dataService/fantasyDraftPickService';
 import FantasyGameHistoryService from '../dataService/fantasyGameHistoryService';
+import { InsertOneResult } from 'mongodb';
 
 export function fantasyRouter(
     fantasyGameDataSource: FantasyGameMethods,
@@ -23,11 +24,13 @@ export function fantasyRouter(
     // Helper function to broadcast updates to all connected clients for a game
     const broadcastToGame = (gameId: string, message: any) => {
         const connections = activeConnections.get(gameId);
+        console.log("number of connections: ", connections?.size);
         if (connections) {
             const messageStr = `data: ${JSON.stringify(message)}\n\n`;
             connections.forEach(res => {
                 try {
-                    res.write(messageStr);
+                    console.log("broadcasting to connection"); 
+                    res.write(messageStr); 
                 } catch (error) {
                     // Remove dead connections
                     connections.delete(res);
@@ -41,7 +44,7 @@ export function fantasyRouter(
         if (keepAlive) {
             clearInterval(keepAlive);
         }
-        
+        console.log("cleaning up connection");
         const connections = activeConnections.get(gameId);
         if (connections) {
             connections.delete(res);
@@ -54,7 +57,6 @@ export function fantasyRouter(
     // Fantasy Game endpoints
     router.post('/createGame', async (req: Request, res: Response) => {
 
-        console.log("createGame", req.body);
         const { user, gameType, countAgainstRecord, secondsPerPick, tournamentCt, isSeason, tournamentSize } = req.body;
 
 
@@ -83,7 +85,7 @@ export function fantasyRouter(
     // Real-time game updates via Server-Sent Events
     router.get('/getGameLive/:gameId', async (req: Request, res: Response) => {
         const { gameId } = req.params;
-        
+        console.log("getting game live: ", gameId);
         // Set up SSE headers
         res.writeHead(200, {
             'Content-Type': 'text/event-stream',
@@ -102,8 +104,11 @@ export function fantasyRouter(
         // Send initial game data
         try {
             const game = await fantasyService.getFantasyGame(gameId);
-            res.write(`data: ${JSON.stringify({ type: 'gameUpdate', data: game })}\n\n`);
+            const draftPicks = await draftPickService.getFantasyDraftPicks(gameId);
+            console.log("sending initial game data with status: ", game.status);
+            res.write(`data: ${JSON.stringify({ type: 'gameUpdate', data: {game, draftPicks} })}\n\n`);
         } catch (error) {
+            console.log("error fetching game data: ", error);
             res.write(`data: ${JSON.stringify({ type: 'error', message: 'Failed to fetch game data' })}\n\n`);
         }
 
@@ -113,17 +118,21 @@ export function fantasyRouter(
                 res.write(': keepalive\n\n');
             } catch (error) {
                 // Connection is dead, clean up
+                console.log("connection is dead, cleaning up");
                 cleanupConnection(gameId, res, keepAlive);
             }
         }, 30000);
 
         // Handle client disconnect
         req.on('close', () => {
+            console.log("connection closed, cleaning up");
             cleanupConnection(gameId, res, keepAlive);
         });
 
         // Handle connection errors
-        req.on('error', () => {
+        req.on('error', (err) => {
+            console.log("connection error: ", err);
+            console.log("connection error, cleaning up");
             cleanupConnection(gameId, res, keepAlive);
         });
     });
@@ -132,30 +141,37 @@ export function fantasyRouter(
         const { gameId } = req.params;
         const { state, users } = req.body;
 
-        if (!state || typeof state !== 'string' || !['draft', 'complete'].includes(state)) {
-            return res.status(400).send('Invalid state. Must be one of: draft, complete');
+        console.log("updateGameState", gameId, state, users);
+
+        if (!state || typeof state !== 'string' || !['draft', 'complete', 'stage-draft'].includes(state)) {
+            return res.status(400).send('Invalid state. Must be one of: draft, complete, stage-draft');
         }
 
-        if(state === 'draft' && !users) {
-            return res.status(400).send('Users are required when state is draft');
+        if(state === 'stage-draft' && !users) {
+            return res.status(400).send('Users are required when state is stage-draft');
         }
 
-        const result = await fantasyService.updateFantasyGameState(gameId, state as 'draft' | 'complete', users);
         if(state === 'draft') {
-            const result2 = await draftPickService.runAutoDraftPicks(gameId, -1);
+            const autoDraftResult = await draftPickService.runAutoDraftPicks(gameId, -1);
         }
-        const updatedGame = await fantasyService.getFantasyGame(gameId);
+        const result = await fantasyService.updateFantasyGameState(gameId, state as 'stage-draft' | 'draft' | 'complete', users);
+
+        const game = await fantasyService.getFantasyGame(gameId);
+        console.log("game status: ", game);
+        const draftPicks = await draftPickService.getFantasyDraftPicks(gameId);
+        
 
         const connections = activeConnections.get(gameId);
         try {
             if (connections) {
                 connections.forEach(res => {
-                    res.write(`data: ${JSON.stringify({ type: 'gameUpdate', data: updatedGame })}\n\n`);
-                    res.end();
+                    res.write(`data: ${JSON.stringify({ type: 'gameUpdate', data: {game, draftPicks} })}\n\n`);
+                    // res.end();
                 });
-                setTimeout(() => {
-                    activeConnections.delete(gameId);
-                }, 5000)
+                console.log("finished writing update"); 
+                // setTimeout(() => {
+                //     activeConnections.delete(gameId);
+                // }, 5000)
             }
         } catch (error) {
             console.error('Failed to broadcast game update:', error);
@@ -163,6 +179,58 @@ export function fantasyRouter(
 
         res.status(200).send(result);
     });
+
+    router.post('/insertDraftPick', async (req: Request, res: Response) => {
+        const draftPick: FantasyDraftPick = req.body;
+        
+        if (!draftPick.gameId || !draftPick.user || typeof draftPick.draftPick !== 'number' || !draftPick.contestSummaryKey) {
+            return res.status(400).send('Missing required fields: gameId, user, draftPick, contestSummaryKey');
+        }
+        console.log("draftPick to insert", draftPick);
+
+
+        var insertDraftPickResult: InsertOneResult;
+        try {
+            insertDraftPickResult = await draftPickService.insertDraftPick(draftPick);
+        } catch (error) {
+            console.error('Failed to insert draft pick:', error);
+            broadcastToGame(draftPick.gameId, { type: 'error', message: 'Failed to insert draft pick' });
+            return res.status(500).send('Failed to insert draft pick'); 
+        }
+
+        var autodraftResult: {autoDraftPicks: FantasyDraftPick[]};
+
+        try {
+            autodraftResult = await draftPickService.runAutoDraftPicks(draftPick.gameId, draftPick.draftPick); 
+        } catch (error) {
+            console.error('Failed to run auto draft picks:', error);
+            broadcastToGame(draftPick.gameId, { type: 'error', message: 'Failed to run auto draft picks' });
+            return res.status(500).send('Failed to run auto draft picks'); 
+        }
+
+        var game: FantasyGame;
+        var updatedDraftPicks: FantasyDraftPick[];
+
+        try {
+            game = await fantasyService.getFantasyGame(draftPick.gameId);
+            updatedDraftPicks = await draftPickService.getFantasyDraftPicks(draftPick.gameId);
+            const picksNeeded = game.gameType === 'one-team' ? 1 : 8 * game.users.length;
+            const picksMade = updatedDraftPicks.length;
+            if(picksMade >= picksNeeded) {
+                const result3 = await fantasyService.updateFantasyGameState(draftPick.gameId, 'complete');
+                game = await fantasyService.getFantasyGame(draftPick.gameId);
+            }
+            console.log("broadcasting game update, pick length", updatedDraftPicks.length);
+            broadcastToGame(draftPick.gameId, { type: 'gameUpdate', data: {game, draftPicks: updatedDraftPicks} });
+        } catch (error) {
+            console.error('Failed to get fantasy game or draft picks:', error);
+            broadcastToGame(draftPick.gameId, { type: 'error', message: 'Failed to get fantasy game or draft picks' });
+            return res.status(500).send('Failed to get fantasy game or draft picks'); 
+        }
+
+        res.status(201).send({insertDraftPickResult, autodraftResult});
+    });
+
 
 
     router.get('/getGames/:user', async (req: Request, res: Response) => {
@@ -187,7 +255,7 @@ export function fantasyRouter(
         // Broadcast game update to all connected clients
         try {
             const updatedGame = await fantasyService.getFantasyGame(gameId);
-            broadcastToGame(gameId, { type: 'gameUpdate', data: updatedGame });
+            broadcastToGame(gameId, { type: 'gameUpdate', data: {game: updatedGame} });
         } catch (error) {
             console.error('Failed to broadcast game update:', error);
         }
@@ -206,76 +274,6 @@ export function fantasyRouter(
         const { gameId } = req.params;
         const draftPicks = await draftPickService.getFantasyDraftPicks(gameId);
         res.status(200).send(draftPicks);
-    });
-
-    // Real-time draft picks via Server-Sent Events
-    router.get('/getDraftPicksLive/:gameId', async (req: Request, res: Response) => {
-        const { gameId } = req.params;
-        
-        // Set up SSE headers
-        res.writeHead(200, {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': 'Cache-Control'
-        });
-
-        // Add this connection to the active connections
-        if (!activeConnections.has(gameId)) {
-            activeConnections.set(gameId, new Set());
-        }
-        activeConnections.get(gameId)!.add(res);
-
-        // Send initial draft picks data
-        try {
-            const draftPicks = await draftPickService.getFantasyDraftPicks(gameId);
-            res.write(`data: ${JSON.stringify({ type: 'draftPicksUpdate', data: draftPicks })}\n\n`);
-        } catch (error) {
-            res.write(`data: ${JSON.stringify({ type: 'error', message: 'Failed to fetch draft picks' })}\n\n`);
-        }
-
-        // Keep connection alive
-        const keepAlive = setInterval(() => {
-            try {
-                res.write(': keepalive\n\n');
-            } catch (error) {
-                // Connection is dead, clean up
-                cleanupConnection(gameId, res, keepAlive);
-            }
-        }, 30000);
-
-        // Handle client disconnect
-        req.on('close', () => {
-            cleanupConnection(gameId, res, keepAlive);
-        });
-
-        // Handle connection errors
-        req.on('error', () => {
-            cleanupConnection(gameId, res, keepAlive);
-        });
-    });
-
-    router.post('/insertDraftPick', async (req: Request, res: Response) => {
-        const draftPick: FantasyDraftPick = req.body;
-        
-        if (!draftPick.gameId || !draftPick.user || typeof draftPick.draftPick !== 'number' || !draftPick.contestSummaryKey) {
-            return res.status(400).send('Missing required fields: gameId, user, draftPick, contestSummaryKey');
-        }
-
-        const result = await draftPickService.insertDraftPick(draftPick);
-
-        const result2 = await draftPickService.runAutoDraftPicks(draftPick.gameId, draftPick.draftPick); 
-        
-        // Broadcast draft picks update to all connected clients
-        try {
-            const updatedDraftPicks = await draftPickService.getFantasyDraftPicks(draftPick.gameId);
-            broadcastToGame(draftPick.gameId, { type: 'draftPicksUpdate', data: updatedDraftPicks });
-        } catch (error) {
-            console.error('Failed to broadcast draft picks update:', error);
-        }
-        
-        res.status(201).send({result, result2});
     });
 
     router.delete('/deleteDraftPicks/:gameId', async (req: Request, res: Response) => {
