@@ -5,6 +5,7 @@ import FantasyService from '../dataService/fantasyService';
 import FantasyDraftPickService from '../dataService/fantasyDraftPickService';
 import FantasyGameHistoryService from '../dataService/fantasyGameHistoryService';
 import { InsertOneResult } from 'mongodb';
+import { awsCognitoAuthMiddleware, requireRole, requireGroup } from './awsCognitoMdw';
 
 export function fantasyRouter(
     fantasyGameDataSource: FantasyGameMethods,
@@ -55,13 +56,14 @@ export function fantasyRouter(
     };
 
     // Fantasy Game endpoints
-    router.post('/createGame', async (req: Request, res: Response) => {
+    router.post('/createGame', awsCognitoAuthMiddleware, async (req: Request, res: Response) => {
+        const user = req.user?.email as string; 
+        const { gameType, countAgainstRecord, secondsPerPick, tournamentCt, isSeason, tournamentSize } = req.body;
+        console.log("req.user: ", req.user);
 
-        const { user, gameType, countAgainstRecord, secondsPerPick, tournamentCt, isSeason, tournamentSize } = req.body;
-
-
-        if (!user || !gameType || typeof countAgainstRecord !== 'boolean' || typeof isSeason !== 'boolean') {
-            return res.status(400).send('Missing required fields: user, gameType, countAgainstRecord, isSeason');
+        console.log("user: ", user);
+        if (!gameType || typeof countAgainstRecord !== 'boolean' || typeof isSeason !== 'boolean') {
+            return res.status(400).send('Missing required fields: gameType, countAgainstRecord, isSeason');
         }
 
         if (!['one-team', '8-team', '8-team-no-repeat'].includes(gameType)) {
