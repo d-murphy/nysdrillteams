@@ -23,6 +23,7 @@ class FantasyGameDb implements FantasyGameMethods {
         tournamentCt: number, 
         users: string[],
         simulationIndex: number[],
+        name: string
     ): Promise<FantasyGame> {
         const newGame: FantasyGame = {
             gameId: gameId,
@@ -32,7 +33,9 @@ class FantasyGameDb implements FantasyGameMethods {
             users: users,
             simulationIndex: simulationIndex,
             secondsPerPick: secondsPerPick,
-            tournamentCt: tournamentCt
+            tournamentCt: tournamentCt,
+            created: new Date(), 
+            name: name
         };
         
         await this._dbCollection.insertOne(newGame);
@@ -72,4 +75,11 @@ class FantasyGameDb implements FantasyGameMethods {
         return (this._dbCollection.find(query).skip(offset).limit(limit).toArray() as unknown as FantasyGame[]);
     }
 
+    async getOpenFantasyGames(limit: number, offset: number, state: 'stage' | 'stage-draft' | 'draft' | 'complete'): Promise<FantasyGame[]> {
+        const query = { 
+            status: state, 
+            created: { $gt: new Date(Date.now() - 1000 * 60 * 60 * 6) }
+        };
+        return (this._dbCollection.find(query).skip(offset).limit(limit).toArray() as unknown as FantasyGame[]);
+    }
 }

@@ -71,6 +71,7 @@ class FantasyDraftPickService {
             const contestsComplete = picksForUser.map(pick => pick.contestSummaryKey.split("|")[2]);
             const remainingContests = contests.filter(contest => !contestsComplete.includes(contest));
             const randomContest = remainingContests[Math.floor(Math.random() * remainingContests.length)];
+
             const autoDraftNumber = nextPick.split("-")[1];
             const draftStrategyType = parseInt(autoDraftNumber) % 4;
             const draftStrategy = draftStrategyType === 3 ? 
@@ -87,6 +88,9 @@ class FantasyDraftPickService {
                 [randomContest], draftStrategy, 2, 0, undefined, undefined, 
                 teamContestKeyArrToExclude, keysToExclude
             );
+            if(!options.length) {
+                throw new Error("Auto draft - No options found");
+            }
             const draftChoice = options[Math.floor(Math.random() * options.length)];
             // console.log("autodraft - draftChoice", draftChoice);
             const draftPick = {

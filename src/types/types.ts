@@ -334,6 +334,8 @@ export type FantasyGame = {
     users: string[], 
     simulationIndex: number[], 
     secondsPerPick: number
+    created: Date,
+    name: string, 
 }
 
 export type FantasyGameMethods = {
@@ -343,12 +345,14 @@ export type FantasyGameMethods = {
         tournamentCt: number, 
         users: string[],
         simulationIndex: number[],
+        name: string
     ): Promise<FantasyGame>
     deleteFantasyGame(gameId: string): Promise<DeleteResult>
     addUsersToFantasyGame(gameId: string, user: string[]): Promise<UpdateResult>
     updateFantasyGameState(gameId: string, state: 'stage-draft' | 'draft' | 'complete', users?: string[]): Promise<UpdateResult>
     getFantasyGame(gameId: string): Promise<FantasyGame>
     getFantasyGames(user: string, limit: number, offset: number): Promise<FantasyGame[]>
+    getOpenFantasyGames(limit: number, offset: number, state?: 'stage' | 'stage-draft' | 'draft' | 'complete'): Promise<FantasyGame[]>
 }
 
 export type FantasyDraftPickMethods = {
@@ -362,6 +366,7 @@ export type FantasyGameHistoryMethods = {
     insertGameHistory(gameHistory: FantasyGameHistory): Promise<InsertOneResult>
     getGameHistoryByGameId(gameId: string): Promise<FantasyGameHistory[]>
     deleteFantasyGame(gameId: string): Promise<DeleteResult>
+    getMostGamesPlayed(limit: number, offset: number): Promise<{user: string, gameCount: number}[]>
 }
 
 export type FantasyDraftPick = {
@@ -387,7 +392,6 @@ export type FantasyGameHistory = {
     // _id: ObjectId,
     gameId: string, 
     user: string, 
-    teamName: string, 
     contestSummaryKeys: string[]
     gameType: 'one-team' | '8-team' | '8-team-no-repeat'
     win: boolean, 

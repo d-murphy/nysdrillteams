@@ -58,10 +58,10 @@ export function fantasyRouter(
     // Fantasy Game endpoints
     router.post('/createGame', awsCognitoAuthMiddleware, async (req: Request, res: Response) => {
         const user = req.user?.email as string; 
-        const { gameType, countAgainstRecord, secondsPerPick, tournamentCt, isSeason, tournamentSize } = req.body;
-        console.log("req.user: ", req.user);
+        const { gameType, countAgainstRecord, secondsPerPick, tournamentCt, isSeason, tournamentSize, name } = req.body;
 
-        console.log("user: ", user);
+        console.log("req.user: ", user);
+
         if (!gameType || typeof countAgainstRecord !== 'boolean' || typeof isSeason !== 'boolean') {
             return res.status(400).send('Missing required fields: gameType, countAgainstRecord, isSeason');
         }
@@ -69,12 +69,15 @@ export function fantasyRouter(
         if (!['one-team', '8-team', '8-team-no-repeat'].includes(gameType)) {
             return res.status(400).send('Invalid gameType. Must be one of: one-team, 8-team, 8-team-no-repeat');
         }
+        if(user.toLowerCase()?.startsWith("autodraft")) {
+            return res.status(400).send('Invalid user. Must be a real user');
+        }
 
         let finalSecondsPerPick = secondsPerPick || 30;
         let finalTournamentCt = tournamentCt || 12;
         let finalTournamentSize = tournamentSize || 50;
 
-        const game = await fantasyService.createFantasyGame(user, gameType, countAgainstRecord, finalSecondsPerPick, finalTournamentCt, isSeason, finalTournamentSize);
+        const game = await fantasyService.createFantasyGame(user, gameType, countAgainstRecord, finalSecondsPerPick, finalTournamentCt, isSeason, finalTournamentSize, name);
         res.status(201).send(game);
     });
 
@@ -139,7 +142,7 @@ export function fantasyRouter(
         });
     });
 
-    router.put('/updateGameState/:gameId', async (req: Request, res: Response) => {
+    router.put('/updateGameState/:gameId', awsCognitoAuthMiddleware, async (req: Request, res: Response) => {
         const { gameId } = req.params;
         const { state, users } = req.body;
 
@@ -182,11 +185,13 @@ export function fantasyRouter(
         res.status(200).send(result);
     });
 
-    router.post('/insertDraftPick', async (req: Request, res: Response) => {
+    router.post('/insertDraftPick', awsCognitoAuthMiddleware, async (req: Request, res: Response) => {
         const draftPick: FantasyDraftPick = req.body;
-        
-        if (!draftPick.gameId || !draftPick.user || typeof draftPick.draftPick !== 'number' || !draftPick.contestSummaryKey) {
-            return res.status(400).send('Missing required fields: gameId, user, draftPick, contestSummaryKey');
+        const user = req.user?.email as string; 
+        draftPick.user = user;
+
+        if (!draftPick.gameId || typeof draftPick.draftPick !== 'number' || !draftPick.contestSummaryKey) {
+            return res.status(400).send('Missing required fields: gameId, draftPick, contestSummaryKey');
         }
         console.log("draftPick to insert", draftPick);
 
@@ -244,12 +249,21 @@ export function fantasyRouter(
         res.status(200).send(games);
     });
 
-    router.put('/addUsers/:gameId', async (req: Request, res: Response) => {
+    router.put('/addUsers/:gameId', awsCognitoAuthMiddleware, async (req: Request, res: Response) => {
         const { gameId } = req.params;
         const { users } = req.body;
+        const user = req.user?.email as string; 
         
         if (!Array.isArray(users)) {
             return res.status(400).send('Users must be an array');
+        }
+
+        if(!users.includes(user)) {
+            return res.status(400).send('User is not in users array');
+        }
+
+        if(user.toLowerCase()?.startsWith("autodraft")) {
+            return res.status(400).send('Invalid user. Must be a real user');
         }
 
         const result = await fantasyService.addUsersToFantasyGame(gameId, users);
@@ -265,8 +279,22 @@ export function fantasyRouter(
         res.status(200).send(result);
     });
 
-    router.delete('/deleteGame/:gameId', async (req: Request, res: Response) => {
+    router.delete('/deleteGame/:gameId', awsCognitoAuthMiddleware, requireRole('fantasy-admin'), async (req: Request, res: Response) => {
         const { gameId } = req.params;
+        const user = req.user?.email as string; 
+
+        const game = await fantasyService.getFantasyGame(gameId);
+
+        if(!game.users.includes(user)) {
+            return res.status(400).send('User is not in users array');
+        }
+
+        if(game.status === 'complete' || game.status === 'draft') {
+            return res.status(400).send('Game is complete, cannot delete');
+        }; 
+
+        await draftPickService.deleteFantasyGame(gameId);
+        await historyService.deleteFantasyGame(gameId);
         const result = await fantasyService.deleteFantasyGame(gameId);
         res.status(200).send(result);
     });
@@ -278,15 +306,9 @@ export function fantasyRouter(
         res.status(200).send(draftPicks);
     });
 
-    router.delete('/deleteDraftPicks/:gameId', async (req: Request, res: Response) => {
-        const { gameId } = req.params;
-        const result = await draftPickService.deleteFantasyGame(gameId);
-        res.status(200).send(result);
-    });
-
     // Fantasy Game History endpoints
-    router.get('/getGameHistory/:user', async (req: Request, res: Response) => {
-        const { user } = req.params;
+    router.get('/getGameHistory/:user', awsCognitoAuthMiddleware, async (req: Request, res: Response) => {
+        const user = req.user?.email as string; 
         const limit = parseInt(req.query.limit as string) || 10;
         const offset = parseInt(req.query.offset as string) || 0;
         
@@ -303,22 +325,22 @@ export function fantasyRouter(
     router.post('/insertGameHistory', async (req: Request, res: Response) => {
         const gameHistory: FantasyGameHistory = req.body;
         
-        if (!gameHistory.gameId || !gameHistory.user || !gameHistory.teamName ) {
-            return res.status(400).send('Missing required fields: gameId, user, gameType');
+        if (!gameHistory.gameId || !gameHistory.user ) {
+            return res.status(400).send('Missing required fields: gameId, user');
         }
 
         const result = await historyService.insertGameHistory(gameHistory);
         res.status(201).send(result);
     });
 
-    router.delete('/deleteGameHistory/:gameId', async (req: Request, res: Response) => {
-        const { gameId } = req.params;
-        const result = await historyService.deleteFantasyGame(gameId);
-        res.status(200).send(result);
+    router.get('/getMostGamesPlayed', async (req: Request, res: Response) => {
+        const limit: number = parseInt(req.query.limit as string); 
+        const offset: number = parseInt(req.query.offset as string); 
+        const mostGamesPlayed = await historyService.getMostGamesPlayed(limit, offset); 
+        res.status(200).send(mostGamesPlayed);
     });
 
-    // Combined operations
-    router.delete('/deleteGameAndRelated/:gameId', async (req: Request, res: Response) => {
+    router.delete('/deleteGameAndRelated/:gameId', awsCognitoAuthMiddleware, requireRole('fantasy-admin'),  async (req: Request, res: Response) => {
         const { gameId } = req.params;
         
         // Delete from all three collections
@@ -333,6 +355,19 @@ export function fantasyRouter(
             draftPicksDeleted: draftPickResult,
             historyDeleted: historyResult
         });
+    });
+
+    router.get('/getOpenFantasyGames', async (req: Request, res: Response) => {
+        var limit: number = parseInt(req.query.limit as string); 
+        var offset: number = parseInt(req.query.offset as string); 
+        const state: 'stage' | 'stage-draft' | 'draft' | 'complete' = req.query.state as 'stage' | 'stage-draft' | 'draft' | 'complete'; 
+        if(!state) {
+            return res.status(400).send('Missing required fields: state');
+        }
+        limit = limit || 10;
+        offset = offset || 0;
+        const openFantasyGames = await fantasyService.getOpenFantasyGames(limit, offset, state); 
+        res.status(200).send(openFantasyGames);
     });
 
     router.use((err: Error, req: Request, res: Response, next: NextFunction) => {

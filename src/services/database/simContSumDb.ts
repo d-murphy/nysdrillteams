@@ -53,10 +53,9 @@ class SimContSumDb implements SimulationContestSummaryMethods {
             sortObj.overallScore = -1; 
         }
 
-        // Debug: Check how many documents match before exclusions
-        const totalMatchingContest = await this._dbCollection.countDocuments({ contest: { $in: contestArr } });
-
-        const result = await (this._dbCollection.find(query).skip(offset).limit(limit).sort(sortObj).toArray() as unknown as SimulationContestSummary[]);
+        // // Debug: Check how many documents match before exclusions
+        // const totalMatchingContest = await this._dbCollection.countDocuments({ contest: { $in: contestArr } });
+        const result = (this._dbCollection.find(query).skip(offset).limit(limit).sort(sortObj).toArray() as unknown as SimulationContestSummary[]);
         
         return result;
     }

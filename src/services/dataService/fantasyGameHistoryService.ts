@@ -23,6 +23,10 @@ class FantasyGameHistoryService {
     public deleteFantasyGame(gameId: string): Promise<DeleteResult> {
         return this.fantasyGameHistoryDataSource.deleteFantasyGame(gameId); 
     }
+
+    public getMostGamesPlayed(limit: number, offset: number): Promise<{user: string, gameCount: number}[]> {
+        return this.fantasyGameHistoryDataSource.getMostGamesPlayed(limit, offset); 
+    }
 }
     
 export default FantasyGameHistoryService;

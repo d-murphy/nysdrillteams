@@ -33,4 +33,13 @@ class FantasyGameHistoryDb implements FantasyGameHistoryMethods {
         const query = { gameId: gameId };
         return (this._dbCollection.find(query).toArray() as unknown as FantasyGameHistory[]);
     }
+
+    async getMostGamesPlayed(limit: number, offset: number): Promise<{user: string, gameCount: number}[]> {
+        return (this._dbCollection.aggregate([
+            { $group: { _id: "$user", gameCount: { $sum: 1 } } },
+            { $sort: { gameCount: -1 } },
+            { $skip: offset },
+            { $limit: limit }
+        ]).toArray() as unknown as {user: string, gameCount: number}[]);
+    }
 }

@@ -14,6 +14,7 @@ class FantasyService {
         tournamentCt: number, 
         isSeason: boolean, 
         tournamentSize: number, 
+        name: string
     ): Promise<FantasyGame> {
         const gameId = `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         const users = [user, ...(new Array(tournamentSize - 1).fill("autodraft"))];
@@ -21,7 +22,7 @@ class FantasyService {
         simulationIndex = simulationIndex.map(() => Math.floor(Math.random() * 499));
         return this.fantasyGameDataSource.createFantasyGame(
             gameId, user, gameType, countAgainstRecord, secondsPerPick, 
-            tournamentCt, users, simulationIndex); 
+            tournamentCt, users, simulationIndex, name); 
     }
 
     public deleteFantasyGame(gameId: string): Promise<DeleteResult> {
@@ -45,6 +46,9 @@ class FantasyService {
         const game = await this.fantasyGameDataSource.getFantasyGame(gameId);
         const currentUsers = game.users;
         const firstAutoDraftIndex = currentUsers.map(el => el.split("-")[0]).indexOf("autodraft");
+        if(firstAutoDraftIndex === -1) {
+            return Promise.reject(new Error('No open spots found'));
+        }; 
         const newUsers = [...currentUsers.slice(0, firstAutoDraftIndex), ...users, ...currentUsers.slice(firstAutoDraftIndex + users.length)];
         return this.fantasyGameDataSource.addUsersToFantasyGame(gameId, newUsers); 
     }
@@ -55,6 +59,10 @@ class FantasyService {
 
     public getFantasyGames(user: string, limit: number, offset: number): Promise<FantasyGame[]> {
         return this.fantasyGameDataSource.getFantasyGames(user, limit, offset); 
+    }
+
+    public getOpenFantasyGames(limit: number, offset: number, state: 'stage' | 'stage-draft' | 'draft' | 'complete'): Promise<FantasyGame[]> {
+        return this.fantasyGameDataSource.getOpenFantasyGames(limit, offset, state); 
     }
 }
     
