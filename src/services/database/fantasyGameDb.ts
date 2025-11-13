@@ -48,10 +48,11 @@ class FantasyGameDb implements FantasyGameMethods {
     }
 
     async updateFantasyGameState(gameId: string, state: 'draft' | 'complete', users?: string[]): Promise<UpdateResult> {
-        const filter = { gameId: gameId };
-        const updateDoc: { $set: { status: string, users?: string[] } } = {
+        const filter = { gameId: gameId };        
+        const updateDoc: { $set: { status: string, users?: string[], completed?: Date } } = {
             $set: { status: state }
         };
+        if(state === 'complete') updateDoc.$set.completed = new Date();
         if(users) updateDoc.$set.users = users;
         return this._dbCollection.updateOne(filter, updateDoc);
     }
@@ -70,9 +71,12 @@ class FantasyGameDb implements FantasyGameMethods {
         return result;
     }
 
-    async getFantasyGames(user: string, limit: number, offset: number): Promise<FantasyGame[]> {
-        const query = { users: user };
-        return (this._dbCollection.find(query).skip(offset).limit(limit).toArray() as unknown as FantasyGame[]);
+    async getFantasyGames(user: string | null, state: 'stage' | 'stage-draft' | 'draft' | 'complete' | null, limit: number, offset: number): Promise<FantasyGame[]> {
+        const query: { users?: string, status?: 'stage' | 'stage-draft' | 'draft' | 'complete' } = {};
+        if(user) query.users = user;
+        if(state) query.status = state;
+        const sort: { [key: string]: 1 | -1 } = { created: -1 };
+        return (this._dbCollection.find(query).skip(offset).limit(limit).sort(sort).toArray() as unknown as FantasyGame[]);
     }
 
     async getOpenFantasyGames(limit: number, offset: number, state: 'stage' | 'stage-draft' | 'draft' | 'complete'): Promise<FantasyGame[]> {

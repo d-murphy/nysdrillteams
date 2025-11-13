@@ -36,6 +36,10 @@ import { fantasyRouter } from './services/controllers/fantasyController';
 import { fantasyGameDbFactory } from './services/database/fantasyGameDb';
 import { fantasyDraftPickDbFactory } from './services/database/fantasyDraftPickDb';
 import { fantasyGameHistoryDbFactory } from './services/database/fantasyGameHistoryDb';
+import { simulationRunRouter } from './services/controllers/simulationRunController';
+import { simulationRunDbFactory } from './services/database/simulationRunDb';
+import { fantasyNameRouter } from './services/controllers/fantasyNameController';
+import { fantasyNameDbFactory } from './services/database/fantasyNameDb';
 
 dotenv.config(); 
 let { PORT, DB_NAME, dbUn, dbPass, keyLocation, certLocation } = process.env; 
@@ -79,7 +83,9 @@ var credentials = {key: privateKey, cert: certificate};
     let simContSumData = await simContSumDbFactory(dbPromise, 'simulation-contest-summary'); 
     let fantasyGameData = await fantasyGameDbFactory(dbPromise, 'simulation-fantasy-games'); 
     let fantasyPickData = await fantasyDraftPickDbFactory(dbPromise, 'simulation-fantasy-draft-picks'); 
-    let fantasyGameHistoryData = await fantasyGameHistoryDbFactory(dbPromise, 'simulation-fantasy-game-history'); 
+    let fantasyGameHistoryData = await fantasyGameHistoryDbFactory(dbPromise, 'simulation-fantasy-game-history');
+    let simulationRunData = await simulationRunDbFactory(dbPromise, 'simulation-runs');
+    let fantasyNameData = await fantasyNameDbFactory(dbPromise, 'simulation-fantasy-name-suggestions', 'simulation-fantasy-players'); 
     if(runsData) app.use('/runs', runsRouter(runsData, sessionAdmin)); 
     if(teamsData) app.use('/teams', teamsRouter(teamsData, sessionAdmin));
     if(tournamentsData) app.use('/tournaments', tournamentsRouter(tournamentsData, sessionAdmin));  
@@ -90,7 +96,9 @@ var credentials = {key: privateKey, cert: certificate};
     if(imageMethods) app.use('/images', makeImagesRouter(imageMethods, sessionAdmin))
     if(projectionData) app.use('/projections', projectionRouter(projectionData))
     if(simContSumData) app.use('/simContSum', simContSumRouter(simContSumData))
-    if(fantasyGameData && fantasyPickData && fantasyGameHistoryData && simContSumData) app.use('/fantasy', fantasyRouter(fantasyGameData, fantasyPickData, fantasyGameHistoryData, simContSumData))
+    if(fantasyGameData && fantasyPickData && fantasyGameHistoryData && simContSumData && simulationRunData) app.use('/fantasy', fantasyRouter(fantasyGameData, fantasyPickData, fantasyGameHistoryData, simContSumData, simulationRunData))
+    if(simulationRunData) app.use('/simulationRuns', simulationRunRouter(simulationRunData))
+    if(fantasyNameData) app.use('/fantasyNames', fantasyNameRouter(fantasyNameData))
 
     app.use("/announcements", announcementRouter(sessionAdmin))
 

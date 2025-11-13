@@ -335,6 +335,7 @@ export type FantasyGame = {
     simulationIndex: number[], 
     secondsPerPick: number
     created: Date,
+    completed?: Date,
     name: string, 
 }
 
@@ -351,7 +352,7 @@ export type FantasyGameMethods = {
     addUsersToFantasyGame(gameId: string, user: string[]): Promise<UpdateResult>
     updateFantasyGameState(gameId: string, state: 'stage-draft' | 'draft' | 'complete', users?: string[]): Promise<UpdateResult>
     getFantasyGame(gameId: string): Promise<FantasyGame>
-    getFantasyGames(user: string, limit: number, offset: number): Promise<FantasyGame[]>
+    getFantasyGames(user: string | null, state: 'stage' | 'stage-draft' | 'draft' | 'complete' | null, limit: number, offset: number): Promise<FantasyGame[]>
     getOpenFantasyGames(limit: number, offset: number, state?: 'stage' | 'stage-draft' | 'draft' | 'complete'): Promise<FantasyGame[]>
 }
 
@@ -398,4 +399,36 @@ export type FantasyGameHistory = {
     top5: boolean, 
     finish: number, 
     participantCount: number, 
+    points: number
+    displayAfter: Date
+}
+
+export type SimulationRun = {
+    key: string, 
+    finalRun: number
+}
+
+export type SimulationRunMethods = {
+    getSimulationRuns(keys: string[]): Promise<SimulationRun[]>
+}
+
+
+export type FantasyName = {
+    email: string, 
+    town: string, 
+    name: string
+}
+
+export type FantasyNameSuggestion = {
+    name: string, 
+    type: 'town' | 'team'
+}
+
+export type FantasyNameMethods = {
+    getFantasyTeamNames(emails: string[]): Promise<FantasyName[]>
+    getRandomFantasyTeamTown(): Promise<string>
+    isFantasyTeamNameAvailable(town: string, name: string): Promise<boolean>
+    upsertFantasyTeamName(email: string, town: string, name: string): Promise<UpdateResult>
+    getFantasyTeamTowns(searchString: string, limit: number, offset: number): Promise<string[]>
+    getTeamNameSuggestions(town: string, limit: number, offset: number): Promise<string[]>
 }

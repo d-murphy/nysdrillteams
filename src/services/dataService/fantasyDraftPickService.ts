@@ -35,7 +35,8 @@ class FantasyDraftPickService {
     public async runAutoDraftPicks(gameId: string, lastPickIndex: number): Promise<{autoDraftPicks: FantasyDraftPick[]}> {
 
         const contests = ["Three Man Ladder", "B Ladder", "C Ladder", "C Hose", "B Hose", "Efficiency", "Motor Pump", "Buckets"]
-        const sortCols = ["consistency", "speedRating", "overallScore"];
+        // const sortCols = ["consistency", "speedRating", "overallScore"];
+        const sortCols = ["speedRating", "overallScore"];
 
         const nextPickIndex = lastPickIndex + 1;
         const game = await this.fantasyGameDataSource.getFantasyGame(gameId);
@@ -53,10 +54,15 @@ class FantasyDraftPickService {
         const listFromNextPick = draftOrder.slice(nextPickIndex);
         const firstNonAutoDraftPickIndex = listFromNextPick.findIndex(pick => pick.split("-")[0] !== 'autodraft');
 
+        // const picksToMake = firstNonAutoDraftPickIndex === 0 ? [] : 
+        //     firstNonAutoDraftPickIndex === -1 ? listFromNextPick :
+        //     listFromNextPick.slice(0, firstNonAutoDraftPickIndex);
+
+
+        // adjusting this only do 1 pick at a time. 
         const picksToMake = firstNonAutoDraftPickIndex === 0 ? [] : 
-            firstNonAutoDraftPickIndex === -1 ? listFromNextPick :
-            listFromNextPick.slice(0, firstNonAutoDraftPickIndex);
-        console.log("autodraft - picksToMake", picksToMake);
+            listFromNextPick.slice(0, 1);
+
 
         if(picksToMake.length === 0) return {autoDraftPicks: []}; 
 
@@ -72,11 +78,7 @@ class FantasyDraftPickService {
             const remainingContests = contests.filter(contest => !contestsComplete.includes(contest));
             const randomContest = remainingContests[Math.floor(Math.random() * remainingContests.length)];
 
-            const autoDraftNumber = nextPick.split("-")[1];
-            const draftStrategyType = parseInt(autoDraftNumber) % 4;
-            const draftStrategy = draftStrategyType === 3 ? 
-                sortCols[Math.floor(Math.random() * sortCols.length)] : 
-                sortCols[draftStrategyType];
+            const draftStrategy = sortCols[Math.floor(Math.random() * sortCols.length)] 
             const teamContestKeyArrToExclude = isNoRepeat ? picksForUser.map(pick => {
                 const [team, year, contest] = pick.contestSummaryKey.split("|");
                 return `${team}|${contest}`;
@@ -85,7 +87,7 @@ class FantasyDraftPickService {
 
             const keysToExclude = currentPicks.map(pick => pick.contestSummaryKey);
             const options = await this.contestSummaryDataSource.getTopSimulationContestSummaries(
-                [randomContest], draftStrategy, 2, 0, undefined, undefined, 
+                [randomContest], draftStrategy, 5, 0, undefined, undefined, 
                 teamContestKeyArrToExclude, keysToExclude
             );
             if(!options.length) {
@@ -103,13 +105,8 @@ class FantasyDraftPickService {
             currentPicks.push(draftPick);
             await this.fantasyDraftPickDataSource.insertDraftPick(draftPick);
         }
-
-        console.log("autodraft - autoDraftPicks length", autoDraftPicks.length);
         //@ts-ignore
         return {autoDraftPicks}; 
-
-
-
     }
 }
     

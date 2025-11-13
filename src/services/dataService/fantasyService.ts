@@ -57,8 +57,8 @@ class FantasyService {
         return this.fantasyGameDataSource.getFantasyGame(gameId); 
     }
 
-    public getFantasyGames(user: string, limit: number, offset: number): Promise<FantasyGame[]> {
-        return this.fantasyGameDataSource.getFantasyGames(user, limit, offset); 
+    public getFantasyGames(user: string | null, state: 'stage' | 'stage-draft' | 'draft' | 'complete' | null, limit: number, offset: number): Promise<FantasyGame[]> {
+        return this.fantasyGameDataSource.getFantasyGames(user, state, limit, offset); 
     }
 
     public getOpenFantasyGames(limit: number, offset: number, state: 'stage' | 'stage-draft' | 'draft' | 'complete'): Promise<FantasyGame[]> {
