@@ -19,9 +19,9 @@ class FantasyNameDb implements FantasyNameMethods {
         this._playersCollection = playersCollection;
     }
     
-    async getFantasyTeamNames(emails: string[]): Promise<FantasyName[]> {
+    async getFantasyTeamNames(emails: string[]): Promise<Omit<FantasyName, 'accessCode'>[]> {
         const query = { email: { $in: emails } };
-        return (this._playersCollection.find(query).toArray() as unknown as FantasyName[]);
+        return (this._playersCollection.find(query).project({ accessCode: 0 }).toArray() as unknown as FantasyName[]);
     }
 
     async isFantasyTeamNameAvailable(town: string, name: string): Promise<boolean> {
@@ -104,5 +104,12 @@ class FantasyNameDb implements FantasyNameMethods {
         ];
                 
         return allResults.slice(0, limit);
+    }
+
+    async setCodeUsed(email: string, accessCode: string): Promise<boolean> {
+        const filter = { email: email, accessCode: accessCode };
+        const update = { $set: { codeUsed: true } };
+        const result = await this._playersCollection.updateOne(filter, update);
+        return result.modifiedCount > 0;
     }
 }

@@ -23,7 +23,7 @@ class FantasyNameService {
             newTeamName = {
                 email: email,
                 town: townName,
-                name: teamName
+                name: teamName, 
             }
         }
         await this.dataSource.upsertFantasyTeamName(email, newTeamName.town, newTeamName.name); 
@@ -52,6 +52,10 @@ class FantasyNameService {
         const validOffset = Math.max(offset, 0); // At least 0
         
         return this.dataSource.getTeamNameSuggestions(town, validLimit, validOffset); 
+    }
+
+    public setCodeUsed(email: string, accessCode: string): Promise<boolean> {
+        return this.dataSource.setCodeUsed(email, accessCode); 
     }
 }
     

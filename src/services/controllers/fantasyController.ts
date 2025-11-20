@@ -29,12 +29,10 @@ export function fantasyRouter(
     // Helper function to broadcast updates to all connected clients for a game
     const broadcastToGame = (gameId: string, message: any) => {
         const connections = activeConnections.get(gameId);
-        console.log("number of connections: ", connections?.size);
         if (connections) {
             const messageStr = `data: ${JSON.stringify(message)}\n\n`;
             connections.forEach(res => {
                 try {
-                    console.log("broadcasting to connection"); 
                     res.write(messageStr); 
                 } catch (error) {
                     // Remove dead connections
@@ -49,7 +47,6 @@ export function fantasyRouter(
         if (keepAlive) {
             clearInterval(keepAlive);
         }
-        console.log("cleaning up connection");
         const connections = activeConnections.get(gameId);
         if (connections) {
             connections.delete(res);
@@ -63,8 +60,6 @@ export function fantasyRouter(
     router.post('/createGame', awsCognitoAuthMiddleware, async (req: Request, res: Response) => {
         const user = req.user?.email as string; 
         const { gameType, countAgainstRecord, secondsPerPick, tournamentCt, isSeason, tournamentSize, name } = req.body;
-
-        console.log("req.user: ", user);
 
         if (!gameType || typeof countAgainstRecord !== 'boolean' || typeof isSeason !== 'boolean') {
             return res.status(400).send('Missing required fields: gameType, countAgainstRecord, isSeason');
@@ -124,7 +119,6 @@ export function fantasyRouter(
                 const historiesAndFinishes = historyService.calculateFantasyGameHistory(draftPicks, game, runs);
                 dataToBroadcast.totalPointsWFinish = historiesAndFinishes.totalPointsWFinish;
             }
-            console.log("sending initial game data with status: ", game.status);
             res.write(`data: ${JSON.stringify({ type: 'gameUpdate', data: dataToBroadcast })}\n\n`);
         } catch (error) {
             console.log("error fetching game data: ", error);
@@ -151,7 +145,6 @@ export function fantasyRouter(
         // Handle connection errors
         req.on('error', (err) => {
             console.log("connection error: ", err);
-            console.log("connection error, cleaning up");
             cleanupConnection(gameId, res, keepAlive);
         });
     });

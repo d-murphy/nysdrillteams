@@ -115,8 +115,6 @@ export function awsCognitoAuthMiddleware(req: Request, res: Response, next: Next
             'cognito:groups': idTokenPayload['cognito:groups'] as string[] | undefined,
             'custom:role': idTokenPayload['custom:role'] as string | undefined
         };
-
-        console.log("req.user: ", req.user);
         req.accessToken = accessToken;
         req.idToken = idToken;
         

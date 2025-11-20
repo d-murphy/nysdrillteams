@@ -33,8 +33,8 @@ export function fantasyNameRouter(fantasyNameDataSource: FantasyNameMethods) {
 
     router.post('/getFantasyTeamNamePossiblyNew', awsCognitoAuthMiddleware, async (req: Request, res: Response) => {
         const { email } = req.body;
-        const teamName = await fantasyNameService.getFantasyTeamNamePossiblyNew(email);
-        res.status(200).send(teamName);
+        const teamInfo = await fantasyNameService.getFantasyTeamNamePossiblyNew(email);
+        res.status(200).send(teamInfo);
     });
 
     // Check if a fantasy team name is available
@@ -108,6 +108,19 @@ export function fantasyNameRouter(fantasyNameDataSource: FantasyNameMethods) {
 
         const suggestions = await fantasyNameService.getTeamNameSuggestions(town as string, limit, offset);
         res.status(200).send(suggestions);
+    });
+
+    router.post('/setCodeUsed', awsCognitoAuthMiddleware, async (req: Request, res: Response) => {
+        const { email, accessCode } = req.body;
+        const result = await fantasyNameService.setCodeUsed(email as string, accessCode as string);
+        if(result) {
+            return res.status(200).send({ message: 'Code used successfully' });
+        } else {
+            return res.status(400).json({ 
+                error: 'Bad Request', 
+                message: 'Invalid access code' 
+            });
+        }
     });
 
     router.use((err: Error, req: Request, res: Response, next: NextFunction) => {

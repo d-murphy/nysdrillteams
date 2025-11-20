@@ -23,7 +23,6 @@ class HistoryDb implements HistoryData{
         this._collectionName = collectionName; 
     }
     async insertHistories(teamHistories: {team: string, histories: TeamTournHistory[]}[]): Promise<boolean> {
-        console.log("Starting write to temp histories db"); 
         let result = await this._tempDbCollection.insertMany(teamHistories as unknown as Document[]); 
         console.log("Temp histories db write successful.  Starting rename."); 
         const renameResult = await this._tempDbCollection.rename(this._collectionName, {dropTarget: true})

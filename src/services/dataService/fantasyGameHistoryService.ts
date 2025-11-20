@@ -55,7 +55,6 @@ class FantasyGameHistoryService {
             return { user, points } 
         });
         const totalPointsWFinish: TotalPointsWFinish[] = assignFinish<{user: string, points: number}>(totalPointsArray, "points", true, [1,2,3,4,5]);
-        console.log("totalPointsWFinish", totalPointsWFinish);
         totalPointsWFinish.forEach(el => {
             if(el.user && !el.user.startsWith("autodraft")) {
                 fantasyGameHistory.push({

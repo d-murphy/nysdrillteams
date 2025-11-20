@@ -416,8 +416,12 @@ export type SimulationRunMethods = {
 export type FantasyName = {
     email: string, 
     town: string, 
-    name: string
+    name: string, 
+    accessCode?: string, 
+    codeUsed?: boolean, 
 }
+
+export type FantasyNameNoAccessCode = Omit<FantasyName, 'accessCode'>;
 
 export type FantasyNameSuggestion = {
     name: string, 
@@ -425,10 +429,11 @@ export type FantasyNameSuggestion = {
 }
 
 export type FantasyNameMethods = {
-    getFantasyTeamNames(emails: string[]): Promise<FantasyName[]>
+    getFantasyTeamNames(emails: string[]): Promise<FantasyNameNoAccessCode[]>
     getRandomFantasyTeamTown(): Promise<string>
     isFantasyTeamNameAvailable(town: string, name: string): Promise<boolean>
     upsertFantasyTeamName(email: string, town: string, name: string): Promise<UpdateResult>
     getFantasyTeamTowns(searchString: string, limit: number, offset: number): Promise<string[]>
     getTeamNameSuggestions(town: string, limit: number, offset: number): Promise<string[]>
+    setCodeUsed(email: string, accessCode: string): Promise<boolean>
 }
