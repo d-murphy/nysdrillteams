@@ -17,6 +17,10 @@ class SimContSumService {
         const teamYearContestKeyArrToExcludeArr: string[] = teamYearContestKeyArrToExclude ? teamYearContestKeyArrToExclude.split(',') : []; 
         return this.dataSource.getTopSimulationContestSummaries(contestArr, sortBy, limit, offset, teamArr, yearArr, teamContestKeyArrToExcludeArr, teamYearContestKeyArrToExcludeArr  ); 
     }
+
+    public getSimulationContestSummaries(keys: string[]): Promise<SimulationContestSummary[]> {
+        return this.dataSource.getSimulationContestSummaries(keys); 
+    }
 }
     
 export default SimContSumService;

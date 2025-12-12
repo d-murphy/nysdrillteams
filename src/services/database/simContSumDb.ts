@@ -59,4 +59,9 @@ class SimContSumDb implements SimulationContestSummaryMethods {
         
         return result;
     }
+
+    async getSimulationContestSummaries(keys: string[]): Promise<SimulationContestSummary[]> {
+        const query = { key: { $in: keys } };
+        return (this._dbCollection.find(query).toArray() as unknown as SimulationContestSummary[]);
+    }
 }

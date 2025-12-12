@@ -35,6 +35,28 @@ export function simContSumRouter (simContSumDataSource:SimulationContestSummaryM
         res.status(200).send(topSummaries);
     })
 
+    router.post('/getSimulationContestSummariesByKeys', async (req: Request, res: Response) => {
+        const { keys } = req.body;
+        console.log("the keys: ", keys);
+        
+        if (!keys || !Array.isArray(keys)) {
+            return res.status(400).json({ 
+                error: 'Bad Request', 
+                message: 'keys must be an array' 
+            });
+        }
+
+        if (keys.length === 0) {
+            return res.status(400).json({ 
+                error: 'Bad Request', 
+                message: 'keys array cannot be empty' 
+            });
+        }
+
+        const summaries = await SimContSum.getSimulationContestSummaries(keys);
+        res.status(200).send(summaries);
+    })
+
     router.use((err:Error, req:Request, res:Response, next:NextFunction) => {
         if (err) {
             res.status(500);

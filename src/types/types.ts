@@ -321,7 +321,8 @@ export type SimulationContestSummaryMethods = {
         offset: number, teamArr?: string[], yearArr?: number[], 
         teamContestKeyArrToExclude?: string[], 
         teamYearContestKeyArrToExclude?: string[]
-    ): Promise<SimulationContestSummary[]>
+    ): Promise<SimulationContestSummary[]>, 
+    getSimulationContestSummaries(keys: string[]): Promise<SimulationContestSummary[]>
 }
 
 export type FantasyGame = {
