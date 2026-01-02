@@ -8,7 +8,7 @@ class FantasyService {
     ){}
 
     public createFantasyGame(
-        user: string, gameType: 'one-team' | '8-team' | '8-team-no-repeat', 
+        user: string, gameType: 'decade' | '8-team' | '8-team-no-repeat', 
         countAgainstRecord: boolean, 
         secondsPerPick: number,
         tournamentCt: number, 

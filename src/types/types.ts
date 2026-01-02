@@ -329,9 +329,10 @@ export type FantasyGame = {
     // _id: ObjectId,
     gameId: string, 
     status: 'stage' | 'stage-draft' | 'draft' | 'complete', 
-    gameType: 'one-team' | '8-team' | '8-team-no-repeat'
+    gameType: 'decade' | '8-team' | '8-team-no-repeat' | 'one-team'
     tournamentCt: number,
     countAgainstRecord: boolean, 
+    owner: string,
     users: string[], 
     simulationIndex: number[], 
     secondsPerPick: number
@@ -342,7 +343,7 @@ export type FantasyGame = {
 
 export type FantasyGameMethods = {
     createFantasyGame(
-        gameId: string, user: string, gameType: 'one-team' | '8-team' | '8-team-no-repeat', 
+        gameId: string, user: string, gameType: 'decade' | '8-team' | '8-team-no-repeat', 
         countAgainstRecord: boolean, secondsPerPick: number,
         tournamentCt: number, 
         users: string[],

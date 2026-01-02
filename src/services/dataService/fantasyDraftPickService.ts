@@ -79,22 +79,20 @@ class FantasyDraftPickService {
             const randomContest = remainingContests[Math.floor(Math.random() * remainingContests.length)];
 
             const draftStrategy = sortCols[Math.floor(Math.random() * sortCols.length)] 
-            const teamContestKeyArrToExclude = isNoRepeat ? picksForUser.map(pick => {
+            const teamContestKeyArrToExclude = isNoRepeat ? currentPicks.map(pick => {
                 const [team, year, contest] = pick.contestSummaryKey.split("|");
                 return `${team}|${contest}`;
             }) : [];
 
-
             const keysToExclude = currentPicks.map(pick => pick.contestSummaryKey);
             const options = await this.contestSummaryDataSource.getTopSimulationContestSummaries(
-                [randomContest], draftStrategy, 5, 0, undefined, undefined, 
+                [randomContest], draftStrategy, 2, 0, undefined, undefined, 
                 teamContestKeyArrToExclude, keysToExclude
             );
             if(!options.length) {
                 throw new Error("Auto draft - No options found");
             }
             const draftChoice = options[Math.floor(Math.random() * options.length)];
-            // console.log("autodraft - draftChoice", draftChoice);
             const draftPick = {
                 gameId: gameId,
                 user: nextPick,

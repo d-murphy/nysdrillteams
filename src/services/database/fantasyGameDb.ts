@@ -16,8 +16,9 @@ class FantasyGameDb implements FantasyGameMethods {
     }
     
     async createFantasyGame(
-        gameId: string, user: string, 
-        gameType: 'one-team' | '8-team' | '8-team-no-repeat', 
+        gameId: string, 
+        user: string, 
+        gameType: 'decade' | '8-team' | '8-team-no-repeat', 
         countAgainstRecord: boolean, 
         secondsPerPick: number,
         tournamentCt: number, 
@@ -30,6 +31,7 @@ class FantasyGameDb implements FantasyGameMethods {
             status: 'stage',
             gameType: gameType,
             countAgainstRecord: countAgainstRecord,
+            owner: user,
             users: users,
             simulationIndex: simulationIndex,
             secondsPerPick: secondsPerPick,
