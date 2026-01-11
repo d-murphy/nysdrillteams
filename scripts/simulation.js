@@ -646,7 +646,7 @@ async function createContestSummaries() {
                         const smallGoodRunCtPenalty = smallGoodRunCt ? bestRuns[contest] * .1 : 0; 
                         speedRating = Math.floor((bestRuns[contest] / (goodAvg + smallGoodRunCtPenalty)) * 100) / 100; 
                     }
-                    let overallScore = (speedRating || 0) * (consistencyScore || 0); 
+                    let overallScore = ((speedRating || 0) * 9 + (consistencyScore || 0)) / 10; 
 
                     runSummary.push({
                         team: team, 
