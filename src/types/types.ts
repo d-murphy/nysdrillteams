@@ -396,7 +396,7 @@ export type FantasyGameHistory = {
     gameId: string, 
     user: string, 
     contestSummaryKeys: string[]
-    gameType: 'one-team' | '8-team' | '8-team-no-repeat'
+    gameType: 'one-team' | '8-team' | '8-team-no-repeat' | 'decade'
     win: boolean, 
     top5: boolean, 
     finish: number, 
