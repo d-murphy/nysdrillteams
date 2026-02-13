@@ -4,9 +4,9 @@ import { FantasyGameMethods, FantasyDraftPickMethods, FantasyGameHistoryMethods,
 import FantasyService from '../dataService/fantasyService';
 import FantasyDraftPickService from '../dataService/fantasyDraftPickService';
 import FantasyGameHistoryService, { TotalPointsWFinish } from '../dataService/fantasyGameHistoryService';
-import { InsertOneResult } from 'mongodb';
 import { awsCognitoAuthMiddleware, requireRole, requireGroup } from './awsCognitoMdw';
 import SimulationRunService from '../dataService/simulationRunService';
+import getDataToBroadcast from '../../library/getDataToBroadcast';
 import isGameComplete from '../../library/isGameComplete';
 
 export function fantasyRouter(
@@ -17,7 +17,7 @@ export function fantasyRouter(
     simulationRunDataSource: SimulationRunMethods
 ) {
     const fantasyService = new FantasyService(fantasyGameDataSource);
-    const draftPickService = new FantasyDraftPickService(fantasyDraftPickDataSource, fantasyGameDataSource, contestSummaryDataSource);
+    const draftPickService = new FantasyDraftPickService(fantasyDraftPickDataSource, contestSummaryDataSource);
     const historyService = new FantasyGameHistoryService(fantasyGameHistoryDataSource, simulationRunDataSource);
     const simulationRunService = new SimulationRunService(simulationRunDataSource);
 
@@ -72,11 +72,7 @@ export function fantasyRouter(
             return res.status(400).send('Invalid user. Must be a real user');
         }
 
-        let finalSecondsPerPick = secondsPerPick || 30;
-        let finalTournamentCt = tournamentCt || 12;
-        let finalTournamentSize = tournamentSize || 50;
-
-        const game = await fantasyService.createFantasyGame(user, gameType, countAgainstRecord, finalSecondsPerPick, finalTournamentCt, isSeason, finalTournamentSize, name);
+        const game = await fantasyService.createFantasyGame(user, gameType, countAgainstRecord, secondsPerPick, tournamentCt, isSeason, tournamentSize, name);
         res.status(201).send(game);
     });
 
@@ -89,6 +85,7 @@ export function fantasyRouter(
     // Real-time game updates via Server-Sent Events
     router.get('/getGameLive/:gameId', async (req: Request, res: Response) => {
         const { gameId } = req.params;
+        const user = req.query.user as string | null; 
         // Set up SSE headers
         res.writeHead(200, {
             'Content-Type': 'text/event-stream',
@@ -104,25 +101,21 @@ export function fantasyRouter(
         }
         activeConnections.get(gameId)!.add(res);
 
+        const dataToBroadcast = await getDataToBroadcast(fantasyService, draftPickService, simulationRunService, historyService, gameId);
         // Send initial game data
-        const dataToBroadcast: {game?: FantasyGame, draftPicks?: FantasyDraftPick[], runs?: SimulationRun[], totalPointsWFinish?: TotalPointsWFinish[]} = {};  
         try {
-            const game = await fantasyService.getFantasyGame(gameId);
-            const draftPicks = await draftPickService.getFantasyDraftPicks(gameId);
-            dataToBroadcast.game = game;
-            dataToBroadcast.draftPicks = draftPicks;
-            if(isGameComplete(game, draftPicks)) {
-                const gameSimIndex = game.simulationIndex[0]; 
-                const keys = draftPicks.map(pick => pick.contestSummaryKey + "|" + gameSimIndex);
-                const runs = await simulationRunService.getSimulationRuns(keys); 
-                dataToBroadcast.runs = runs;
-                const historiesAndFinishes = historyService.calculateFantasyGameHistory(draftPicks, game, runs);
-                dataToBroadcast.totalPointsWFinish = historiesAndFinishes.totalPointsWFinish;
-            }
             res.write(`data: ${JSON.stringify({ type: 'gameUpdate', data: dataToBroadcast })}\n\n`);
         } catch (error) {
             console.log("error fetching game data: ", error);
             res.write(`data: ${JSON.stringify({ type: 'error', message: 'Failed to fetch game data' })}\n\n`);
+        }
+        const lastPick = dataToBroadcast.draftPicks.length === 0 ? null : dataToBroadcast.draftPicks[dataToBroadcast.draftPicks.length - 1];
+        const gameComplete = isGameComplete(dataToBroadcast.game, dataToBroadcast.draftPicks);
+        if(lastPick && !gameComplete && user && user.toLowerCase() === dataToBroadcast.game.owner.toLowerCase()) {
+            await draftPickService.autoDraftAndGameCompleteCheckWithBroadcast(
+                fantasyService, draftPickService, simulationRunService, historyService,
+                dataToBroadcast.game, dataToBroadcast.draftPicks, lastPick, dataToBroadcast.game.gameId, broadcastToGame
+            );
         }
 
         // Keep connection alive
@@ -151,6 +144,7 @@ export function fantasyRouter(
 
     router.put('/updateGameState/:gameId', awsCognitoAuthMiddleware, async (req: Request, res: Response) => {
         const { gameId } = req.params;
+        const user = req.user?.email as string; 
         const { state, users } = req.body;
 
         if (!state || typeof state !== 'string' || !['draft', 'complete', 'stage-draft'].includes(state)) {
@@ -161,23 +155,16 @@ export function fantasyRouter(
             return res.status(400).send('Users are required when state is stage-draft');
         }
 
-        const result = await fantasyService.updateFantasyGameState(gameId, state as 'stage-draft' | 'draft', users);
-        const game = await fantasyService.getFantasyGame(gameId);
+        const result = await fantasyService.updateFantasyGameState(gameId, state as 'stage-draft' | 'draft' | 'complete', users);
+        const picksDefault = ['stage-draft', 'draft'].includes(state) ? [] : undefined;
+        const dataToBroadcast = await getDataToBroadcast(fantasyService, draftPickService, simulationRunService, historyService, gameId, undefined, picksDefault); 
+        const game = dataToBroadcast.game;
         try {
-            broadcastToGame(gameId, { type: 'gameUpdate', data: {game, draftPicks: []} });    
-            if(state === 'draft') {
-                let autoDraftResult = await draftPickService.runAutoDraftPicks(gameId, -1); 
-                while(autoDraftResult.autoDraftPicks.length > 0) {
-                    const autoDraftDataToBroadcast: {game?: FantasyGame, draftPicks?: FantasyDraftPick[]} = {};  
-                    const draftPicks = await draftPickService.getFantasyDraftPicks(gameId);
-                    autoDraftDataToBroadcast.draftPicks = draftPicks;
-                    autoDraftDataToBroadcast.game = game;
-                    broadcastToGame(gameId, { type: 'gameUpdate', data: autoDraftDataToBroadcast });
-                    const lastPick = autoDraftResult.autoDraftPicks[autoDraftResult.autoDraftPicks.length - 1];
-                    autoDraftResult = await draftPickService.runAutoDraftPicks(gameId, lastPick.draftPick); 
-                }
+            broadcastToGame(gameId, { type: 'gameUpdate', data: dataToBroadcast });
+            if(state === 'draft' && user === game.owner) {
+                const draftPicks: FantasyDraftPick[] = []; 
+                await draftPickService.runComputerPicksAndBroadcast(fantasyService, draftPickService, simulationRunService, historyService, game, draftPicks, gameId, broadcastToGame);
             }
-
         } catch (error) {
             console.error('Failed to update fantasy game state:', error);
             broadcastToGame(gameId, { type: 'error', message: 'Failed to update fantasy game state' });
@@ -194,46 +181,24 @@ export function fantasyRouter(
         if (!draftPick.gameId || typeof draftPick.draftPick !== 'number' || !draftPick.contestSummaryKey) {
             return res.status(400).send('Missing required fields: gameId, draftPick, contestSummaryKey');
         }
-
+        draftPick.time = new Date();
         var insertDraftPickResult = await draftPickService.insertDraftPick(draftPick);
+        if(!insertDraftPickResult) {
+            return res.status(400).send('Invalid draft pick');
+        }
 
         try {
             // broadcasting draft pick
-            const dataToBroadcast: {game?: FantasyGame, draftPicks?: FantasyDraftPick[], runs?: SimulationRun[], totalPointsWFinish?: TotalPointsWFinish[]} = {};  
-            var game = await fantasyService.getFantasyGame(draftPick.gameId);
-            var updatedDraftPicks = await draftPickService.getFantasyDraftPicks(draftPick.gameId);
-            dataToBroadcast.draftPicks = updatedDraftPicks;
-            dataToBroadcast.game = game;
+            const dataToBroadcast = await getDataToBroadcast(fantasyService, draftPickService, simulationRunService, historyService, draftPick.gameId);
             broadcastToGame(draftPick.gameId, { type: 'gameUpdate', data: dataToBroadcast });
+            const game = dataToBroadcast.game;
+            const draftPicks = dataToBroadcast.draftPicks;
 
-            // broadcast auto draft picks
-            var autodraftResult = await draftPickService.runAutoDraftPicks(draftPick.gameId, draftPick.draftPick);             
-            while(autodraftResult.autoDraftPicks.length > 0) {
-                updatedDraftPicks = await draftPickService.getFantasyDraftPicks(draftPick.gameId);
-                dataToBroadcast.draftPicks = updatedDraftPicks;
-                broadcastToGame(draftPick.gameId, { type: 'gameUpdate', data: dataToBroadcast });    
-                const lastPick = autodraftResult.autoDraftPicks[autodraftResult.autoDraftPicks.length - 1];
-                // 
-                await new Promise(resolve => setTimeout(resolve, (Math.random() * 200 + 200)));
-                autodraftResult = await draftPickService.runAutoDraftPicks(draftPick.gameId, lastPick.draftPick); 
-            }
-            // broadcast game complete
-            if(isGameComplete(game, updatedDraftPicks)) {
-                await fantasyService.updateFantasyGameState(draftPick.gameId, 'complete');
-                dataToBroadcast.game = await fantasyService.getFantasyGame(draftPick.gameId);
-                const gameSimIndex = game.simulationIndex[0]; 
-                const keys = updatedDraftPicks.map(pick => pick.contestSummaryKey + "|" + gameSimIndex);
-                const runs = await simulationRunService.getSimulationRuns(keys); 
-                dataToBroadcast.runs = runs;
-                const historiesAndFinishes = historyService.calculateFantasyGameHistory(updatedDraftPicks, game, runs);
-                dataToBroadcast.totalPointsWFinish = historiesAndFinishes.totalPointsWFinish;
-                const fantasyGameHistories = historiesAndFinishes.fantasyGameHistory;
-                fantasyGameHistories.forEach(async history => {
-                    await historyService.insertGameHistory(history);
-                });
-                broadcastToGame(draftPick.gameId, { type: 'gameUpdate', data: dataToBroadcast });
-            }
-
+            await draftPickService.autoDraftAndGameCompleteCheckWithBroadcast(
+                fantasyService, draftPickService, simulationRunService, historyService,
+                game, draftPicks, draftPick, draftPick.gameId, broadcastToGame
+            ); 
+            
         } catch (error) {
             console.error('Failed during broadcasting in insert draft pick:', error);
             broadcastToGame(draftPick.gameId, { type: 'error', message: 'Failure during fantasy draft.' });
@@ -247,11 +212,13 @@ export function fantasyRouter(
 
     router.get('/getGames', async (req: Request, res: Response) => {
         const user = req.query.user as string | null;
-        const state = req.query.state as 'stage' | 'stage-draft' | 'draft' | 'complete' | null;
+        const state = req.query.state as string; 
+        const stateArray = state ? state.split(',') : null;
         const limit = parseInt(req.query.limit as string) || 10;
         const offset = parseInt(req.query.offset as string) || 0;
-        
-        const games = await fantasyService.getFantasyGames(user, state as 'stage' | 'stage-draft' | 'draft' | 'complete' | null, limit, offset);
+        const created = req.query.created as string | null;
+        const createdDate = created ? new Date(created) : null;
+        const games = await fantasyService.getFantasyGames(user, stateArray as ('stage' | 'stage-draft' | 'draft' | 'complete')[] | null, limit, offset, createdDate);
         res.status(200).send(games);
     });
 

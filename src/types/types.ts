@@ -101,6 +101,7 @@ export interface TeamData {
     getTeam(teamId:number): Promise<Team | undefined>;
     getTeams(): Promise<Team[]>;
     getSimilarTeams(team:string, year:number): Promise<SimilarTeam[]>; 
+    isNameAvailable(proposedNickname:string): Promise<boolean>;
 }
 
 export type Tournament = {
@@ -354,7 +355,7 @@ export type FantasyGameMethods = {
     addUsersToFantasyGame(gameId: string, user: string[]): Promise<UpdateResult>
     updateFantasyGameState(gameId: string, state: 'stage-draft' | 'draft' | 'complete', users?: string[]): Promise<UpdateResult>
     getFantasyGame(gameId: string): Promise<FantasyGame>
-    getFantasyGames(user: string | null, state: 'stage' | 'stage-draft' | 'draft' | 'complete' | null, limit: number, offset: number): Promise<FantasyGame[]>
+    getFantasyGames(user: string | null, state: ('stage' | 'stage-draft' | 'draft' | 'complete')[] | null, limit: number, offset: number, created: Date | null): Promise<FantasyGame[]>
     getOpenFantasyGames(limit: number, offset: number, state?: 'stage' | 'stage-draft' | 'draft' | 'complete'): Promise<FantasyGame[]>
 }
 
@@ -378,6 +379,7 @@ export type FantasyDraftPick = {
     user: string, 
     contestSummaryKey: string,
     draftPick: number, 
+    time: Date
 }
 
 // you should create a composite key in the simulation collection to allow for the lookup

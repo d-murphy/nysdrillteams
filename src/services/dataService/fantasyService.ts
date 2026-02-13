@@ -10,19 +10,25 @@ class FantasyService {
     public createFantasyGame(
         user: string, gameType: 'decade' | '8-team' | '8-team-no-repeat', 
         countAgainstRecord: boolean, 
-        secondsPerPick: number,
-        tournamentCt: number, 
+        secondsPerPick: number | undefined,
+        tournamentCt: number | undefined, 
         isSeason: boolean, 
-        tournamentSize: number, 
+        tournamentSize: number | undefined, 
         name: string
     ): Promise<FantasyGame> {
+        let finalTournamentSize = tournamentSize || 50;
+
         const gameId = `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        const users = [user, ...(new Array(tournamentSize - 1).fill("autodraft"))];
+        const users = [user, ...(new Array(finalTournamentSize - 1).fill("autodraft"))];
         let simulationIndex = isSeason ? new Array(12).fill(-1) : new Array(1).fill(-1);
         simulationIndex = simulationIndex.map(() => Math.floor(Math.random() * 499));
+
+        let finalSecondsPerPick = secondsPerPick || 30;
+        let finalTournamentCt = tournamentCt || 12;
+
         return this.fantasyGameDataSource.createFantasyGame(
-            gameId, user, gameType, countAgainstRecord, secondsPerPick, 
-            tournamentCt, users, simulationIndex, name); 
+            gameId, user, gameType, countAgainstRecord, finalSecondsPerPick, 
+            finalTournamentCt, users, simulationIndex, name); 
     }
 
     public deleteFantasyGame(gameId: string): Promise<DeleteResult> {
@@ -30,10 +36,6 @@ class FantasyService {
     }
 
     public updateFantasyGameState(gameId: string, state: 'stage-draft' | 'draft' | 'complete', users?: string[]): Promise<UpdateResult> {
-
-        if(state === 'stage-draft' && !users) {
-            return Promise.reject(new Error('Users are required when state is stage-draft'));
-        }
 
         if(state === 'stage-draft' && users){
             users.sort(() => Math.random() - 0.5);
@@ -57,8 +59,8 @@ class FantasyService {
         return this.fantasyGameDataSource.getFantasyGame(gameId); 
     }
 
-    public getFantasyGames(user: string | null, state: 'stage' | 'stage-draft' | 'draft' | 'complete' | null, limit: number, offset: number): Promise<FantasyGame[]> {
-        return this.fantasyGameDataSource.getFantasyGames(user, state, limit, offset); 
+    public getFantasyGames(user: string | null, state: ('stage' | 'stage-draft' | 'draft' | 'complete')[] | null, limit: number, offset: number, created: Date | null): Promise<FantasyGame[]> {
+        return this.fantasyGameDataSource.getFantasyGames(user, state, limit, offset, created); 
     }
 
     public getOpenFantasyGames(limit: number, offset: number, state: 'stage' | 'stage-draft' | 'draft' | 'complete'): Promise<FantasyGame[]> {

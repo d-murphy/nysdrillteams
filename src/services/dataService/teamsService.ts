@@ -23,6 +23,16 @@ class TeamsService {
     public getSimilarTeams(team:string, year: number): Promise<SimilarTeam[]> {
         return this.dataSource.getSimilarTeams(team, year); 
     }
+    public isNameAvailable(proposedNickname: string): Promise<boolean> {
+        const capCaseNickname = proposedNickname
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ')
+            .split("-")
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join("-");
+        return this.dataSource.isNameAvailable(capCaseNickname); 
+    }
 }
     
 export default TeamsService; 

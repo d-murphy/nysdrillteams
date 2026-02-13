@@ -1,12 +1,13 @@
 import express, {Request, Response, NextFunction} from 'express'; 
 
-import { FantasyNameMethods, FantasyName } from '../../types/types';
+import { FantasyNameMethods, FantasyName, TeamData } from '../../types/types';
 import FantasyNameService from '../dataService/fantasyNameService'; 
 import { awsCognitoAuthMiddleware } from './awsCognitoMdw';
+import TeamsService from '../dataService/teamsService';
 
-export function fantasyNameRouter(fantasyNameDataSource: FantasyNameMethods) {
+export function fantasyNameRouter(fantasyNameDataSource: FantasyNameMethods, teamsDataSource: TeamData) {
     const fantasyNameService = new FantasyNameService(fantasyNameDataSource); 
-
+    const teamsService = new TeamsService(teamsDataSource); 
     const router = express.Router();
 
     // Get fantasy team names for multiple emails
@@ -40,7 +41,6 @@ export function fantasyNameRouter(fantasyNameDataSource: FantasyNameMethods) {
     // Check if a fantasy team name is available
     router.get('/isFantasyTeamNameAvailable', async (req: Request, res: Response) => {
         const { town, name } = req.query;
-        
         if (!town || !name) {
             return res.status(400).json({ 
                 error: 'Bad Request', 
@@ -49,7 +49,9 @@ export function fantasyNameRouter(fantasyNameDataSource: FantasyNameMethods) {
         }
 
         const isAvailable = await fantasyNameService.isFantasyTeamNameAvailable(town as string, name as string);
-        res.status(200).send({ available: isAvailable });
+        if(!isAvailable) return res.status(200).send({ available: false });
+        const nicknameIsAvailable = await teamsService.isNameAvailable(name as string);
+        res.status(200).send({ available: nicknameIsAvailable });
     });
 
     // Create or update a fantasy team name

@@ -73,10 +73,11 @@ class FantasyGameDb implements FantasyGameMethods {
         return result;
     }
 
-    async getFantasyGames(user: string | null, state: 'stage' | 'stage-draft' | 'draft' | 'complete' | null, limit: number, offset: number): Promise<FantasyGame[]> {
-        const query: { users?: string, status?: 'stage' | 'stage-draft' | 'draft' | 'complete' } = {};
+    async getFantasyGames(user: string | null, state: ('stage' | 'stage-draft' | 'draft' | 'complete')[] | null, limit: number, offset: number, created: Date | null): Promise<FantasyGame[]> {
+        const query: { users?: string, status?: { $in: ('stage' | 'stage-draft' | 'draft' | 'complete')[] }, created?: { $gt: Date } } = {};
         if(user) query.users = user;
-        if(state) query.status = state;
+        if(state) query.status = { $in: state as ('stage' | 'stage-draft' | 'draft' | 'complete')[] };
+        if(created) query.created = { $gt: created };
         const sort: { [key: string]: 1 | -1 } = { created: -1 };
         return (this._dbCollection.find(query).skip(offset).limit(limit).sort(sort).toArray() as unknown as FantasyGame[]);
     }

@@ -98,7 +98,7 @@ var credentials = {key: privateKey, cert: certificate};
     if(simContSumData) app.use('/simContSum', simContSumRouter(simContSumData))
     if(fantasyGameData && fantasyPickData && fantasyGameHistoryData && simContSumData && simulationRunData) app.use('/fantasy', fantasyRouter(fantasyGameData, fantasyPickData, fantasyGameHistoryData, simContSumData, simulationRunData))
     if(simulationRunData) app.use('/simulationRuns', simulationRunRouter(simulationRunData))
-    if(fantasyNameData) app.use('/fantasyNames', fantasyNameRouter(fantasyNameData))
+    if(fantasyNameData && teamsData) app.use('/fantasyNames', fantasyNameRouter(fantasyNameData, teamsData))
 
     app.use("/announcements", announcementRouter(sessionAdmin))
 

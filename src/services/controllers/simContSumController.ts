@@ -37,7 +37,6 @@ export function simContSumRouter (simContSumDataSource:SimulationContestSummaryM
 
     router.post('/getSimulationContestSummariesByKeys', async (req: Request, res: Response) => {
         const { keys } = req.body;
-        console.log("the keys: ", keys);
         
         if (!keys || !Array.isArray(keys)) {
             return res.status(400).json({ 

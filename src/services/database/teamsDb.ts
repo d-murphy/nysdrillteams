@@ -42,4 +42,9 @@ class TeamsDb implements TeamData{
         const query = {team: team, year: year}; 
         return (this._similarTeamsCollection.find(query)).toArray() as unknown as SimilarTeam[]; 
     }
+    async isNameAvailable(proposedNickname: string): Promise<boolean> {
+        const query = { nickname: proposedNickname };
+        const count = await this._dbCollection.countDocuments(query);
+        return count === 0;
+    }
 }
