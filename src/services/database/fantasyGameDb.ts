@@ -51,10 +51,11 @@ class FantasyGameDb implements FantasyGameMethods {
 
     async updateFantasyGameState(gameId: string, state: 'draft' | 'complete', users?: string[]): Promise<UpdateResult> {
         const filter = { gameId: gameId };        
-        const updateDoc: { $set: { status: string, users?: string[], completed?: Date } } = {
+        const updateDoc: { $set: { status: string, users?: string[], completed?: Date, draftStarted?: Date } } = {
             $set: { status: state }
         };
         if(state === 'complete') updateDoc.$set.completed = new Date();
+        if(state === 'draft') updateDoc.$set.draftStarted = new Date();
         if(users) updateDoc.$set.users = users;
         return this._dbCollection.updateOne(filter, updateDoc);
     }

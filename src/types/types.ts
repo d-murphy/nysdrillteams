@@ -340,6 +340,8 @@ export type FantasyGame = {
     created: Date,
     completed?: Date,
     name: string, 
+    draftStarted?: Date
+
 }
 
 export type FantasyGameMethods = {
