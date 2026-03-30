@@ -96,6 +96,9 @@ class FantasyGameHistoryService {
     public getMostGamesPlayed(limit: number, offset: number): Promise<{user: string, gameCount: number}[]> {
         return this.fantasyGameHistoryDataSource.getMostGamesPlayed(limit, offset); 
     }
+    public getHighestWinPercentages(limit: number, offset: number, minGamesPlayed: number): Promise<{user: string, winPercentage: number}[]> {
+        return this.fantasyGameHistoryDataSource.getHighestWinPercentages(limit, offset, minGamesPlayed); 
+    }
 }
     
 export default FantasyGameHistoryService;

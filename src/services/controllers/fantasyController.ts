@@ -1,6 +1,6 @@
 import express, {Request, Response, NextFunction, response} from 'express'; 
 
-import { FantasyGameMethods, FantasyDraftPickMethods, FantasyGameHistoryMethods, FantasyGame, FantasyDraftPick, FantasyGameHistory, SimulationContestSummaryMethods, SimulationRunMethods, SimulationRun } from '../../types/types';
+import { FantasyGameMethods, FantasyDraftPickMethods, FantasyGameHistoryMethods, FantasyGame, FantasyDraftPick, FantasyGameHistory, SimulationContestSummaryMethods, SimulationRunMethods, SimulationRun, FantasyNameMethods } from '../../types/types';
 import FantasyService from '../dataService/fantasyService';
 import FantasyDraftPickService from '../dataService/fantasyDraftPickService';
 import FantasyGameHistoryService, { TotalPointsWFinish } from '../dataService/fantasyGameHistoryService';
@@ -14,9 +14,10 @@ export function fantasyRouter(
     fantasyDraftPickDataSource: FantasyDraftPickMethods,
     fantasyGameHistoryDataSource: FantasyGameHistoryMethods,
     contestSummaryDataSource: SimulationContestSummaryMethods, 
-    simulationRunDataSource: SimulationRunMethods
+    simulationRunDataSource: SimulationRunMethods,
+    fantasyNameDataSource: FantasyNameMethods
 ) {
-    const fantasyService = new FantasyService(fantasyGameDataSource);
+    const fantasyService = new FantasyService(fantasyGameDataSource, fantasyNameDataSource);
     const draftPickService = new FantasyDraftPickService(fantasyDraftPickDataSource, contestSummaryDataSource);
     const historyService = new FantasyGameHistoryService(fantasyGameHistoryDataSource, simulationRunDataSource);
     const simulationRunService = new SimulationRunService(simulationRunDataSource);
@@ -311,6 +312,14 @@ export function fantasyRouter(
         const offset: number = parseInt(req.query.offset as string); 
         const mostGamesPlayed = await historyService.getMostGamesPlayed(limit, offset); 
         res.status(200).send(mostGamesPlayed);
+    });
+
+    router.get('/getHighestWinPercentages', async (req: Request, res: Response) => {
+        const limit: number = parseInt(req.query.limit as string); 
+        const offset: number = parseInt(req.query.offset as string); 
+        const minGamesPlayed: number = parseInt(req.query.minGamesPlayed as string); 
+        const highestWinPercentages = await historyService.getHighestWinPercentages(limit, offset, minGamesPlayed); 
+        res.status(200).send(highestWinPercentages);
     });
 
     router.delete('/deleteGameAndRelated/:gameId', awsCognitoAuthMiddleware, requireRole('fantasy-admin'),  async (req: Request, res: Response) => {

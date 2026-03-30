@@ -30,15 +30,18 @@ class FantasyNameDb implements FantasyNameMethods {
         return count === 0;
     }
 
-    async upsertFantasyTeamName(email: string, town: string, name: string): Promise<UpdateResult> {
+    async upsertFantasyTeamName(email: string, town: string, name: string, insideColor?: string, outsideColor?: string): Promise<UpdateResult> {
         const filter = { email: email };
-        const update = { 
-            $set: { 
-                email: email, 
-                town: town, 
-                name: name 
-            } 
+        const fields: Record<string, string> = {
+            email,
+            town,
+            name,
         };
+        if (insideColor !== undefined && outsideColor !== undefined) {
+            fields.insideColor = insideColor;
+            fields.outsideColor = outsideColor;
+        }
+        const update = { $set: fields };
         return this._playersCollection.updateOne(filter, update, { upsert: true });
     }
 

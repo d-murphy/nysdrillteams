@@ -373,6 +373,7 @@ export type FantasyGameHistoryMethods = {
     getGameHistoryByGameId(gameId: string): Promise<FantasyGameHistory[]>
     deleteFantasyGame(gameId: string): Promise<DeleteResult>
     getMostGamesPlayed(limit: number, offset: number): Promise<{user: string, gameCount: number}[]>
+    getHighestWinPercentages(limit: number, offset: number, minGamesPlayed: number): Promise<{user: string, winPercentage: number}[]>
 }
 
 export type FantasyDraftPick = {
@@ -425,6 +426,8 @@ export type FantasyName = {
     name: string, 
     accessCode?: string, 
     codeUsed?: boolean, 
+    insideColor?: string, 
+    outsideColor?: string
 }
 
 export type FantasyNameNoAccessCode = Omit<FantasyName, 'accessCode'>;
@@ -438,7 +441,7 @@ export type FantasyNameMethods = {
     getFantasyTeamNames(emails: string[]): Promise<FantasyNameNoAccessCode[]>
     getRandomFantasyTeamTown(): Promise<string>
     isFantasyTeamNameAvailable(town: string, name: string): Promise<boolean>
-    upsertFantasyTeamName(email: string, town: string, name: string): Promise<UpdateResult>
+    upsertFantasyTeamName(email: string, town: string, name: string, insideColor?: string, outsideColor?: string): Promise<UpdateResult>
     getFantasyTeamTowns(searchString: string, limit: number, offset: number): Promise<string[]>
     getTeamNameSuggestions(town: string, limit: number, offset: number): Promise<string[]>
     setCodeUsed(email: string, accessCode: string): Promise<boolean>

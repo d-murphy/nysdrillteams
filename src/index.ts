@@ -96,7 +96,9 @@ var credentials = {key: privateKey, cert: certificate};
     if(imageMethods) app.use('/images', makeImagesRouter(imageMethods, sessionAdmin))
     if(projectionData) app.use('/projections', projectionRouter(projectionData))
     if(simContSumData) app.use('/simContSum', simContSumRouter(simContSumData))
-    if(fantasyGameData && fantasyPickData && fantasyGameHistoryData && simContSumData && simulationRunData) app.use('/fantasy', fantasyRouter(fantasyGameData, fantasyPickData, fantasyGameHistoryData, simContSumData, simulationRunData))
+    if(fantasyGameData && fantasyPickData && fantasyGameHistoryData && simContSumData && simulationRunData && fantasyNameData) {
+        app.use('/fantasy', fantasyRouter(fantasyGameData, fantasyPickData, fantasyGameHistoryData, simContSumData, simulationRunData, fantasyNameData))
+    }
     if(simulationRunData) app.use('/simulationRuns', simulationRunRouter(simulationRunData))
     if(fantasyNameData && teamsData) app.use('/fantasyNames', fantasyNameRouter(fantasyNameData, teamsData))
 

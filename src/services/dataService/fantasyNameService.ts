@@ -34,8 +34,12 @@ class FantasyNameService {
         return this.dataSource.isFantasyTeamNameAvailable(town, name); 
     }
 
-    public upsertFantasyTeamName(email: string, town: string, name: string): Promise<UpdateResult> {
-        return this.dataSource.upsertFantasyTeamName(email, town, name); 
+    public upsertFantasyTeamName(email: string, town: string, name: string, insideColor?: string, outsideColor?: string): Promise<UpdateResult> {
+        return this.dataSource.upsertFantasyTeamName(email, town, name, insideColor, outsideColor);
+    }
+
+    public getRandomFantasyTeamTown(): Promise<string> {
+        return this.dataSource.getRandomFantasyTeamTown();
     }
 
     public getFantasyTeamTowns(searchString: string, limit: number, offset: number): Promise<string[]> {

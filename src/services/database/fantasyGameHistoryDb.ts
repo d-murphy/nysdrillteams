@@ -42,4 +42,22 @@ class FantasyGameHistoryDb implements FantasyGameHistoryMethods {
             { $limit: limit }
         ]).toArray() as unknown as {user: string, gameCount: number}[]);
     }
+
+    async getHighestWinPercentages(limit: number, offset: number, minGamesPlayed: number): Promise<{user: string, winPercentage: number}[]> {
+        // $sum ignores booleans; convert win true/false to 1/0 before summing
+        return (this._dbCollection.aggregate([
+            {
+                $group: {
+                    _id: '$user',
+                    winCount: { $sum: { $cond: [{ $eq: ['$win', true] }, 1, 0] } },
+                    gameCount: { $sum: 1 },
+                },
+            },
+            { $match: { gameCount: { $gte: minGamesPlayed } } },
+            { $project: { user: '$_id', winPercentage: { $divide: ['$winCount', '$gameCount'] } } },
+            { $sort: { winPercentage: -1 } },
+            { $skip: offset },
+            { $limit: limit },
+        ]).toArray() as unknown as { user: string; winPercentage: number }[]);
+    }
 }

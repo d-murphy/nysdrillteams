@@ -56,13 +56,26 @@ export function fantasyNameRouter(fantasyNameDataSource: FantasyNameMethods, tea
 
     // Create or update a fantasy team name
     router.post('/upsertFantasyTeamName', awsCognitoAuthMiddleware, async (req: Request, res: Response) => {
-        const { email, town, name } = req.body;
+        const { email, town, name, insideColor, outsideColor } = req.body;
         const userEmail = req.user?.email as string;
         
         if (!email || !town || !name) {
             return res.status(400).json({ 
                 error: 'Bad Request', 
                 message: 'email, town, and name are required' 
+            });
+        }
+
+        if (insideColor !== undefined && typeof insideColor !== 'string') {
+            return res.status(400).json({
+                error: 'Bad Request',
+                message: 'insideColor must be a string when provided',
+            });
+        }
+        if (outsideColor !== undefined && typeof outsideColor !== 'string') {
+            return res.status(400).json({
+                error: 'Bad Request',
+                message: 'outsideColor must be a string when provided',
             });
         }
 
@@ -73,16 +86,42 @@ export function fantasyNameRouter(fantasyNameDataSource: FantasyNameMethods, tea
             });
         }
 
-        const isAvailable = await fantasyNameService.isFantasyTeamNameAvailable(town as string, name as string);
-        if(!isAvailable) {
-            return res.status(400).json({ 
-                error: 'Bad Request', 
-                message: 'Team name is already taken.' 
-            });
+        const currentInfo = await fantasyNameService.getFantasyTeamNames([email]);
+        const currentTeamTown = currentInfo[0]?.town || '';
+        const currentTeamName = currentInfo[0]?.name || '';
+        console.log(currentTeamTown, currentTeamName);
+        console.log(town, name);
+
+        const noNameChange = currentTeamTown.toLowerCase() === town.toLowerCase() && currentTeamName.toLowerCase() === name.toLowerCase();
+        console.log(noNameChange);
+        if(!noNameChange) {
+            const isAvailable = await fantasyNameService.isFantasyTeamNameAvailable(town as string, name as string);
+            if(!isAvailable) {
+                return res.status(400).json({ 
+                    error: 'Bad Request', 
+                    message: 'Team name is already taken.' 
+                });
+            }    
         }
 
-        const result = await fantasyNameService.upsertFantasyTeamName(email, town, name);
+        const includeColors = insideColor !== undefined || outsideColor !== undefined;
+        const result = await fantasyNameService.upsertFantasyTeamName(
+            email,
+            town,
+            name,
+            ...(includeColors
+                ? [
+                    typeof insideColor === 'string' ? insideColor.trim() : '',
+                    typeof outsideColor === 'string' ? outsideColor.trim() : '',
+                  ]
+                : []),
+        );
         res.status(200).send(result);
+    });
+
+    router.get('/getRandomFantasyTeamTown', async (req: Request, res: Response) => {
+        const town = await fantasyNameService.getRandomFantasyTeamTown();
+        res.status(200).send({ town });
     });
 
     // Get town suggestions

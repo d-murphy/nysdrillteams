@@ -1,20 +1,21 @@
 import { DeleteResult, UpdateResult } from 'mongodb'
-import { FantasyGameMethods, FantasyGame } from '../../types/types'
+import { FantasyGameMethods, FantasyGame, FantasyNameMethods } from '../../types/types'
 
 class FantasyService {
 
     constructor (
-        private fantasyGameDataSource: FantasyGameMethods
+        private fantasyGameDataSource: FantasyGameMethods, 
+        private fantasyNameDataSource: FantasyNameMethods
     ){}
 
-    public createFantasyGame(
+    public async createFantasyGame(
         user: string, gameType: 'decade' | '8-team' | '8-team-no-repeat', 
         countAgainstRecord: boolean, 
         secondsPerPick: number | undefined,
         tournamentCt: number | undefined, 
         isSeason: boolean, 
         tournamentSize: number | undefined, 
-        name: string
+        name: string | undefined
     ): Promise<FantasyGame> {
         let finalTournamentSize = tournamentSize || 50;
 
@@ -26,9 +27,25 @@ class FantasyService {
         let finalSecondsPerPick = secondsPerPick || 30;
         let finalTournamentCt = tournamentCt || 12;
 
+        let finalName: string;
+        if(!name) {
+            const townName = await this.fantasyNameDataSource.getFantasyTeamTowns('', 1, 0);
+            const randomTitleAdditions = [
+                "Invitational", 
+                "Classic", 
+                "Invitational Drill", 
+                "Drill",             
+            ]
+            const randomTitleAddition = randomTitleAdditions[Math.floor(Math.random() * randomTitleAdditions.length)];
+            finalName = `${townName[0]} ${randomTitleAddition}`;
+        } else {
+            finalName = name;
+        }
+
+
         return this.fantasyGameDataSource.createFantasyGame(
             gameId, user, gameType, countAgainstRecord, finalSecondsPerPick, 
-            finalTournamentCt, users, simulationIndex, name); 
+            finalTournamentCt, users, simulationIndex, finalName); 
     }
 
     public deleteFantasyGame(gameId: string): Promise<DeleteResult> {
