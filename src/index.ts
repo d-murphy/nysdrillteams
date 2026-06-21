@@ -40,6 +40,8 @@ import { simulationRunRouter } from './services/controllers/simulationRunControl
 import { simulationRunDbFactory } from './services/database/simulationRunDb';
 import { fantasyNameRouter } from './services/controllers/fantasyNameController';
 import { fantasyNameDbFactory } from './services/database/fantasyNameDb';
+import { fortyForFortyRouter } from './services/controllers/fortyForFortyController';
+import { fortyForFortyDbFactory } from './services/database/fortyForFortyDb';
 
 dotenv.config(); 
 let { PORT, DB_NAME, dbUn, dbPass, keyLocation, certLocation } = process.env; 
@@ -85,7 +87,8 @@ var credentials = {key: privateKey, cert: certificate};
     let fantasyPickData = await fantasyDraftPickDbFactory(dbPromise, 'simulation-fantasy-draft-picks'); 
     let fantasyGameHistoryData = await fantasyGameHistoryDbFactory(dbPromise, 'simulation-fantasy-game-history');
     let simulationRunData = await simulationRunDbFactory(dbPromise, 'simulation-runs');
-    let fantasyNameData = await fantasyNameDbFactory(dbPromise, 'simulation-fantasy-name-suggestions', 'simulation-fantasy-players'); 
+    let fantasyNameData = await fantasyNameDbFactory(dbPromise, 'simulation-fantasy-name-suggestions', 'simulation-fantasy-players');
+    let fortyForFortyData = await fortyForFortyDbFactory(dbPromise, 'simulation-forty-for-forty');
     if(runsData) app.use('/runs', runsRouter(runsData, sessionAdmin)); 
     if(teamsData) app.use('/teams', teamsRouter(teamsData, sessionAdmin));
     if(tournamentsData) app.use('/tournaments', tournamentsRouter(tournamentsData, sessionAdmin));  
@@ -101,6 +104,7 @@ var credentials = {key: privateKey, cert: certificate};
     }
     if(simulationRunData) app.use('/simulationRuns', simulationRunRouter(simulationRunData))
     if(fantasyNameData && teamsData) app.use('/fantasyNames', fantasyNameRouter(fantasyNameData, teamsData))
+    if(fortyForFortyData && simulationRunData) app.use('/fortyForForty', fortyForFortyRouter(fortyForFortyData, simulationRunData))
 
     app.use("/announcements", announcementRouter(sessionAdmin))
 

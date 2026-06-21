@@ -446,3 +446,20 @@ export type FantasyNameMethods = {
     getTeamNameSuggestions(town: string, limit: number, offset: number): Promise<string[]>
     setCodeUsed(email: string, accessCode: string): Promise<boolean>
 }
+
+
+export type FortyForFortyGame = {
+    _id: string
+    gameId: string
+    user: string
+    simInd: number
+    contestSummaryKeys: string[]
+    totalPoints: number
+    contestPoints: number[]
+    gameMode: string
+}
+
+export type FortyForFortyGameMethods = {
+    insertFortyForFortyGame(game: FortyForFortyGame): Promise<InsertOneResult>
+    getFortyForFortyGame(gameId: string): Promise<FortyForFortyGame | undefined>
+}
