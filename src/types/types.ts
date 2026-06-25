@@ -412,7 +412,7 @@ export type FantasyGameHistory = {
 
 export type SimulationRun = {
     key: string, 
-    finalRun: number
+    finalRun: number | string
 }
 
 export type SimulationRunMethods = {

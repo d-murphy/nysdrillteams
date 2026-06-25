@@ -2,7 +2,7 @@
 
 
 
-export default function calcFortyForForty(runs: number[]) {
+export default function calcFortyForForty(runs: (number | string)[]) {
     const pointsToAward = [
         {contest: 0, time: 6.26},
         {contest: 0, time: 6.34},
