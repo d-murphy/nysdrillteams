@@ -457,9 +457,17 @@ export type FortyForFortyGame = {
     totalPoints: number
     contestPoints: number[]
     gameMode: string
+    leaderboardName?: string
 }
+
+export type FortyForFortyGameMode = 'classic' | 'lifer';
 
 export type FortyForFortyGameMethods = {
     insertFortyForFortyGame(game: FortyForFortyGame): Promise<InsertOneResult>
     getFortyForFortyGame(gameId: string): Promise<FortyForFortyGame | undefined>
+    updateLeaderboardName(gameId: string, leaderboardName: string): Promise<UpdateResult>
+    getRecentNamedGames(gameMode: FortyForFortyGameMode | undefined, limit: number, offset: number): Promise<FortyForFortyGame[]>
+    getTopGamesThisWeek(gameMode: FortyForFortyGameMode | undefined, limit: number, offset: number): Promise<FortyForFortyGame[]>
+    getTopGamesAllTime(gameMode: FortyForFortyGameMode | undefined, limit: number, offset: number): Promise<FortyForFortyGame[]>
+    countCompleteGames(): Promise<number>
 }

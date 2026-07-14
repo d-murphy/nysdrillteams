@@ -1,4 +1,4 @@
-import { FortyForFortyGame, FortyForFortyGameMethods, SimulationRunMethods } from '../../types/types';
+import { FortyForFortyGame, FortyForFortyGameMethods, FortyForFortyGameMode, SimulationRunMethods } from '../../types/types';
 import calcFortyForForty from '../../library/calcFortyForForty';
 
 class FortyForFortyService {
@@ -33,7 +33,8 @@ class FortyForFortyService {
             contestSummaryKeys,
             contestPoints,
             totalPoints,
-            gameMode
+            gameMode, 
+            leaderboardName: "not_set"
         };
 
         await this.dataSource.insertFortyForFortyGame(game);
@@ -53,8 +54,56 @@ class FortyForFortyService {
             runMap.set(contestSummaryKey, run.finalRun);
         });
 
-        const finalTimes = game.contestSummaryKeys.map(key => runMap.get(key) ?? "OT");
+        const minRunsLU: Record<string, number> = {
+            "Three Man Ladder": 5.97, 
+            "B Ladder": 4.79, 
+            "C Ladder": 8.41, 
+            "C Hose": 11.79, 
+            "B Hose": 7.36,
+            "Efficiency": 8.32, 
+            "Motor Pump": 5.35, 
+            "Buckets": 19.4 
+        }
+
+        const finalTimes = game.contestSummaryKeys.map(key => {
+            const time = runMap.get(key) || "OT"; 
+            const isStr = Number.isNaN(parseFloat(time as string))
+            if(isStr) return time; 
+            const contest = key.split("|")[2]; 
+            return Math.max(time as number, minRunsLU[contest])
+        })
+
         return { ...game, finalTimes };
+    }
+
+    public async updateLeaderboardName(gameId: string, leaderboardName: string): Promise<{ success: true } | { success: false; message: string }> {
+        const game = await this.dataSource.getFortyForFortyGame(gameId);
+        if (!game) {
+            return { success: false, message: 'Game not found.' };
+        }
+
+        if (game.leaderboardName !== 'not_set') {
+            return { success: false, message: 'Leaderboard name has already been set and cannot be changed.' };
+        }
+
+        await this.dataSource.updateLeaderboardName(gameId, leaderboardName);
+        return { success: true };
+    }
+
+    public getRecentNamedGames(gameMode: FortyForFortyGameMode | undefined, limit: number, offset: number): Promise<FortyForFortyGame[]> {
+        return this.dataSource.getRecentNamedGames(gameMode, limit, offset);
+    }
+
+    public getTopGamesThisWeek(gameMode: FortyForFortyGameMode | undefined, limit: number, offset: number): Promise<FortyForFortyGame[]> {
+        return this.dataSource.getTopGamesThisWeek(gameMode, limit, offset);
+    }
+
+    public getTopGamesAllTime(gameMode: FortyForFortyGameMode | undefined, limit: number, offset: number): Promise<FortyForFortyGame[]> {
+        return this.dataSource.getTopGamesAllTime(gameMode, limit, offset);
+    }
+
+    public countCompleteGames(): Promise<number> {
+        return this.dataSource.countCompleteGames();
     }
 }
 
