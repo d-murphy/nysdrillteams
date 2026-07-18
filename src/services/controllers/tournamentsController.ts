@@ -51,6 +51,9 @@ export function tournamentsRouter (tournamentsDataSource:TournamentsData, sessio
         years = checkQuery(req, 'years').map(Number); 
         tracks = checkQuery(req, 'tracks'); 
         tournaments = checkQuery(req, 'tournaments'); 
+        if(!years.length && !tracks.length && !tournaments.length) {
+            return res.status(400).send('At least one of years, tracks, or tournaments is required.');
+        }
         let result = await Tournaments.getFilteredTournaments(years, tracks, tournaments); 
         return res.status(200).send(result); 
     })

@@ -42,6 +42,8 @@ import { fantasyNameRouter } from './services/controllers/fantasyNameController'
 import { fantasyNameDbFactory } from './services/database/fantasyNameDb';
 import { fortyForFortyRouter } from './services/controllers/fortyForFortyController';
 import { fortyForFortyDbFactory } from './services/database/fortyForFortyDb';
+import { articlesRouter } from './services/controllers/articlesController';
+import { articlesDbFactory } from './services/database/articlesDb';
 
 dotenv.config(); 
 let { PORT, DB_NAME, dbUn, dbPass, keyLocation, certLocation } = process.env; 
@@ -89,6 +91,7 @@ var credentials = {key: privateKey, cert: certificate};
     let simulationRunData = await simulationRunDbFactory(dbPromise, 'simulation-runs');
     let fantasyNameData = await fantasyNameDbFactory(dbPromise, 'simulation-fantasy-name-suggestions', 'simulation-fantasy-players');
     let fortyForFortyData = await fortyForFortyDbFactory(dbPromise, 'simulation-forty-for-forty');
+    let articlesData = await articlesDbFactory(dbPromise, 'articles');
     if(runsData) app.use('/runs', runsRouter(runsData, sessionAdmin)); 
     if(teamsData) app.use('/teams', teamsRouter(teamsData, sessionAdmin));
     if(tournamentsData) app.use('/tournaments', tournamentsRouter(tournamentsData, sessionAdmin));  
@@ -105,6 +108,7 @@ var credentials = {key: privateKey, cert: certificate};
     if(simulationRunData) app.use('/simulationRuns', simulationRunRouter(simulationRunData))
     if(fantasyNameData && teamsData) app.use('/fantasyNames', fantasyNameRouter(fantasyNameData, teamsData))
     if(fortyForFortyData && simulationRunData) app.use('/fortyForForty', fortyForFortyRouter(fortyForFortyData, simulationRunData))
+    if(articlesData) app.use('/articles', articlesRouter(articlesData, sessionAdmin))
 
     app.use("/announcements", announcementRouter(sessionAdmin))
 

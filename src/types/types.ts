@@ -471,3 +471,25 @@ export type FortyForFortyGameMethods = {
     getTopGamesAllTime(gameMode: FortyForFortyGameMode | undefined, limit: number, offset: number): Promise<FortyForFortyGame[]>
     countCompleteGames(): Promise<number>
 }
+
+
+
+export type Article = {
+    _id: string
+    id: number
+    title: string
+    content: string
+    created: Date
+    updated: Date
+    author: string
+    tags: string[]
+    isPublished: boolean
+    isFeatured: boolean
+    sortOrder: number
+}
+
+export type ArticleMethods = {
+    upsertArticle(article: Article): Promise<UpdateResult>
+    getArticle(articleId: number): Promise<Article | undefined>
+    getArticles(limit: number, offset: number, isPublished?: boolean, isFeatured?: boolean, tag?:string): Promise<Article[]>
+}
